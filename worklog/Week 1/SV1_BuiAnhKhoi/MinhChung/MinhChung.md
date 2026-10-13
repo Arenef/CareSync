@@ -25,3 +25,6 @@
 ![Gắn Tag Project và Owner](../../img/Tag_KMS.png)
 
 ![Kiểm tra Region và tài nguyên S3](../../img/Tag_SNS.png)
+
+![Gắn Tag S3](../../img/Tag_S3.jpg)
+![Gắn Tag S3](../../img/Tag_S3_2.jpg)
