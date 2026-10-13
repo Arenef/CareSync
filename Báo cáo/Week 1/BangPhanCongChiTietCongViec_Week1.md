@@ -1,0 +1,30 @@
+Thành viên nhóm:
+
+- Sinh viên 1: Bùi Anh Khôi – MSSV: 24110258 – Email: <24110258@student.hcmute.edu.vn>
+- Sinh viên 2: Huỳnh Ngọc Bảo Khang – MSSV: 24110241 – Email: 24110241@student.hcmute.edu.vn
+
+Bảng phân công chi tiết công việc và thời gian
+
+### 1. Bùi Anh Khôi – MSSV: 24110258
+
+| Stt | Công việc phụ trách                                                          | Số giờ | Nội dung có sự hỗ trợ của AI/LLM                                                                                                     | Minh chứng thực tế                                               |
+| :-: | :--------------------------------------------------------------------------- | :----: | :----------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
+|  1  | Tìm hiểu EventBridge Scheduler và SNS: cơ chế tạo lịch nhắc và gửi thông báo |   1    | **Công cụ: ChatGPT**<br>Hỗ trợ giải thích cơ chế tạo lịch, kích hoạt tác vụ và gửi thông báo; tổng hợp kiến thức phục vụ triển khai. | File tổng hợp nội dung tìm hiểu                                  |
+|  2  | Tìm hiểu KMS và S3: mã hóa dữ liệu, lưu trữ website và bảo mật               |  1.5   | AI hỗ trợ giải thích chức năng mã hóa bằng KMS, lưu trữ dữ liệu trên S3 và các lưu ý bảo mật.                                        | File tổng hợp nội dung tìm hiểu                                  |
+|  3  | Thiết kế database: Doctors, Appointments và các thuộc tính cần thiết         |  1.5   | -                                                                                                                                    | Bản thiết kế database, danh sách thuộc tính.                     |
+|  4  | Thiết kế API cho hệ thống đặt lịch                                           |   1    | -                                                                                                                                    | Tài liệu thiết kế API, danh sách endpoint và mô tả chức năng.    |
+|  5  | Thiết kế luồng nhắc lịch và bảo mật                                          |  0.5   | -                                                                                                                                    | Sơ đồ luồng xử lý nhắc lịch và mô tả phương án bảo mật.          |
+|  6  | Dựng SNS, EventBridge, KMS thử nghiệm trên AWS Learner Lab                   |   2    | AI hướng dẫn các bước tạo tài nguyên, cấu hình thử nghiệm và kiểm tra hoạt động trên AWS Console/CLI.                                | Ảnh chụp AWS Console, kết quả CLI và kết quả thử nghiệm thực tế. |
+|  7  | Gắn Tag Project/Owner, kiểm tra Region và tài nguyên AWS                     |  0.5   | -                                                                                                                                    | Ảnh chụp tag Project/Owner, Region và danh sách tài nguyên AWS.  |
+|  8  | Chụp minh chứng Console/CLI, tổng hợp kết quả tuần 1                         |  0.5   | -                                                                                                                                    | File chi tiết báo cáo tuần 1                                     |
+
+### 2. Huỳnh Ngọc Bảo Khang – MSSV: 24110241
+
+| Stt | Công việc phụ trách                                                               | Số giờ | Nội dung có sự hỗ trợ của AI/LLM                                                                                                    | Minh chứng thực tế                                                                                           |
+| :-: | :-------------------------------------------------------------------------------- | :----: | :---------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
+|  1  | Tìm hiểu API Gateway và Lambda: chức năng, cách hoạt động, cách kết nối           |  1.5   | AI hỗ trợ giải thích chức năng, cơ chế hoạt động và cách kết nối API Gateway với Lambda trong hệ thống.                             | File tổng hợp nội dung tìm hiểu                                                                              |
+|  2  | Tìm hiểu DynamoDB: cấu trúc bảng, key, CRUD và Conditional Write chống trùng lịch |  1.5   | AI hỗ trợ giải thích cấu trúc bảng, khóa chính, các thao tác CRUD và cách sử dụng Conditional Write để hạn chế trùng lịch đặt khám. | File tổng hợp nội dung tìm hiểu                                                                              |
+|  3  | Thiết kế database: Doctors, Appointments và các thuộc tính cần thiết              |  1.5   | -                                                                                                                                   | Bản thiết kế database, danh sách thuộc tính và sơ đồ quan hệ nếu đã thực hiện.                               |
+|  4  | Thiết kế API cho hệ thống đặt lịch                                                |   1    | -                                                                                                                                   | Tài liệu thiết kế API, danh sách endpoint và mô tả chức năng.                                                |
+|  5  | Dựng S3, DynamoDB, Lambda, API Gateway thử nghiệm trên AWS Learner Lab            |   2    | AI hỗ trợ hướng dẫn tạo tài nguyên, cấu hình dịch vụ và kiểm tra kết nối giữa các thành phần trên AWS.                              | Ảnh chụp AWS Console, kết quả kiểm thử API hoặc CLI và tài nguyên đã tạo.                                    |
+|  6  | Tạo/cập nhật Git repository, tổ chức mã nguồn                                     |  0.5   | -                                                                                                                                   | Link GitHub Repository của nhóm:<br>[https://github.com/Arenef/CareSync](https://github.com/Arenef/CareSync) |
