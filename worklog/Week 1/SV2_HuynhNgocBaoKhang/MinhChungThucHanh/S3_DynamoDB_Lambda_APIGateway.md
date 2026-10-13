@@ -1,8 +1,19 @@
-# Thực hành AWS
+# Thực hành AWS - SV2 Huỳnh Ngọc Bảo Khang
 
-## 9. Dựng S3, DynamoDB, Lambda, API Gateway thử nghiệm trên AWS Learner Lab
+## Mục lục
 
-### 9.1. Khởi tạo Amazon S3 Bucket
+- [Dựng S3, DynamoDB, Lambda, API Gateway thử nghiệm trên AWS Learner Lab](#dựng-s3-dynamodb-lambda-api-gateway-thử-nghiệm-trên-aws-learner-lab)
+  - [1. Khởi tạo Amazon S3 Bucket](#1-khởi-tạo-amazon-s3-bucket)
+  - [2. Khởi tạo và cấu hình Amazon DynamoDB](#2-khởi-tạo-và-cấu-hình-amazon-dynamodb)
+  - [3. Xây dựng AWS Lambda Function](#3-xây-dựng-aws-lambda-function)
+  - [4. Cấu hình Amazon API Gateway (HTTP API)](#4-cấu-hình-amazon-api-gateway-http-api)
+  - [5. Kiểm thử tích hợp qua Postman](#5-kiểm-thử-tích-hợp-qua-postman)
+
+---
+
+## Dựng S3, DynamoDB, Lambda, API Gateway thử nghiệm trên AWS Learner Lab
+
+### 1. Khởi tạo Amazon S3 Bucket
 
 Tạo thành công S3 Bucket mang tên `appointment-booking-web-demo` tại vùng `us-east-1` đóng vai trò lưu trữ mã nguồn giao diện web tĩnh (HTML, CSS, JS).
 
@@ -10,7 +21,7 @@ Tạo thành công S3 Bucket mang tên `appointment-booking-web-demo` tại vùn
 
 ---
 
-### 9.2. Khởi tạo và cấu hình Amazon DynamoDB
+### 2. Khởi tạo và cấu hình Amazon DynamoDB
 
 > **Lưu ý:** Giai đoạn PoC tuần 1 chỉ khởi tạo bảng `Doctors` và `Appointments` nhằm tập trung kiểm thử tính năng Conditional Write; bảng `Patients` sẽ được triển khai cùng module xác thực ở tuần sau.
 
@@ -28,7 +39,7 @@ Tạo thành công S3 Bucket mang tên `appointment-booking-web-demo` tại vùn
 
 ---
 
-### 9.3. Xây dựng AWS Lambda Function
+### 3. Xây dựng AWS Lambda Function
 
 Khởi tạo hàm xử lý bằng runtime **Node.js 24.x** (gán quyền thực thi qua role `LabRole` có sẵn của Learner Lab).
 
@@ -158,7 +169,7 @@ Deploy Lambda function thành công:
 
 ---
 
-### 9.4. Cấu hình Amazon API Gateway (HTTP API)
+### 4. Cấu hình Amazon API Gateway (HTTP API)
 
 - Tạo API mang tên `AppointmentBookingAPI` tích hợp trực tiếp với Lambda function `AppointmentBookingFunction`.
 
@@ -178,7 +189,7 @@ Deploy Lambda function thành công:
 
 ---
 
-### 9.5. Kiểm thử tích hợp qua Postman
+### 5. Kiểm thử tích hợp qua Postman
 
 - **Test GET /doctors:** Gửi request thành công, nhận phản hồi mã `200 OK` kèm danh sách bác sĩ truy vấn trực tiếp từ bảng `Doctors` trong DynamoDB.
 
@@ -195,3 +206,5 @@ Deploy Lambda function thành công:
 - **Test chống trùng lịch (Conditional Write):** Gửi lại request với cùng thông tin ca khám vừa đặt, hệ thống kích hoạt cơ chế chống trùng lặp và phản hồi đúng mã `409 Conflict` kèm thông báo *"Khung giờ này của bác sĩ đã có người đặt trước. Vui lòng chọn giờ khác!"*.
 
 ![Kiểm thử trùng lịch phản hồi 409 Conflict](../../img/Test_API_4.png)
+
+[⬆ Quay lại Mục lục](#mục-lục)
