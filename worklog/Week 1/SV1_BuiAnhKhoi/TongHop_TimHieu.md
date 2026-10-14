@@ -1,21 +1,23 @@
-# Tổng Hợp Nội Dung Tìm Hiểu - SV1 Bùi Anh Khởi
+# Tổng Hợp Nội Dung Tìm Hiểu - SV1 Bùi Anh Khôi
 
 ## Mục lục
 
-- [1. Tìm hiểu EventBridge Scheduler và SNS: cơ chế tạo lịch nhắc và gửi thông báo](#1-tìm-hiểu-eventbridge-scheduler-và-sns-cơ-chế-tạo-lịch-nhắc-và-gửi-thông-báo)
-  - [Amazon EventBridge Scheduler](#amazon-eventbridge-scheduler)
-  - [Amazon SNS (Amazon Simple Notification Service)](#amazon-sns-amazon-simple-notification-service)
-  - [Cơ chế kết hợp và ứng dụng thực tế](#cơ-chế-kết-hợp-và-ứng-dụng-thực-tế)
-- [2. Tìm hiểu KMS và S3: mã hóa dữ liệu, lưu trữ website và bảo mật](#2-tìm-hiểu-kms-và-s3-mã-hóa-dữ-liệu-lưu-trữ-website-và-bảo-mật)
-  - [AWS Key Management Service (KMS)](#aws-key-management-service-kms)
-  - [Amazon Simple Storage Service (Amazon S3)](#amazon-simple-storage-service-amazon-s3)
-  - [Cơ chế bảo mật và ứng dụng thực tế](#cơ-chế-bảo-mật-và-ứng-dụng-thực-tế)
-- [3. Thiết kế Database](#3-thiết-kế-database)
-  - [1. Bảng Doctors](#1-bảng-doctors)
-  - [2. Bảng Patients](#2-bảng-patients)
-  - [3. Bảng Appointments](#3-bảng-appointments)
-  - [Mối quan hệ giữa các bảng](#mối-quan-hệ-giữa-các-bảng)
-- [4. Thiết kế luồng nhắc lịch và bảo mật](#4-thiết-kế-luồng-nhắc-lịch-và-bảo-mật)
+- [Tổng Hợp Nội Dung Tìm Hiểu - SV1 Bùi Anh Khôi](#tổng-hợp-nội-dung-tìm-hiểu---sv1-bùi-anh-khôi)
+  - [Mục lục](#mục-lục)
+  - [1. Tìm hiểu EventBridge Scheduler và SNS: cơ chế tạo lịch nhắc và gửi thông báo](#1-tìm-hiểu-eventbridge-scheduler-và-sns-cơ-chế-tạo-lịch-nhắc-và-gửi-thông-báo)
+    - [Amazon EventBridge Scheduler](#amazon-eventbridge-scheduler)
+    - [Amazon SNS (Amazon Simple Notification Service)](#amazon-sns-amazon-simple-notification-service)
+    - [Cơ chế kết hợp và ứng dụng thực tế](#cơ-chế-kết-hợp-và-ứng-dụng-thực-tế)
+  - [2. Tìm hiểu KMS và S3: mã hóa dữ liệu, lưu trữ website và bảo mật](#2-tìm-hiểu-kms-và-s3-mã-hóa-dữ-liệu-lưu-trữ-website-và-bảo-mật)
+    - [AWS Key Management Service (KMS)](#aws-key-management-service-kms)
+    - [Amazon Simple Storage Service (Amazon S3)](#amazon-simple-storage-service-amazon-s3)
+    - [Cơ chế bảo mật và ứng dụng thực tế](#cơ-chế-bảo-mật-và-ứng-dụng-thực-tế)
+  - [3. Thiết kế Database](#3-thiết-kế-database)
+    - [1. Bảng Doctors](#1-bảng-doctors)
+    - [2. Bảng Patients](#2-bảng-patients)
+    - [3. Bảng Appointments](#3-bảng-appointments)
+    - [Mối quan hệ giữa các bảng](#mối-quan-hệ-giữa-các-bảng)
+  - [4. Thiết kế luồng nhắc lịch và bảo mật](#4-thiết-kế-luồng-nhắc-lịch-và-bảo-mật)
 
 ---
 
