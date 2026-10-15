@@ -1,0 +1,694 @@
+let selectedTimeSlot = "08:30";
+let currentDoctor = null;
+
+// Khởi tạo ô booking
+function initBooking() {
+  const dateInput = document.getElementById("appointmentDate");
+  const timeSlotButtons = document.querySelectorAll(".time-slot-btn");
+  const bookingForm = document.getElementById("bookingForm");
+  const resetBtn = document.getElementById("resetBookingBtn");
+
+  // Chọn ngày bé nhất là hôm nay
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+  const todayStr = `${yyyy}-${mm}-${dd}`;
+
+  if (dateInput) {
+    dateInput.min = todayStr;
+    // Chọn ngày mai mặc định nếu có thể
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomYyyy = tomorrow.getFullYear();
+    const tomMm = String(tomorrow.getMonth() + 1).padStart(2, "0");
+    const tomDd = String(tomorrow.getDate()).padStart(2, "0");
+    dateInput.value = `${tomYyyy}-${tomMm}-${tomDd}`;
+    dateInput.addEventListener("change", handleDateChange);
+  }
+
+  // Chọn giờ
+  timeSlotButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (btn.disabled || btn.classList.contains("is-unavailable")) return;
+
+      timeSlotButtons.forEach((b) => b.classList.remove("is-selected"));
+      btn.classList.add("is-selected");
+      selectedTimeSlot = btn.dataset.time || btn.textContent.trim();
+      updateSummary();
+    });
+  });
+
+  // Realtime input listeners for summary & error clearing
+  const patientNameInput = document.getElementById("patientName");
+  const patientPhoneInput = document.getElementById("patientPhone");
+  const patientEmailInput = document.getElementById("patientEmail");
+  const patientReasonInput = document.getElementById("patientReason");
+
+  [
+    patientNameInput,
+    patientPhoneInput,
+    patientEmailInput,
+    patientReasonInput,
+  ].forEach((input) => {
+    if (input) {
+      input.addEventListener("input", () => {
+        clearFieldError(input);
+        updateSummary();
+      });
+    }
+  });
+
+  // Nút Submit
+  if (bookingForm) {
+    bookingForm.addEventListener("submit", handleBookingSubmit);
+  }
+
+  // Nút Reset
+  if (resetBtn) {
+    resetBtn.addEventListener("click", handleBookingReset);
+  }
+
+  // Hiển thị tóm tắt
+  updateSummary();
+
+  // Khởi tạo My Appointments section
+  initMyAppointments();
+}
+
+// Cập nhật thông tin bác sĩ
+function updateSelectedDoctor(doc) {
+  currentDoctor = doc;
+  updateSummary();
+}
+
+// Định dạng ngày VN
+function formatDateToVN(dateStr) {
+  if (!dateStr) return "Chưa chọn ngày";
+  const parts = dateStr.split("-");
+  if (parts.length === 3) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return dateStr;
+}
+
+// Xử lý thay đổi ngày
+function handleDateChange(e) {
+  const dateInput = e.target;
+  const selectedDate = new Date(dateInput.value);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (selectedDate < today) {
+    showFieldError(dateInput, "Vui lòng không chọn ngày khám trong quá khứ");
+  } else {
+    clearFieldError(dateInput);
+  }
+  updateSummary();
+}
+
+// Cập nhật tóm tắt
+function updateSummary() {
+  const summaryDoctorEl = document.getElementById("summaryDoctor");
+  const summarySpecialtyEl = document.getElementById("summarySpecialty");
+  const summaryDateEl = document.getElementById("summaryDate");
+  const summaryTimeEl = document.getElementById("summaryTime");
+  const summaryPatientEl = document.getElementById("summaryPatient");
+  const dateInput = document.getElementById("appointmentDate");
+  const patientNameInput = document.getElementById("patientName");
+
+  if (summaryDoctorEl) {
+    summaryDoctorEl.textContent = currentDoctor
+      ? currentDoctor.name
+      : "Chưa chọn";
+  }
+  if (summarySpecialtyEl) {
+    summarySpecialtyEl.textContent = currentDoctor
+      ? currentDoctor.specialty
+      : "--";
+  }
+  if (summaryDateEl) {
+    const rawDate = dateInput ? dateInput.value : "";
+    summaryDateEl.textContent = rawDate ? formatDateToVN(rawDate) : "Chưa chọn";
+  }
+  if (summaryTimeEl) {
+    summaryTimeEl.textContent = selectedTimeSlot
+      ? selectedTimeSlot
+      : "Chưa chọn";
+  }
+  if (summaryPatientEl) {
+    const nameVal = patientNameInput ? patientNameInput.value.trim() : "";
+    summaryPatientEl.textContent = nameVal.length > 0 ? nameVal : "Chưa nhập";
+  }
+}
+
+// Kiểm tra form
+function validateBookingForm() {
+  let isValid = true;
+
+  const patientNameInput = document.getElementById("patientName");
+  const patientPhoneInput = document.getElementById("patientPhone");
+  const patientEmailInput = document.getElementById("patientEmail");
+  const dateInput = document.getElementById("appointmentDate");
+
+  // Kiểm tra bác sĩ
+  if (!currentDoctor) {
+    showToast(
+      "Thiếu thông tin",
+      "Vui lòng chọn một bác sĩ từ danh sách",
+      "warning",
+    );
+    isValid = false;
+  }
+
+  // Kiểm tra ngày
+  if (!dateInput || !dateInput.value) {
+    showFieldError(dateInput, "Vui lòng chọn ngày khám");
+    isValid = false;
+  } else {
+    const selectedDate = new Date(dateInput.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (selectedDate < today) {
+      showFieldError(dateInput, "Ngày khám không được trong quá khứ");
+      isValid = false;
+    }
+  }
+
+  // Chọn giờ khám
+  if (!selectedTimeSlot) {
+    showToast("Thiếu thông tin", "Vui lòng chọn một khung giờ khám", "warning");
+    isValid = false;
+  }
+
+  // Tên bệnh nhân
+  if (!patientNameInput || patientNameInput.value.trim().length < 2) {
+    showFieldError(
+      patientNameInput,
+      "Vui lòng nhập họ và tên đầy đủ (tối thiểu 2 ký tự)",
+    );
+    isValid = false;
+  }
+
+  // Ktra sđt
+  const phoneRegex = /^(0[3|5|7|8|9])[0-9]{8}$/;
+  if (!patientPhoneInput || !phoneRegex.test(patientPhoneInput.value.trim())) {
+    showFieldError(
+      patientPhoneInput,
+      "Vui lòng nhập số điện thoại Việt Nam hợp lệ (10 chữ số, ví dụ 0912345678)",
+    );
+    isValid = false;
+  }
+
+  // Ktra email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!patientEmailInput || !emailRegex.test(patientEmailInput.value.trim())) {
+    showFieldError(patientEmailInput, "Vui lòng nhập địa chỉ email hợp lệ");
+    isValid = false;
+  }
+
+  return isValid;
+}
+
+// Hiện lỗi input
+function showFieldError(inputElement, errorMessage) {
+  if (!inputElement) return;
+  const formGroup = inputElement.closest(".form-group");
+  if (formGroup) {
+    formGroup.classList.add("has-error");
+    const errorEl = formGroup.querySelector(".form-error-msg");
+    if (errorEl) {
+      errorEl.textContent = errorMessage;
+    }
+  }
+}
+
+// Xóa lỗi input
+function clearFieldError(inputElement) {
+  if (!inputElement) return;
+  const formGroup = inputElement.closest(".form-group");
+  if (formGroup) {
+    formGroup.classList.remove("has-error");
+  }
+}
+
+// Xử lý Submit
+function handleBookingSubmit(e) {
+  e.preventDefault();
+
+  if (!validateBookingForm()) {
+    showToast(
+      "Kiểm tra lại thông tin",
+      "Vui lòng hoàn thành các trường bắt buộc theo đúng định dạng",
+      "danger",
+    );
+    return;
+  }
+
+  // Tạo demo booking ticket
+  const patientName = document.getElementById("patientName").value.trim();
+  const patientPhone = document.getElementById("patientPhone").value.trim();
+  const patientEmail = document.getElementById("patientEmail").value.trim();
+  const patientReason =
+    document.getElementById("patientReason").value.trim() ||
+    "Khám tổng quát định kỳ";
+  const rawDate = document.getElementById("appointmentDate").value;
+  const formattedDate = formatDateToVN(rawDate);
+
+  // Tạo code random
+  const randomRef = "CS-" + Math.floor(100000 + Math.random() * 900000);
+
+  // Modal Ticket Content
+  const ticketCodeEl = document.getElementById("ticketCode");
+  const ticketDoctorEl = document.getElementById("ticketDoctor");
+  const ticketSpecialtyEl = document.getElementById("ticketSpecialty");
+  const ticketRoomEl = document.getElementById("ticketRoom");
+  const ticketDateEl = document.getElementById("ticketDate");
+  const ticketTimeEl = document.getElementById("ticketTime");
+  const ticketPatientEl = document.getElementById("ticketPatient");
+  const ticketPhoneEl = document.getElementById("ticketPhone");
+  const ticketReasonEl = document.getElementById("ticketReason");
+
+  if (ticketCodeEl) ticketCodeEl.textContent = randomRef;
+  if (ticketDoctorEl) ticketDoctorEl.textContent = currentDoctor.name;
+  if (ticketSpecialtyEl)
+    ticketSpecialtyEl.textContent = currentDoctor.specialty;
+  if (ticketRoomEl) ticketRoomEl.textContent = currentDoctor.room;
+  if (ticketDateEl) ticketDateEl.textContent = formattedDate;
+  if (ticketTimeEl) ticketTimeEl.textContent = selectedTimeSlot;
+  if (ticketPatientEl) ticketPatientEl.textContent = patientName;
+  if (ticketPhoneEl) ticketPhoneEl.textContent = patientPhone;
+  if (ticketReasonEl) ticketReasonEl.textContent = patientReason;
+
+  // lưu cuộc hẹn vào local storage
+  const newAppointment = {
+    id: randomRef,
+    doctorId: currentDoctor.id,
+    doctorName: currentDoctor.name,
+    doctorSpecialty: currentDoctor.specialty,
+    doctorRoom: currentDoctor.room,
+    doctorAvatar: currentDoctor.avatar,
+    date: formattedDate,
+    rawDate: rawDate,
+    time: selectedTimeSlot,
+    patientName: patientName,
+    patientPhone: patientPhone,
+    patientEmail: patientEmail,
+    patientReason: patientReason,
+    status: "upcoming",
+    createdAt: new Date().toISOString(),
+  };
+
+  saveNewAppointment(newAppointment);
+  renderMyAppointments();
+
+  showToast(
+    "Đặt lịch thành công (Demo)",
+    `Mã phiếu khám của bạn là: ${randomRef}`,
+    "success",
+  );
+}
+
+// Đặt lại form
+function handleBookingReset() {
+  const confirmed = confirm(
+    "Bạn có chắc chắn muốn đặt lại toàn bộ thông tin đã nhập trên biểu mẫu không?",
+  );
+  if (!confirmed) return;
+
+  const form = document.getElementById("bookingForm");
+  if (form) form.reset();
+
+  // Reset lỗi
+  const errorGroups = document.querySelectorAll(".form-group.has-error");
+  errorGroups.forEach((g) => g.classList.remove("has-error"));
+
+  // Reset ngày
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomYyyy = tomorrow.getFullYear();
+  const tomMm = String(tomorrow.getMonth() + 1).padStart(2, "0");
+  const tomDd = String(tomorrow.getDate()).padStart(2, "0");
+  const dateInput = document.getElementById("appointmentDate");
+  if (dateInput) {
+    dateInput.value = `${tomYyyy}-${tomMm}-${tomDd}`;
+  }
+
+  // Reset giờ khám
+  selectedTimeSlot = "08:30";
+  const slotButtons = document.querySelectorAll(".time-slot-btn");
+  slotButtons.forEach((btn) => {
+    btn.classList.toggle("is-selected", btn.dataset.time === "08:30");
+  });
+
+  // Reset chọn bác sĩ
+  if (typeof resetDoctorSelection === "function") {
+    resetDoctorSelection();
+  }
+
+  updateSummary();
+  showToast("Đã đặt lại", "Biểu mẫu đã được đưa về trạng thái ban đầu", "info");
+}
+
+function showToast(title, message, type = "info") {
+  let container = document.getElementById("toastContainer");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "toastContainer";
+    container.className = "toast-container";
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement("div");
+  toast.className = `toast toast-${type}`;
+
+  const iconMap = {
+    success: "&#10004;",
+    warning: "&#9888;",
+    danger: "&#10006;",
+    info: "&#8505;",
+  };
+
+  toast.innerHTML = `
+    <span class="toast-icon">${iconMap[type] || "&#8505;"}</span>
+    <div class="toast-content">
+      <div class="toast-title">${title}</div>
+      <div class="toast-msg">${message}</div>
+    </div>
+    <button type="button" class="toast-close" aria-label="Đóng thông báo">&times;</button>
+  `;
+
+  const closeBtn = toast.querySelector(".toast-close");
+  const removeToast = () => {
+    toast.classList.remove("show");
+    setTimeout(() => {
+      if (toast.parentElement) toast.remove();
+    }, 250);
+  };
+
+  closeBtn.addEventListener("click", removeToast);
+
+  container.appendChild(toast);
+  // Hiệu ứng
+  requestAnimationFrame(() => {
+    toast.classList.add("show");
+  });
+
+  // Tự động đóng sau 4.5 giây
+  setTimeout(removeToast, 4500);
+}
+
+/* Quản lý lịch hẹn */
+const STORAGE_KEY_APPOINTMENTS = "caresync_appointments";
+let currentAppointmentFilter = "all";
+let currentAppointmentSearch = "";
+
+// Khởi tạo
+function initMyAppointments() {
+  seedInitialAppointments();
+
+  const searchInput = document.getElementById("appointmentSearchInput");
+  const tabButtons = document.querySelectorAll(".appointments-tabs .tab-btn");
+
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      currentAppointmentSearch = e.target.value.trim().toLowerCase();
+      renderMyAppointments();
+    });
+  }
+
+  tabButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      tabButtons.forEach((b) => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      currentAppointmentFilter = btn.dataset.filter || "all";
+      renderMyAppointments();
+    });
+  });
+
+  renderMyAppointments();
+}
+
+// tạo cuộc hẹn demo
+function seedInitialAppointments() {
+  const existing = localStorage.getItem(STORAGE_KEY_APPOINTMENTS);
+  if (!existing || JSON.parse(existing).length === 0) {
+    const sampleAppointments = [
+      {
+        id: "CS-108234",
+        doctorId: "doc-1",
+        doctorName: "BS.CKII Nguyễn Văn Bình",
+        doctorSpecialty: "Chuyên khoa Tim mạch",
+        doctorRoom: "Phòng khám 201 (Tầng 2)",
+        doctorAvatar: "assets/images/doctor-1.jpg",
+        date: "25/10/2026",
+        rawDate: "2026-10-25",
+        time: "08:30",
+        patientName: "Trần Mai Anh",
+        patientPhone: "0987654321",
+        patientEmail: "maianh.tran@gmail.com",
+        patientReason: "Tái khám theo dõi huyết áp định kỳ",
+        status: "upcoming",
+        createdAt: "2026-10-15T08:00:00.000Z",
+      },
+      {
+        id: "CS-902145",
+        doctorId: "doc-4",
+        doctorName: "BS.CKI Phạm Thị Lan",
+        doctorSpecialty: "Chuyên khoa Da liễu",
+        doctorRoom: "Phòng khám 402 (Tầng 4)",
+        doctorAvatar: "assets/images/doctor-4.jpg",
+        date: "28/10/2026",
+        rawDate: "2026-10-28",
+        time: "14:30",
+        patientName: "Lê Hoàng Nam",
+        patientPhone: "0912345678",
+        patientEmail: "hoangnam.le@gmail.com",
+        patientReason: "Tư vấn điều trị viêm da dị ứng",
+        status: "upcoming",
+        createdAt: "2026-10-14T10:30:00.000Z",
+      },
+    ];
+    localStorage.setItem(
+      STORAGE_KEY_APPOINTMENTS,
+      JSON.stringify(sampleAppointments),
+    );
+  }
+}
+
+// Lấy tất cả cuộc hẹn từ localStorage
+function getAppointmentsFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_APPOINTMENTS);
+    return raw ? JSON.parse(raw) : [];
+  } catch (err) {
+    console.error("Error reading appointments from storage:", err);
+    return [];
+  }
+}
+
+// Lưu cuộc hẹn
+function saveNewAppointment(appt) {
+  const list = getAppointmentsFromStorage();
+  list.unshift(appt);
+  localStorage.setItem(STORAGE_KEY_APPOINTMENTS, JSON.stringify(list));
+}
+
+// Cập nhật cuộc hẹn
+function updateAppointmentInStorage(id, updates) {
+  const list = getAppointmentsFromStorage();
+  const index = list.findIndex((a) => a.id === id);
+  if (index !== -1) {
+    list[index] = { ...list[index], ...updates };
+    localStorage.setItem(STORAGE_KEY_APPOINTMENTS, JSON.stringify(list));
+  }
+}
+
+// Render danh sách
+function renderMyAppointments() {
+  const container = document.getElementById("myAppointmentsList");
+  const emptyNotice = document.getElementById("emptyAppointmentsNotice");
+  const countAllEl = document.getElementById("countAll");
+  const countUpcomingEl = document.getElementById("countUpcoming");
+  const countCancelledEl = document.getElementById("countCancelled");
+
+  if (!container) return;
+
+  const allAppointments = getAppointmentsFromStorage();
+
+  // Đếm cuộc hẹn
+  const upcomingCount = allAppointments.filter(
+    (a) => a.status === "upcoming",
+  ).length;
+  const cancelledCount = allAppointments.filter(
+    (a) => a.status === "cancelled",
+  ).length;
+
+  if (countAllEl) countAllEl.textContent = allAppointments.length;
+  if (countUpcomingEl) countUpcomingEl.textContent = upcomingCount;
+  if (countCancelledEl) countCancelledEl.textContent = cancelledCount;
+
+  // Filter by status tab
+  let filtered = allAppointments;
+  if (currentAppointmentFilter === "upcoming") {
+    filtered = filtered.filter((a) => a.status === "upcoming");
+  } else if (currentAppointmentFilter === "cancelled") {
+    filtered = filtered.filter((a) => a.status === "cancelled");
+  }
+
+  // Filter by search query (phone, ID, doctor name, patient name)
+  if (currentAppointmentSearch) {
+    filtered = filtered.filter((a) => {
+      const q = currentAppointmentSearch;
+      return (
+        (a.id && a.id.toLowerCase().includes(q)) ||
+        (a.patientPhone && a.patientPhone.includes(q)) ||
+        (a.patientName && a.patientName.toLowerCase().includes(q)) ||
+        (a.doctorName && a.doctorName.toLowerCase().includes(q))
+      );
+    });
+  }
+
+  container.innerHTML = "";
+
+  if (filtered.length === 0) {
+    if (emptyNotice) emptyNotice.classList.add("show");
+    return;
+  }
+
+  if (emptyNotice) emptyNotice.classList.remove("show");
+
+  filtered.forEach((appt) => {
+    const isCancelled = appt.status === "cancelled";
+    const statusBadge = isCancelled
+      ? '<span class="badge badge-neutral">Đã hủy</span>'
+      : '<span class="badge badge-success">Sắp tới</span>';
+
+    const card = document.createElement("div");
+    card.className = "appointment-card";
+    card.dataset.id = appt.id;
+
+    card.innerHTML = `
+      <div class="appointment-card-header">
+        <span class="appointment-code-badge">${appt.id}</span>
+        ${statusBadge}
+      </div>
+
+      <div class="appointment-doctor-row">
+        <img src="${appt.doctorAvatar || "assets/images/doctor-1.jpg"}" alt="${appt.doctorName}" class="appointment-doc-avatar" loading="lazy">
+        <div class="appointment-doc-meta">
+          <h4 class="appointment-doc-name">${appt.doctorName}</h4>
+          <span class="appointment-doc-spec">${appt.doctorSpecialty} &bull; ${appt.doctorRoom || "Phòng khám đa khoa"}</span>
+        </div>
+      </div>
+
+      <div class="appointment-info-grid">
+        <div class="appointment-info-col">
+          <span class="appointment-info-label">Thời gian khám:</span>
+          <span class="appointment-info-value">${appt.time}, ${appt.date}</span>
+        </div>
+        <div class="appointment-info-col">
+          <span class="appointment-info-label">Bệnh nhân:</span>
+          <span class="appointment-info-value">${appt.patientName}</span>
+        </div>
+        <div class="appointment-info-col">
+          <span class="appointment-info-label">Số điện thoại:</span>
+          <span class="appointment-info-value">${appt.patientPhone}</span>
+        </div>
+        <div class="appointment-info-col">
+          <span class="appointment-info-label">Email:</span>
+          <span class="appointment-info-value">${appt.patientEmail || "--"}</span>
+        </div>
+      </div>
+
+      ${
+        appt.patientReason
+          ? `
+        <div class="appointment-reason-note">
+          <strong>Lý do khám:</strong> ${appt.patientReason}
+        </div>
+      `
+          : ""
+      }
+
+      <div class="appointment-card-actions">
+        <button type="button" class="btn btn-outline btn-sm action-view-ticket" data-id="${appt.id}">
+          Xem phiếu khám
+        </button>
+        ${
+          !isCancelled
+            ? `
+          <button type="button" class="btn btn-secondary btn-sm action-cancel-appt" data-id="${appt.id}" style="color: var(--color-danger);">
+            Hủy lịch
+          </button>
+        `
+            : ""
+        }
+      </div>
+    `;
+
+    // Xem phiếu khám
+    const viewBtn = card.querySelector(".action-view-ticket");
+    if (viewBtn) {
+      viewBtn.addEventListener("click", () => openAppointmentTicketModal(appt));
+    }
+
+    // Hủy lịch
+    const cancelBtn = card.querySelector(".action-cancel-appt");
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", () =>
+        handleCancelAppointment(appt.id),
+      );
+    }
+
+    container.appendChild(card);
+  });
+}
+
+// Xử lý hủy lịch hẹn
+function handleCancelAppointment(id) {
+  const confirmed = confirm(
+    `Bạn có chắc chắn muốn hủy lịch hẹn khám ${id} không?`,
+  );
+  if (!confirmed) return;
+
+  updateAppointmentInStorage(id, { status: "cancelled" });
+  renderMyAppointments();
+  showToast(
+    "Đã hủy lịch khám",
+    `Phiếu hẹn ${id} đã được chuyển sang trạng thái đã hủy`,
+    "info",
+  );
+}
+
+// Mở phiếu khám
+function openAppointmentTicketModal(appt) {
+  const ticketCodeEl = document.getElementById("ticketCode");
+  const ticketDoctorEl = document.getElementById("ticketDoctor");
+  const ticketSpecialtyEl = document.getElementById("ticketSpecialty");
+  const ticketRoomEl = document.getElementById("ticketRoom");
+  const ticketDateEl = document.getElementById("ticketDate");
+  const ticketTimeEl = document.getElementById("ticketTime");
+  const ticketPatientEl = document.getElementById("ticketPatient");
+  const ticketPhoneEl = document.getElementById("ticketPhone");
+  const ticketReasonEl = document.getElementById("ticketReason");
+
+  if (ticketCodeEl) ticketCodeEl.textContent = appt.id;
+  if (ticketDoctorEl) ticketDoctorEl.textContent = appt.doctorName;
+  if (ticketSpecialtyEl) ticketSpecialtyEl.textContent = appt.doctorSpecialty;
+  if (ticketRoomEl)
+    ticketRoomEl.textContent = appt.doctorRoom || "Phòng khám đa khoa";
+  if (ticketDateEl) ticketDateEl.textContent = appt.date;
+  if (ticketTimeEl) ticketTimeEl.textContent = appt.time;
+  if (ticketPatientEl) ticketPatientEl.textContent = appt.patientName;
+  if (ticketPhoneEl) ticketPhoneEl.textContent = appt.patientPhone;
+  if (ticketReasonEl)
+    ticketReasonEl.textContent = appt.patientReason || "Khám định kỳ";
+
+  const confirmationModal = document.getElementById("confirmationModal");
+  if (confirmationModal) {
+    confirmationModal.classList.add("is-open");
+    confirmationModal.setAttribute("aria-hidden", "false");
+  }
+}

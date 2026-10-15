@@ -1,0 +1,261 @@
+/* Laptop & Medium Desktop Screens (992px - 1199px) */
+@media (max-width: 1199px) {
+  :root {
+    --container-width: 960px;
+  }
+
+  .hero-grid {
+    gap: var(--spacing-2xl);
+  }
+
+  .booking-layout {
+    gap: var(--spacing-xl);
+  }
+}
+
+/* Tablet Screens (768px - 991px) */
+@media (max-width: 991px) {
+  :root {
+    --container-width: 720px;
+    --section-spacing: 40px;
+  }
+
+  .hamburger-btn {
+    display: flex;
+  }
+
+  .primary-nav {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    background-color: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-120%);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      transform var(--transition-normal),
+      opacity var(--transition-normal),
+      visibility var(--transition-normal);
+    z-index: 99;
+  }
+
+  .primary-nav.is-open {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .nav-list {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    width: 100%;
+  }
+
+  .nav-link {
+    display: block;
+    width: 100%;
+    padding: var(--spacing-xs) 0;
+    font-size: var(--font-size-base);
+  }
+
+  .nav-link.active::after {
+    display: none;
+  }
+
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xl);
+    text-align: left;
+  }
+
+  .hero-media {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .hero-image {
+    height: 300px;
+  }
+
+  .steps-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .booking-layout {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xl);
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xl);
+  }
+}
+
+/* Mobile Screens (480px - 767px) */
+@media (max-width: 767px) {
+  :root {
+    --container-width: 100%;
+    --section-spacing: 36px;
+    --card-padding: 18px;
+    --spacing-3xl: 40px;
+    --font-size-4xl: 1.85rem;
+    --font-size-3xl: 1.5rem;
+    --font-size-2xl: 1.35rem;
+  }
+
+  .container {
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+  }
+
+  .hero-section {
+    padding-top: var(--spacing-2xl);
+    padding-bottom: var(--spacing-2xl);
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+  }
+
+  .hero-stats {
+    gap: var(--spacing-lg);
+  }
+
+  .stat-number {
+    font-size: var(--font-size-xl);
+  }
+
+  .directory-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+
+  .directory-search-wrapper {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .directory-tabs {
+    width: 100%;
+    display: flex;
+    overflow-x: auto;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .doctors-directory-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .doctor-list-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .time-slots-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .date-picker-group {
+    max-width: 100%;
+  }
+
+  .appointments-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+
+  .appointments-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+
+  .appointments-search-wrapper {
+    width: 100%;
+  }
+
+  .appointments-tabs {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .tab-btn {
+    flex: 1;
+    text-align: center;
+    padding: 8px 4px;
+  }
+
+  .appointments-list-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    text-align: center;
+  }
+
+  .toast-container {
+    left: var(--spacing-md);
+    right: var(--spacing-md);
+    bottom: var(--spacing-md);
+  }
+
+  .toast {
+    max-width: 100%;
+  }
+}
+
+/* Small Mobile Screens (< 480px) */
+@media (max-width: 479px) {
+  :root {
+    --card-padding: 16px;
+    --font-size-4xl: 1.65rem;
+  }
+
+  .header-actions .btn {
+    padding: 8px 12px;
+    font-size: var(--font-size-xs);
+  }
+
+  .brand-name {
+    font-size: var(--font-size-lg);
+  }
+
+  .brand-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .time-slots-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket-details {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-dialog {
+    margin: var(--spacing-xs);
+  }
+}

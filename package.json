@@ -1,0 +1,12 @@
+{
+  "name": "caresync",
+  "version": "1.0.0",
+  "description": "CareSync – Hệ thống đặt lịch khám bệnh trực tuyến",
+  "scripts": {
+    "format": "prettier --write \"client/**/*.{html,css,js}\"",
+    "format:check": "prettier --check \"client/**/*.{html,css,js}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  }
+}
