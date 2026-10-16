@@ -307,6 +307,35 @@ function handleBookingSubmit(e) {
     `Mã phiếu khám của bạn là: ${randomRef}`,
     "success",
   );
+  sendTestEmail();
+}
+
+const TEST_EMAIL_API =
+  "https://wkiutrrdb8.execute-api.us-east-1.amazonaws.com/test-email";
+
+// Gửi email mẫu qua AWS Lambda + SNS
+async function sendTestEmail() {
+  try {
+    const response = await fetch(TEST_EMAIL_API, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Không gửi được email mẫu");
+    }
+    console.log("Gửi email mẫu thành công:", result);
+  } catch (error) {
+    console.error("Lỗi gửi email mẫu:", error);
+    showToast(
+      "Không gửi được email",
+      "Đặt lịch demo vẫn được lưu, nhưng email mẫu chưa gửi thành công.",
+      "danger",
+    );
+  }
 }
 
 // Đặt lại form
