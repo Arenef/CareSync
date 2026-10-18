@@ -1,4 +1,4 @@
-const DOCTORS_DATA = [
+let DOCTORS_DATA = [
   {
     id: "doc-1",
     name: "BS.CKII Nguyễn Văn Bình",
@@ -44,11 +44,22 @@ let directorySpecialtyFilter = "all";
 let directorySearchQuery = "";
 
 // Khởi tạo danh sách bác sĩ và bộ lọc tìm kiếm
-function initDoctors(onSelectCallback) {
+async function initDoctors(onSelectCallback) {
   onDoctorChangeCallback = onSelectCallback;
   const doctorGrid = document.getElementById("doctorListGrid");
   const searchInput = document.getElementById("doctorSearchInput");
-
+  // 💡 GỌI API LẤY 10 BÁC SĨ THẬT TỪ DYNAMODB
+  try {
+    if (window.CareSyncAPI && window.CareSyncAPI.doctorApi) {
+      const apiDoctors = await window.CareSyncAPI.doctorApi.getAll();
+      if (apiDoctors && apiDoctors.length > 0) {
+        DOCTORS_DATA = apiDoctors;
+        selectedDoctorId = DOCTORS_DATA[0].id;
+      }
+    }
+  } catch (error) {
+    console.warn("Không kết nối được API DynamoDB, dùng dữ liệu dự phòng:", error.message);
+  }
   if (doctorGrid) {
     renderDoctors(DOCTORS_DATA);
   }
