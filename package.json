@@ -8,5 +8,9 @@
   },
   "devDependencies": {
     "prettier": "^3.3.3"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1152.0",
+    "@aws-sdk/lib-dynamodb": "^3.1152.0"
   }
 }
