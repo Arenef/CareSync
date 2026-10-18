@@ -232,10 +232,10 @@ function clearFieldError(inputElement) {
   }
 }
 
-// Xử lý Submit
-function handleBookingSubmit(e) {
+// Xử lý Submit đặt lịch qua AWS DynamoDB
+async function handleBookingSubmit(e) {
   e.preventDefault();
-
+  // 1. Kiểm tra tính hợp lệ của các ô nhập liệu
   if (!validateBookingForm()) {
     showToast(
       "Kiểm tra lại thông tin",
@@ -244,8 +244,14 @@ function handleBookingSubmit(e) {
     );
     return;
   }
-
-  // Tạo demo booking ticket
+  // 2. Khóa nút bấm và hiển thị trạng thái đang xử lý
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  const originalBtnText = submitBtn ? submitBtn.innerHTML : "Xác nhận đặt lịch";
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = "<span>Đang gửi lên AWS...</span>";
+  }
+  // 3. Thu thập dữ liệu từ Form
   const patientName = document.getElementById("patientName").value.trim();
   const patientPhone = document.getElementById("patientPhone").value.trim();
   const patientEmail = document.getElementById("patientEmail").value.trim();
@@ -254,60 +260,111 @@ function handleBookingSubmit(e) {
     "Khám tổng quát định kỳ";
   const rawDate = document.getElementById("appointmentDate").value;
   const formattedDate = formatDateToVN(rawDate);
-
-  // Tạo code random
-  const randomRef = "CS-" + Math.floor(100000 + Math.random() * 900000);
-
-  // Modal Ticket Content
-  const ticketCodeEl = document.getElementById("ticketCode");
-  const ticketDoctorEl = document.getElementById("ticketDoctor");
-  const ticketSpecialtyEl = document.getElementById("ticketSpecialty");
-  const ticketRoomEl = document.getElementById("ticketRoom");
-  const ticketDateEl = document.getElementById("ticketDate");
-  const ticketTimeEl = document.getElementById("ticketTime");
-  const ticketPatientEl = document.getElementById("ticketPatient");
-  const ticketPhoneEl = document.getElementById("ticketPhone");
-  const ticketReasonEl = document.getElementById("ticketReason");
-
-  if (ticketCodeEl) ticketCodeEl.textContent = randomRef;
-  if (ticketDoctorEl) ticketDoctorEl.textContent = currentDoctor.name;
-  if (ticketSpecialtyEl)
-    ticketSpecialtyEl.textContent = currentDoctor.specialty;
-  if (ticketRoomEl) ticketRoomEl.textContent = currentDoctor.room;
-  if (ticketDateEl) ticketDateEl.textContent = formattedDate;
-  if (ticketTimeEl) ticketTimeEl.textContent = selectedTimeSlot;
-  if (ticketPatientEl) ticketPatientEl.textContent = patientName;
-  if (ticketPhoneEl) ticketPhoneEl.textContent = patientPhone;
-  if (ticketReasonEl) ticketReasonEl.textContent = patientReason;
-
-  // lưu cuộc hẹn vào local storage
-  const newAppointment = {
-    id: randomRef,
-    doctorId: currentDoctor.id,
-    doctorName: currentDoctor.name,
-    doctorSpecialty: currentDoctor.specialty,
-    doctorRoom: currentDoctor.room,
-    doctorAvatar: currentDoctor.avatar,
-    date: formattedDate,
-    rawDate: rawDate,
-    time: selectedTimeSlot,
-    patientName: patientName,
-    patientPhone: patientPhone,
-    patientEmail: patientEmail,
-    patientReason: patientReason,
-    status: "upcoming",
-    createdAt: new Date().toISOString(),
-  };
-
-  saveNewAppointment(newAppointment);
-  renderMyAppointments();
-
-  showToast(
-    "Đặt lịch thành công (Demo)",
-    `Mã phiếu khám của bạn là: ${randomRef}`,
-    "success",
-  );
-  sendTestEmail();
+  try {
+    let appointmentId = "APT-" + Date.now();
+    // 💡 4. GỌI API TẠO PHIẾU KHÁM TRÊN AWS DYNAMODB
+    if (window.CareSyncAPI && window.CareSyncAPI.appointmentApi) {
+      const response = await window.CareSyncAPI.appointmentApi.create({
+        doctorId: currentDoctor.id,
+        doctorName: currentDoctor.name,
+        doctorSpecialty: currentDoctor.specialty,
+        appointmentDate: rawDate,
+        slotTime: selectedTimeSlot,
+        patientName: patientName,
+        patientPhone: patientPhone,
+        patientEmail: patientEmail,
+        reason: patientReason,
+      });
+      const bookedData = response.data || response;
+      if (bookedData && bookedData.id) {
+        appointmentId = bookedData.id;
+      }
+    }
+    // 5. Điền thông tin lên Vé khám (Ticket Modal)
+    const ticketCodeEl = document.getElementById("ticketCode");
+    const ticketDoctorEl = document.getElementById("ticketDoctor");
+    const ticketSpecialtyEl = document.getElementById("ticketSpecialty");
+    const ticketRoomEl = document.getElementById("ticketRoom");
+    const ticketDateEl = document.getElementById("ticketDate");
+    const ticketTimeEl = document.getElementById("ticketTime");
+    const ticketPatientEl = document.getElementById("ticketPatient");
+    const ticketPhoneEl = document.getElementById("ticketPhone");
+    const ticketReasonEl = document.getElementById("ticketReason");
+    if (ticketCodeEl) ticketCodeEl.textContent = appointmentId;
+    if (ticketDoctorEl) ticketDoctorEl.textContent = currentDoctor.name;
+    if (ticketSpecialtyEl) ticketSpecialtyEl.textContent = currentDoctor.specialty;
+    if (ticketRoomEl) ticketRoomEl.textContent = currentDoctor.room;
+    if (ticketDateEl) ticketDateEl.textContent = formattedDate;
+    if (ticketTimeEl) ticketTimeEl.textContent = selectedTimeSlot;
+    if (ticketPatientEl) ticketPatientEl.textContent = patientName;
+    if (ticketPhoneEl) ticketPhoneEl.textContent = patientPhone;
+    if (ticketReasonEl) ticketReasonEl.textContent = patientReason;
+    // 6. Lưu vào danh sách Lịch hẹn của tôi (LocalStorage)
+    const newAppointment = {
+      id: appointmentId,
+      doctorId: currentDoctor.id,
+      doctorName: currentDoctor.name,
+      doctorSpecialty: currentDoctor.specialty,
+      doctorRoom: currentDoctor.room,
+      doctorAvatar: currentDoctor.avatar,
+      date: formattedDate,
+      rawDate: rawDate,
+      time: selectedTimeSlot,
+      patientName: patientName,
+      patientPhone: patientPhone,
+      patientEmail: patientEmail,
+      patientReason: patientReason,
+      status: "upcoming",
+      createdAt: new Date().toISOString(),
+    };
+    saveNewAppointment(newAppointment);
+    renderMyAppointments();
+    // 7. Mở cửa sổ popup Vé Khám
+    const confirmationModal = document.getElementById("confirmationModal");
+    if (confirmationModal) {
+      confirmationModal.classList.add("is-open");
+      confirmationModal.setAttribute("aria-hidden", "false");
+    }
+    showToast(
+      "Đặt lịch thành công!",
+      `Mã phiếu khám của bạn là: ${appointmentId}`,
+      "success",
+    );
+    // sendTestEmail();
+  } catch (error) {
+    console.error("Lỗi đặt lịch:", error);
+    // 💡 8. BẮT ĐÚNG MÃ LỖI 409 CONFLICT (CHỐNG TRÙNG LỊCH CỦA DYNAMODB)
+    if (error.status === 409) {
+      showToast(
+        "Trùng lịch khám!",
+        "Khung giờ này vừa có người đặt rồi! Vui lòng chọn khung giờ khác.",
+        "warning",
+      );
+      // Khóa nút giờ này trên giao diện và bỏ chọn
+      const timeSlotButtons = document.querySelectorAll(".time-slot-btn");
+      timeSlotButtons.forEach((btn) => {
+        if ((btn.dataset.time || btn.textContent.trim()) === selectedTimeSlot) {
+          btn.classList.add("is-unavailable");
+          btn.disabled = true;
+          btn.classList.remove("is-selected");
+        }
+      });
+      selectedTimeSlot = "";
+      updateSummary();
+    } else {
+      showToast(
+        "Đặt lịch thất bại",
+        error.message || "Đã có lỗi xảy ra khi tạo phiếu khám.",
+        "danger",
+      );
+    }
+  } finally {
+    // 9. Mở lại nút bấm khi đã xử lý xong
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnText;
+    }
+  }
 }
 
 const TEST_EMAIL_API =
@@ -631,29 +688,27 @@ function renderMyAppointments() {
         </div>
       </div>
 
-      ${
-        appt.patientReason
-          ? `
+      ${appt.patientReason
+        ? `
         <div class="appointment-reason-note">
           <strong>Lý do khám:</strong> ${appt.patientReason}
         </div>
       `
-          : ""
+        : ""
       }
 
       <div class="appointment-card-actions">
         <button type="button" class="btn btn-outline btn-sm action-view-ticket" data-id="${appt.id}">
           Xem phiếu khám
         </button>
-        ${
-          !isCancelled
-            ? `
+        ${!isCancelled
+        ? `
           <button type="button" class="btn btn-secondary btn-sm action-cancel-appt" data-id="${appt.id}" style="color: var(--color-danger);">
             Hủy lịch
           </button>
         `
-            : ""
-        }
+        : ""
+      }
       </div>
     `;
 
