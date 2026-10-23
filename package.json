@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "CareSync – Hệ thống đặt lịch khám bệnh trực tuyến",
   "scripts": {
+    "start": "npx -y serve client -l 3000",
+    "dev": "npx -y serve client -l 3000",
     "format": "prettier --write \"client/**/*.{html,css,js}\"",
     "format:check": "prettier --check \"client/**/*.{html,css,js}\""
   },
@@ -11,6 +13,8 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.1152.0",
+    "@aws-sdk/client-scheduler": "^3.1156.0",
+    "@aws-sdk/client-sns": "^3.1156.0",
     "@aws-sdk/lib-dynamodb": "^3.1152.0"
   }
 }

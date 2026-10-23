@@ -292,7 +292,8 @@ async function handleBookingSubmit(e) {
     const ticketReasonEl = document.getElementById("ticketReason");
     if (ticketCodeEl) ticketCodeEl.textContent = appointmentId;
     if (ticketDoctorEl) ticketDoctorEl.textContent = currentDoctor.name;
-    if (ticketSpecialtyEl) ticketSpecialtyEl.textContent = currentDoctor.specialty;
+    if (ticketSpecialtyEl)
+      ticketSpecialtyEl.textContent = currentDoctor.specialty;
     if (ticketRoomEl) ticketRoomEl.textContent = currentDoctor.room;
     if (ticketDateEl) ticketDateEl.textContent = formattedDate;
     if (ticketTimeEl) ticketTimeEl.textContent = selectedTimeSlot;
@@ -367,33 +368,33 @@ async function handleBookingSubmit(e) {
   }
 }
 
-const TEST_EMAIL_API =
-  "https://wkiutrrdb8.execute-api.us-east-1.amazonaws.com/test-email";
+// const TEST_EMAIL_API =
+//   "https://wkiutrrdb8.execute-api.us-east-1.amazonaws.com/test-email";
 
-// Gửi email mẫu qua AWS Lambda + SNS
-async function sendTestEmail() {
-  try {
-    const response = await fetch(TEST_EMAIL_API, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({}),
-    });
-    const result = await response.json();
-    if (!response.ok || !result.success) {
-      throw new Error(result.message || "Không gửi được email mẫu");
-    }
-    console.log("Gửi email mẫu thành công:", result);
-  } catch (error) {
-    console.error("Lỗi gửi email mẫu:", error);
-    showToast(
-      "Không gửi được email",
-      "Đặt lịch demo vẫn được lưu, nhưng email mẫu chưa gửi thành công.",
-      "danger",
-    );
-  }
-}
+// // Gửi email mẫu qua AWS Lambda + SNS
+// async function sendTestEmail() {
+//   try {
+//     const response = await fetch(TEST_EMAIL_API, {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({}),
+//     });
+//     const result = await response.json();
+//     if (!response.ok || !result.success) {
+//       throw new Error(result.message || "Không gửi được email mẫu");
+//     }
+//     console.log("Gửi email mẫu thành công:", result);
+//   } catch (error) {
+//     console.error("Lỗi gửi email mẫu:", error);
+//     showToast(
+//       "Không gửi được email",
+//       "Đặt lịch demo vẫn được lưu, nhưng email mẫu chưa gửi thành công.",
+//       "danger",
+//     );
+//   }
+// }
 
 // Đặt lại form
 function handleBookingReset() {
@@ -688,27 +689,29 @@ function renderMyAppointments() {
         </div>
       </div>
 
-      ${appt.patientReason
-        ? `
+      ${
+        appt.patientReason
+          ? `
         <div class="appointment-reason-note">
           <strong>Lý do khám:</strong> ${appt.patientReason}
         </div>
       `
-        : ""
+          : ""
       }
 
       <div class="appointment-card-actions">
         <button type="button" class="btn btn-outline btn-sm action-view-ticket" data-id="${appt.id}">
           Xem phiếu khám
         </button>
-        ${!isCancelled
-        ? `
+        ${
+          !isCancelled
+            ? `
           <button type="button" class="btn btn-secondary btn-sm action-cancel-appt" data-id="${appt.id}" style="color: var(--color-danger);">
             Hủy lịch
           </button>
         `
-        : ""
-      }
+            : ""
+        }
       </div>
     `;
 
