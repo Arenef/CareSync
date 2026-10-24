@@ -7,6 +7,12 @@ let DOCTORS_DATA = [
     email: "doc1@caresync.vn",
     isActive: true,
     avatar: "assets/images/doctor-1.jpg",
+    room: "Phòng khám 201 (Tầng 2)",
+    degree: "Bác sĩ Chuyên khoa II",
+    position: "Trưởng khoa Tim mạch can thiệp",
+    experience: "15+ năm kinh nghiệm điều trị bệnh lý tim mạch & mạch vành",
+    bio: "Từng tu nghiệp chuyên sâu tại Viện Tim TP.HCM. Chuyên chẩn đoán, điều trị tăng huyết áp, rối loạn nhịp tim, suy tim và can thiệp mạch vành an toàn, hiệu quả.",
+    workingSlots: ["08:00", "08:30", "09:00", "10:00", "14:00", "15:00"],
   },
   {
     id: "doc-2",
@@ -16,6 +22,12 @@ let DOCTORS_DATA = [
     email: "doc2@caresync.vn",
     isActive: true,
     avatar: "assets/images/doctor-2.jpg",
+    room: "Phòng khám 105 (Tầng 1)",
+    degree: "Thạc sĩ Y khoa",
+    position: "Phó khoa Khám bệnh & Nội tổng quát",
+    experience: "12+ năm công tác trong lĩnh vực Nội khoa và sàng lọc sức khỏe",
+    bio: "Chuyên gia chẩn đoán sớm và điều trị các bệnh lý chuyển hóa, đái tháo đường, gan mật, tiêu hóa và tư vấn sức khỏe định kỳ cho gia đình.",
+    workingSlots: ["08:00", "09:00", "10:00", "14:30", "15:30", "16:00"],
   },
   {
     id: "doc-3",
@@ -25,6 +37,12 @@ let DOCTORS_DATA = [
     email: "doc3@caresync.vn",
     isActive: true,
     avatar: "assets/images/doctor-3.jpg",
+    room: "Phòng khám 302 (Tầng 3)",
+    degree: "Phó Giáo sư, Tiến sĩ Y học",
+    position: "Cố vấn cấp cao Nhi khoa",
+    experience: "20+ năm kinh nghiệm thăm khám và giảng dạy Y khoa",
+    bio: "Chuyên gia đầu ngành Nhi khoa tổng quát, dinh dưỡng trẻ em, các bệnh đường hô hấp và tiêm chủng phòng ngừa cho trẻ sơ sinh và trẻ nhỏ.",
+    workingSlots: ["08:30", "09:30", "10:30", "14:00", "15:00", "16:30"],
   },
   {
     id: "doc-4",
@@ -34,6 +52,12 @@ let DOCTORS_DATA = [
     email: "doc4@caresync.vn",
     isActive: true,
     avatar: "assets/images/doctor-4.jpg",
+    room: "Phòng khám 401 (Tầng 4)",
+    degree: "Bác sĩ Chuyên khoa I",
+    position: "Bác sĩ Chuyên khoa Da liễu & Thẩm mỹ",
+    experience: "8+ năm kinh nghiệm da liễu lâm sàng và laser thẩm mỹ",
+    bio: "Chuyên điều trị mụn trứng cá, viêm da cơ địa, nám da, sẹo rỗ và các liệu trình phục hồi da chuyên sâu theo phác đồ y khoa hiện đại.",
+    workingSlots: ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00"],
   },
 ];
 
@@ -48,7 +72,8 @@ async function initDoctors(onSelectCallback) {
   onDoctorChangeCallback = onSelectCallback;
   const doctorGrid = document.getElementById("doctorListGrid");
   const searchInput = document.getElementById("doctorSearchInput");
-  // 💡 GỌI API LẤY 10 BÁC SĨ THẬT TỪ DYNAMODB
+
+  // 💡 GỌI API LẤY DANH SÁCH BÁC SĨ THẬT TỪ DYNAMODB
   try {
     if (window.CareSyncAPI && window.CareSyncAPI.doctorApi) {
       const apiDoctors = await window.CareSyncAPI.doctorApi.getAll();
@@ -60,6 +85,7 @@ async function initDoctors(onSelectCallback) {
   } catch (error) {
     console.warn("Không kết nối được API DynamoDB, dùng dữ liệu dự phòng:", error.message);
   }
+
   if (doctorGrid) {
     renderDoctors(DOCTORS_DATA);
   }
@@ -86,7 +112,7 @@ async function initDoctors(onSelectCallback) {
   }
 }
 
-// Khởi tạo danh sách bác sĩ
+// Khởi tạo danh sách danh bạ bác sĩ
 function initDoctorDirectory() {
   const directoryGrid = document.getElementById("doctorsDirectoryGrid");
   const searchInput = document.getElementById("directorySearchInput");
@@ -156,7 +182,7 @@ function renderDoctorDirectory() {
     card.dataset.id = doc.id;
 
     card.innerHTML = `
-      <div class="directory-card-top">
+      <div class="directory-card-top" style="cursor: pointer;" title="Bấm để xem hồ sơ phóng to và thông tin chi tiết">
         <div class="directory-avatar-container">
           <img src="${doc.avatar}" alt="${doc.name}" class="directory-avatar" loading="lazy">
         </div>
@@ -177,16 +203,38 @@ function renderDoctorDirectory() {
         </div>
       </div>
       <div class="directory-footer">
+        <button type="button" class="btn btn-secondary btn-sm action-view-doc" data-id="${doc.id}">
+          <span class="material-symbols-rounded" style="font-size: 16px; vertical-align: middle; margin-right: 2px;">visibility</span>
+          <span>Xem chi tiết</span>
+        </button>
         <button type="button" class="btn btn-primary btn-sm action-book-with-doc" data-id="${doc.id}" ${!doc.isActive ? "disabled" : ""}>
           <span>Đặt lịch với BS</span>
         </button>
       </div>
     `;
 
-    // Click "Đặt lịch với BS"
+    // Click vào phần thân trên của card để mở modal
+    const cardTop = card.querySelector(".directory-card-top");
+    if (cardTop) {
+      cardTop.addEventListener("click", () => {
+        showDoctorDetailModal(doc.id);
+      });
+    }
+
+    // Click nút "Xem chi tiết"
+    const viewBtn = card.querySelector(".action-view-doc");
+    if (viewBtn) {
+      viewBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        showDoctorDetailModal(doc.id);
+      });
+    }
+
+    // Click nút "Đặt lịch với BS"
     const bookBtn = card.querySelector(".action-book-with-doc");
     if (bookBtn) {
-      bookBtn.addEventListener("click", () => {
+      bookBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
         selectDoctor(doc.id);
         const bookingSection = document.getElementById("bookingSection");
         if (bookingSection) {
@@ -206,7 +254,7 @@ function renderDoctorDirectory() {
   });
 }
 
-// Hiển thị danh sách bác sĩ
+// Hiển thị danh sách bác sĩ trên form đặt lịch
 function renderDoctors(doctors) {
   const doctorGrid = document.getElementById("doctorListGrid");
   const emptyState = document.getElementById("emptyDoctorState");
@@ -229,8 +277,12 @@ function renderDoctors(doctors) {
     card.setAttribute("tabindex", "0");
     card.setAttribute("aria-pressed", isSelected ? "true" : "false");
     card.dataset.id = doc.id;
+    card.title = "Bấm để chọn bác sĩ và xem thông tin chi tiết";
 
     card.innerHTML = `
+      <button type="button" class="doctor-quick-view-btn" data-action="quick-view" title="Xem ảnh phóng to & hồ sơ chi tiết bác sĩ">
+        <span class="material-symbols-rounded">zoom_in</span>
+      </button>
       <div class="doctor-avatar-wrapper">
         <img src="${doc.avatar}" alt="${doc.name}" class="doctor-avatar" loading="lazy">
         <span class="doctor-check-icon" aria-hidden="true">&#10003;</span>
@@ -244,15 +296,27 @@ function renderDoctors(doctors) {
       </div>
     `;
 
-    const handleSelect = () => {
+    // Khi bấm vào ô bác sĩ: vừa chọn bác sĩ vừa mở modal xem thông tin phóng to
+    const handleCardClick = (e) => {
       selectDoctor(doc.id);
+      showDoctorDetailModal(doc.id);
     };
 
-    card.addEventListener("click", handleSelect);
+    // Nút soi ảnh nhanh
+    const quickViewBtn = card.querySelector("[data-action='quick-view']");
+    if (quickViewBtn) {
+      quickViewBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        selectDoctor(doc.id);
+        showDoctorDetailModal(doc.id);
+      });
+    }
+
+    card.addEventListener("click", handleCardClick);
     card.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        handleSelect();
+        handleCardClick(e);
       }
     });
 
@@ -260,7 +324,124 @@ function renderDoctors(doctors) {
   });
 }
 
-// Chọn bác sĩ và cập nhật
+// Mở modal hiển thị ảnh phóng to và chi tiết hồ sơ bác sĩ từ DB
+function showDoctorDetailModal(doctorId) {
+  const doc = DOCTORS_DATA.find((d) => d.id === doctorId);
+  if (!doc) return;
+
+  const avatarEl = document.getElementById("doctorModalAvatar");
+  const nameEl = document.getElementById("doctorModalName");
+  const specialtyEl = document.getElementById("doctorModalSpecialty");
+  const degreeEl = document.getElementById("doctorModalDegree");
+  const roomEl = document.getElementById("doctorModalRoom");
+  const phoneEl = document.getElementById("doctorModalPhone");
+  const emailEl = document.getElementById("doctorModalEmail");
+  const idEl = document.getElementById("doctorModalId");
+  const statusEl = document.getElementById("doctorModalStatus");
+  const expEl = document.getElementById("doctorModalExp");
+  const bioEl = document.getElementById("doctorModalBio");
+  const slotsContainer = document.getElementById("doctorModalSlots");
+  const bookBtn = document.getElementById("doctorModalBookBtn");
+
+  // 1. Phóng to ảnh bác sĩ
+  if (avatarEl) {
+    avatarEl.src = doc.avatar || "assets/images/doctor-1.jpg";
+    avatarEl.alt = doc.name;
+  }
+
+  // 2. Họ và tên, chuyên khoa
+  if (nameEl) nameEl.textContent = doc.name;
+  if (specialtyEl) specialtyEl.textContent = doc.specialty || "Đa khoa";
+
+  // 3. Học vị & Chức vụ
+  if (degreeEl) {
+    const roleText = [doc.degree, doc.position].filter(Boolean).join(" • ");
+    degreeEl.textContent = roleText || "Bác sĩ Chuyên khoa";
+  }
+
+  // 4. Mã bác sĩ trong CSDL
+  if (idEl) idEl.textContent = doc.id;
+
+  // 5. Trạng thái hoạt động
+  if (statusEl) {
+    statusEl.className = `badge ${doc.isActive ? "badge-primary" : "badge-neutral"}`;
+    statusEl.textContent = doc.isActive ? "Đang hoạt động" : "Tạm ngưng tiếp nhận";
+  }
+
+  // 6. Phòng khám tiếp nhận
+  if (roomEl) roomEl.textContent = doc.room || "Phòng khám Đa khoa";
+
+  // 7. Kinh nghiệm làm việc
+  if (expEl) expEl.textContent = doc.experience || "10+ năm kinh nghiệm trong ngành Y";
+
+  // 8. Số điện thoại & Email liên hệ
+  if (phoneEl) {
+    phoneEl.textContent = doc.phone || "1900 1234";
+    phoneEl.href = `tel:${(doc.phone || "").replace(/\s/g, "")}`;
+  }
+  if (emailEl) {
+    emailEl.textContent = doc.email || "support@caresync.vn";
+    emailEl.href = `mailto:${doc.email || ""}`;
+  }
+
+  // 9. Giới thiệu chuyên môn (Bio)
+  if (bioEl) {
+    bioEl.textContent =
+      doc.bio ||
+      "Bác sĩ có nhiều năm kinh nghiệm công tác trong ngành Y, chuyên môn cao và luôn tận tâm, chu đáo chăm sóc người bệnh.";
+  }
+
+  // 10. Các khung giờ khám tiếp nhận từ CSDL
+  if (slotsContainer) {
+    slotsContainer.innerHTML = "";
+    const slots =
+      doc.workingSlots && doc.workingSlots.length > 0
+        ? doc.workingSlots
+        : ["08:00", "08:30", "09:00", "09:30", "10:00", "14:00", "14:30", "15:00"];
+
+    slots.forEach((s) => {
+      const chip = document.createElement("span");
+      chip.className = "doctor-modal-slot-chip";
+      chip.textContent = s;
+      slotsContainer.appendChild(chip);
+    });
+  }
+
+  // 11. Nút hành động đặt lịch ngay từ Modal
+  if (bookBtn) {
+    bookBtn.disabled = !doc.isActive;
+    bookBtn.onclick = () => {
+      selectDoctor(doc.id);
+      if (typeof closeModal === "function") {
+        closeModal("doctorDetailModal");
+      }
+      const bookingSection = document.getElementById("bookingSection");
+      if (bookingSection) {
+        bookingSection.scrollIntoView({ behavior: "smooth" });
+      }
+      if (typeof showToast === "function") {
+        showToast(
+          "Đã chọn bác sĩ",
+          `Đã chọn ${doc.name}. Vui lòng chọn ngày & giờ khám bên dưới!`,
+          "success",
+        );
+      }
+    };
+  }
+
+  // 12. Mở modal hiển thị
+  if (typeof openModal === "function") {
+    openModal("doctorDetailModal");
+  } else {
+    const modal = document.getElementById("doctorDetailModal");
+    if (modal) {
+      modal.classList.add("is-open");
+      modal.setAttribute("aria-hidden", "false");
+    }
+  }
+}
+
+// Chọn bác sĩ và cập nhật giao diện
 function selectDoctor(doctorId) {
   selectedDoctorId = doctorId;
 
@@ -294,3 +475,7 @@ function resetDoctorSelection() {
     onDoctorChangeCallback(getSelectedDoctor());
   }
 }
+
+// Xuất hàm ra phạm vi toàn cục để tương tác từ các module khác
+window.showDoctorDetailModal = showDoctorDetailModal;
+window.selectDoctor = selectDoctor;
