@@ -37,6 +37,10 @@
 * **Commit Message:** `docs(week3): hoàn thiện báo cáo nhóm và minh chứng thực hành cá nhân SV2 tuần 3`
 * **Mô tả:** Tổng hợp 8 ảnh minh chứng thực tế trên AWS (SNS, S3, API Gateway, Postman) và hoàn thiện các file báo cáo Markdown tuần 3.
 
+### Commit 5: Tích hợp Module Mã hóa AWS KMS
+* **Commit Message:** `feat(kms): xây dựng service mã hóa dữ liệu nhạy cảm bằng AWS KMS và kiểm thử thành công`
+* **Mô tả:** Triển khai module `kms.service.js` với `@aws-sdk/client-kms` (`encryptData`, `decryptData`), tích hợp test handler trong `index.js` và kiểm thử mã hóa/giải mã thành công trên Lambda Console.
+
 ---
 
 ## 4. Model A.I đã sử dụng
