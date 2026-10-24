@@ -1,0 +1,165 @@
+/* ============================================================================
+   CareSync - Lookup Module Stylesheet (Tra Cứu Lịch Hẹn Tại Section)
+   ============================================================================ */
+
+/* 1. Form tra cứu tại Section Lịch hẹn của tôi */
+.appointment-lookup-form {
+  margin-bottom: var(--spacing-lg);
+}
+
+.appointments-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.appointments-search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex: 1;
+  min-width: 300px;
+}
+
+.lookup-field-wrap {
+  position: relative;
+  flex: 1;
+}
+
+.lookup-field-wrap .form-input {
+  height: 42px;
+  padding-right: 36px;
+  font-size: var(--font-size-sm);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.lookup-field-wrap .form-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-focus);
+}
+
+.lookup-field-wrap .form-input.is-invalid {
+  border-color: var(--color-danger) !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
+}
+
+/* Nút xóa nhanh nội dung */
+.lookup-clear-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: var(--color-bg-muted);
+  color: var(--color-text-muted);
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.lookup-clear-btn:hover {
+  background-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+/* Nút Tra cứu & Xem tất cả */
+#sectionLookupSubmitBtn {
+  height: 42px;
+  white-space: nowrap;
+  font-weight: var(--font-weight-semibold);
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.15);
+  transition: all var(--transition-fast);
+}
+
+#sectionLookupSubmitBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.25);
+}
+
+#sectionLookupSubmitBtn.is-loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+/* Thông báo lỗi validation */
+.lookup-error-msg {
+  display: none;
+  color: var(--color-danger);
+  font-size: var(--font-size-xs);
+  margin-top: 6px;
+  font-weight: var(--font-weight-medium);
+}
+
+.lookup-error-msg.show {
+  display: block;
+  animation: lookupShake 0.3s ease-in-out;
+}
+
+@keyframes lookupShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+/* 3. Spinner đang tải khi gọi API */
+.lookup-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: lookupSpin 0.8s linear infinite;
+}
+
+@keyframes lookupSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 4. Thẻ lịch hẹn tinh chỉnh */
+.appointment-info-value.highlight-time {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+/* 5. Responsive */
+@media (max-width: 768px) {
+  .appointments-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .appointments-search-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+    min-width: 100%;
+  }
+
+  .appointments-search-wrapper .btn {
+    width: 100%;
+  }
+
+  .appointments-tabs {
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+}

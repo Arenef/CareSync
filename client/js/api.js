@@ -85,6 +85,8 @@ function mapDoctorFromDynamoDB(doc) {
         workingSlots: doc.WorkingSlots ||
             doc.workingSlots || ["08:00", "09:00", "10:00", "14:00", "15:00"],
         isActive: doc.IsActive !== false,
+        experience: doc.Experience || doc.experience || "10+ năm kinh nghiệm trong ngành Y",
+        bio: doc.Bio || doc.bio || doc.Description || doc.description || "Bác sĩ giàu kinh nghiệm, tận tâm với nghề và luôn đồng hành cùng sức khỏe bệnh nhân.",
     };
 }
 
@@ -105,6 +107,7 @@ function mapAppointmentFromDynamoDB(appt) {
         doctorName: appt.DoctorName || appt.doctorName || "Bác sĩ phụ trách",
         doctorSpecialty: appt.DoctorSpecialty || appt.doctorSpecialty || "",
         doctorRoom: appt.DoctorRoom || appt.doctorRoom || "Phòng khám 101",
+        doctorAvatar: appt.DoctorAvatar || appt.doctorAvatar || "assets/images/doctor-1.jpg",
         date: date,
         time: time,
         patientName: appt.PatientName || appt.patientName,
@@ -187,6 +190,21 @@ const appointmentApi = {
             ...res,
             data: mapAppointmentFromDynamoDB(res.data || res.Item || res),
         };
+    },
+
+    /**
+     * Tra cứu danh sách lịch hẹn theo số điện thoại người bệnh từ AWS API Gateway / Lambda (SV2)
+     * @param {string} phone - Số điện thoại cần tra cứu (ví dụ: '0912345678')
+     * @returns {Promise<Array>} Danh sách các lịch hẹn đã chuẩn hóa
+     */
+    async getByPhone(phone) {
+        if (!phone) return [];
+        const cleanPhone = phone.trim();
+        const res = await request(`/appointments?phone=${encodeURIComponent(cleanPhone)}`, {
+            method: "GET",
+        });
+        const rawList = res.data || res.Items || res.appointments || (Array.isArray(res) ? res : []);
+        return Array.isArray(rawList) ? rawList.map(mapAppointmentFromDynamoDB) : [];
     },
 };
 
