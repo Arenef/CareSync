@@ -1,0 +1,151 @@
+{
+  "info": {
+    "_postman_id": "c1a2b3c4-caresync-week3-collection",
+    "name": "CareSync - Week 3 Collection",
+    "description": "Bộ sưu tập Postman API kiểm thử toàn diện Hệ thống đặt lịch khám bệnh CareSync (Tuần 3) - Triển khai GSI, SNS, EventBridge Scheduler & S3 Website Hosting.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://2q1b3nxtkg.execute-api.us-east-1.amazonaws.com",
+      "type": "string"
+    },
+    {
+      "key": "testPhone",
+      "value": "0934567803",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. GET /doctors - Lấy danh sách 10 Bác sĩ",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/doctors",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "doctors"
+          ]
+        },
+        "description": "Lấy danh sách tất cả bác sĩ đang hoạt động trong hệ thống từ DynamoDB bảng Doctors."
+      },
+      "response": []
+    },
+    {
+      "name": "2. POST /appointments - Đặt lịch khám mới & Gửi thông báo SNS",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"DoctorId\": \"DOC01\",\n  \"DoctorName\": \"BS. Nguyễn Văn A\",\n  \"DoctorSpecialty\": \"Tim mạch\",\n  \"AppointmentDate\": \"2026-11-10\",\n  \"SlotTime\": \"10:00\",\n  \"PatientName\": \"Huỳnh Ngọc Bảo Khang\",\n  \"PatientPhone\": \"0909999888\",\n  \"PatientEmail\": \"24110241@student.hcmute.edu.vn\",\n  \"Reason\": \"Khám định kỳ tổng quát\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/appointments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "appointments"
+          ]
+        },
+        "description": "Tạo lịch hẹn mới: ghi bảng Appointments, lưu hồ sơ Patients song song, gửi email xác nhận qua SNS Publish và tạo lịch hẹn giờ nhắc lịch sau 2 phút qua EventBridge Scheduler."
+      },
+      "response": []
+    },
+    {
+      "name": "3. POST /appointments - Chống trùng lịch (409 Conflict)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"DoctorId\": \"DOC01\",\n  \"DoctorName\": \"BS. Nguyễn Văn A\",\n  \"DoctorSpecialty\": \"Tim mạch\",\n  \"AppointmentDate\": \"2026-11-10\",\n  \"SlotTime\": \"10:00\",\n  \"PatientName\": \"Người Đặt Trùng\",\n  \"PatientPhone\": \"0911222333\",\n  \"PatientEmail\": \"trunglich@gmail.com\",\n  \"Reason\": \"Cố tình đặt trùng ca khám\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/appointments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "appointments"
+          ]
+        },
+        "description": "Gửi request trùng đúng bác sĩ và khung giờ đã được đặt trước. DynamoDB kích hoạt ConditionalCheckFailedException và trả về HTTP 409 Conflict."
+      },
+      "response": []
+    },
+    {
+      "name": "4. GET /appointments?phone={{testPhone}} - Tra cứu theo SĐT qua GSI",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/appointments?phone={{testPhone}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "appointments"
+          ],
+          "query": [
+            {
+              "key": "phone",
+              "value": "{{testPhone}}"
+            }
+          ]
+        },
+        "description": "Truy vấn danh sách lịch hẹn của một số điện thoại thông qua Global Secondary Index (PatientPhone-index) với độ phức tạp O(1) và chi phí RCU tối ưu."
+      },
+      "response": []
+    },
+    {
+      "name": "5. GET /appointments - Lỗi thiếu query param phone (400 Bad Request)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/appointments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "appointments"
+          ]
+        },
+        "description": "Kiểm thử validation khi gọi GET /appointments mà không truyền query param phone. API trả về HTTP 400 Bad Request."
+      },
+      "response": []
+    }
+  ]
+}

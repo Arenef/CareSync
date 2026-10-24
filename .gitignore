@@ -1,6 +1,17 @@
+# Dependencies
 node_modules/
+
+# Environment Variables & Credentials
 .env
 .env.*
+.env.local
 server/lambda/credentials
 credentials
+
+# Logs & Artifacts
 *.log
+*.zip
+
+# OS Files
+Thumbs.db
+.DS_Store
