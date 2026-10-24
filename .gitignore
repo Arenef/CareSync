@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Environment Variables
+.env
+.env.local
+
+# Build & Zip Artifacts
+*.zip
+
+# OS Files
+Thumbs.db
+.DS_Store
