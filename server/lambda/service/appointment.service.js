@@ -5,6 +5,7 @@ const {
   CreateScheduleCommand,
 } = require("@aws-sdk/client-scheduler");
 const { docClient, TABLES } = require("../config/db.js");
+const { saveOrUpdatePatient } = require("./patient.service.js");
 
 const REGION = process.env.AWS_REGION || "us-east-1";
 
@@ -22,10 +23,17 @@ const createAppointment = async (data) => {
   const slotKey = data.SlotKey || `${appointmentDate}#${slotTime}`;
   const appointmentId = data.AppointmentId || "APT-" + Date.now();
 
+  const cleanPhone = patientPhone ? patientPhone.replace(/[^0-9]/g, "") : "";
+  const patientId =
+    data.PatientId ||
+    data.patientId ||
+    (cleanPhone ? `PAT-${cleanPhone}` : `PAT-${Date.now()}`);
+
   const newAppointmentItem = {
     DoctorId: doctorId,
     SlotKey: slotKey,
     AppointmentId: appointmentId,
+    PatientId: patientId,
     PatientName: patientName,
     PatientPhone: patientPhone,
     PatientEmail: patientEmail,
@@ -35,8 +43,8 @@ const createAppointment = async (data) => {
     CreatedAt: new Date().toISOString(),
   };
 
-  // Ghi vào DynamoDB (chặn trùng lịch khám)
-  await docClient.send(
+  // Ghi vào DynamoDB APPOINTMENTS (chặn trùng lịch khám) và ghi nhận hồ sơ PATIENTS song song
+  const appointmentTask = docClient.send(
     new PutCommand({
       TableName: TABLES.APPOINTMENTS,
       Item: newAppointmentItem,
@@ -44,6 +52,20 @@ const createAppointment = async (data) => {
         "attribute_not_exists(DoctorId) AND attribute_not_exists(SlotKey)",
     }),
   );
+
+  // Gọi trực tiếp hàm lưu/cập nhật hồ sơ bệnh nhân song song
+  const patientTask = saveOrUpdatePatient({
+    patientName,
+    patientPhone,
+    email: patientEmail,
+    patientId,
+  }).catch((err) => {
+    console.error("[Patient Service Save Error]:", err.message);
+    return null;
+  });
+
+  // Chờ cả 2 tác vụ hoàn tất song song, ConditionalCheckFailedException ở appointmentTask vẫn được kích hoạt bình thường nếu trùng lịch
+  await Promise.all([appointmentTask, patientTask]);
 
   // Đọc ARN linh hoạt từ biến môi trường (không hardcode ARN)
   const snsTopicArn = process.env.SNS_TOPIC_ARN;
