@@ -1,4 +1,4 @@
-const { PutCommand } = require("@aws-sdk/lib-dynamodb");
+const { PutCommand, QueryCommand } = require("@aws-sdk/lib-dynamodb");
 const { SNSClient, PublishCommand } = require("@aws-sdk/client-sns");
 const {
   SchedulerClient,
@@ -157,6 +157,25 @@ const createAppointment = async (data) => {
   return newAppointmentItem;
 };
 
+/**
+ * Tra cứu danh sách lịch hẹn theo số điện thoại thông qua GSI PatientPhone-index
+ * @param {string} phone - Số điện thoại của bệnh nhân
+ */
+const getAppointmentsByPhone = async (phone) => {
+  const params = {
+    TableName: TABLES.APPOINTMENTS,
+    IndexName: "PatientPhone-index",
+    KeyConditionExpression: "PatientPhone = :phone",
+    ExpressionAttributeValues: {
+      ":phone": phone,
+    },
+  };
+
+  const result = await docClient.send(new QueryCommand(params));
+  return result.Items || [];
+};
+
 module.exports = {
   createAppointment,
+  getAppointmentsByPhone,
 };
