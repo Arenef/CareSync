@@ -87,6 +87,12 @@
 - **Commit Message:** `feat(kms): xây dựng service mã hóa dữ liệu nhạy cảm bằng AWS KMS và kiểm thử thành công`
 - **Mô tả:** Triển khai module `kms.service.js` với `@aws-sdk/client-kms` (`encryptData`, `decryptData`), tích hợp test handler trong `index.js` và kiểm thử mã hóa/giải mã thành công trên Lambda Console.
 
+### Commit 5: Hoàn thiện Báo cáo Tuần 3, Khai báo AI & Minh chứng SV2
+
+- **Link commit:** https://github.com/Arenef/CareSync/commit/672cb63
+- **Commit Message:** `docs(week3): hoàn thiện báo cáo tuần 3, khai báo AI và minh chứng thực hành SV2`
+- **Mô tả:** Cập nhật đầy đủ ảnh thực hành (GSI DynamoDB, Postman 201/409, 2 luồng Email SNS xác nhận & nhắc hẹn), tạo mới file khai báo AI hỗ trợ (Hosting S3 & CloudFront OAC) và tổng hợp toàn diện Báo cáo tuần 3 của cả hai thành viên.
+
 ---
 
 ## 5. Model A.I đã sử dụng
