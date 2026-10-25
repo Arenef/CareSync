@@ -51,7 +51,7 @@ Việc thiết lập Global Secondary Index mang tên **`PatientPhone-index`** v
 * **Attribute projections:** `All`
 * **Trạng thái:** `Active`
 
-*(Chèn ảnh chụp cấu hình GSI PatientPhone-index Active trên DynamoDB Console tại đây)*
+![Cấu hình GSI PatientPhone-index ở trạng thái Active trên Amazon DynamoDB Console](../img/index.png)
 
 ---
 
@@ -205,11 +205,23 @@ Trong quá trình triển khai CloudFront Distribution kết hợp Origin Access
 
 ### 5.2. Test API POST /appointments thành công & SNS Email (201 Created)
 * **Request:** `POST https://2q1b3nxtkg.execute-api.us-east-1.amazonaws.com/appointments`
-* **Kết quả:** HTTP **`201 Created`**, ghi dữ liệu vào bảng `Appointments`, lưu hồ sơ `Patients`, xuất bản email xác nhận qua SNS và kích hoạt EventBridge Scheduler hẹn giờ nhắc sau 2 phút.
+* **Kết quả:** HTTP **`201 Created`**, ghi dữ liệu vào bảng `Appointments`, lưu hồ sơ `Patients`, xuất bản email xác nhận qua SNS và kích hoạt EventBridge Scheduler hẹn giờ nhắc sau 2 phút:
+
+![Kiểm thử Postman tạo lịch hẹn mới POST appointments thành công 201 Created](../img/postman_post_appointments.png)
+
+* Minh chứng Email xác nhận đặt lịch khám gửi tức thì qua Amazon SNS:
+
+![Email xác nhận đặt lịch khám thành công gửi qua Amazon SNS](../img/comfirm_email.png)
+
+* Minh chứng Email thông báo nhắc lịch khám bệnh tự động (do Amazon EventBridge Scheduler kích hoạt):
+
+![Email thông báo nhắc lịch khám bệnh gửi về qua Amazon SNS](../img/notification_email.png)
 
 ### 5.3. Test API POST /appointments chống trùng lịch (409 Conflict)
 * **Kịch bản:** Gửi lại dữ liệu trùng bác sĩ và khung giờ khám đã đặt trước.
-* **Kết quả:** Biểu thức `ConditionExpression` từ chối ghi, Lambda bắt lỗi và trả về HTTP **`409 Conflict`**.
+* **Kết quả:** Biểu thức `ConditionExpression` từ chối ghi, Lambda bắt lỗi và trả về HTTP **`409 Conflict`**:
+
+![Kiểm thử Postman chống trùng lịch khám trả về lỗi 409 Conflict](../img/postman_post_appointment_conflict.png)
 
 ---
 
