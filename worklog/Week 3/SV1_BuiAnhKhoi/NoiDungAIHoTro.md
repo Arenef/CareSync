@@ -3,8 +3,8 @@
 # KHAI BÁO SỬ DỤNG CÔNG CỤ AI – CARESYNC (TUẦN 3)
 
 **Sinh viên 1:** Bùi Anh Khôi  
-**Công cụ AI sử dụng:** ChatGPT (ChatGPT-6)  
-**Model:** Luna
+**Công cụ AI sử dụng:** ChatGPT  
+**Model:** ChatGPT-4o
 
 ---
 
@@ -32,8 +32,8 @@
 
 ## 1. Khai báo công cụ AI
 
-- **Công cụ AI sử dụng:** ChatGPT (ChatGPT-6)
-- **Model:** Luna
+- **Công cụ AI sử dụng:** ChatGPT
+- **Model:** ChatGPT-4o
 - **Mục đích:** Hỗ trợ thiết kế mã nguồn module dịch vụ mã hóa phong bì dữ liệu y tế bằng AWS KMS, viết script kiểm thử độc lập dữ liệu số điện thoại và CCCD, hướng dẫn cấu hình AWS Credentials từ tài khoản AWS Academy Learner Lab trên môi trường Windows.
 
 ---
