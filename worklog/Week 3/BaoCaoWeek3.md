@@ -4,36 +4,43 @@
 **Học phần:** Điện toán đám mây (Cloud Computing) – HCMUTE  
 **Nhóm thực hiện:** Domain Apps  
 **Thành viên:**
+
 - **SV1:** Bùi Anh Khôi – MSSV: 24110258
 - **SV2:** Huỳnh Ngọc Bảo Khang – MSSV: 24110241  
-**GitHub Repository:** [https://github.com/Arenef/CareSync](https://github.com/Arenef/CareSync)  
-**Nhánh chính (Branch):** `main`
+  **GitHub Repository:** [https://github.com/Arenef/CareSync](https://github.com/Arenef/CareSync)  
+  **Nhánh chính (Branch):** `main`
 
 ---
 
 ## Mục Lục
 
-- [1. Tổng Quan Nhiệm Vụ Tuần 3](#1-tổng-quan-nhiệm-vụ-tuần-3)
-  - [1.1. Bảng phân công nhiệm vụ chi tiết](#11-bảng-phân-công-nhiệm-vụ-chi-tiết)
-  - [1.2. Kiến trúc giải pháp hệ thống Tuần 3](#12-kiến-trúc-giải-pháp-hệ-thống-tuần-3)
-- [2. Triển Khai Kỹ Thuật Của SV1 (Bùi Anh Khôi)](#2-triển-khai-kỹ-thuật-của-sv1-bùi-anh-khôi)
-  - [2.1. Triển khai Mã hóa Dữ liệu Nhạy cảm bằng AWS KMS](#21-triển-khai-mã-hóa-dữ-liệu-nhạy-cảm-bằng-aws-kms)
-  - [2.2. Tích hợp Thông báo Tự động SNS & EventBridge Scheduler](#22-tích-hợp-thông-báo-tự-động-sns--eventbridge-scheduler)
-  - [2.3. Module Lưu trữ và Đồng bộ Hồ sơ Bệnh nhân (patient.service.js)](#23-module-lưu-trữ-và-đồng-bộ-hồ-sơ-bệnh-nhân-patientservicejs)
-  - [2.4. Xây dựng Giao diện Form Tra Cứu "Lịch hẹn của tôi"](#24-xây-dựng-giao-diện-form-tra-cứu-lịch-hẹn-của-tôi)
-- [3. Triển Khai Kỹ Thuật Của SV2 (Huỳnh Ngọc Bảo Khang)](#3-triển-khai-kỹ-thuật-của-sv2-huỳnh-ngọc-bảo-khang)
-  - [3.1. Cấu hình Global Secondary Index (GSI) trên DynamoDB](#31-cấu-hình-global-secondary-index-gsi-trên-dynamodb)
-  - [3.2. Lập trình API Backend Tra cứu Lịch hẹn theo Số điện thoại](#32-lập-trình-api-backend-tra-cứu-lịch-hẹn-theo-số-điện-thoại)
-  - [3.3. Cấu hình Amazon SNS Topic & Deploy Lambda Backend](#33-cấu-hình-amazon-sns-topic--deploy-lambda-backend)
-  - [3.4. Triển khai Hosting S3 và Phân tích Rào cản Phân quyền CloudFront](#34-triển-khai-hosting-s3-và-phân-tích-rào-cản-phân-quyền-cloudfront)
-- [4. Kết Quả Kiểm Thử Hệ Thống & Nghiệm Thu Toàn Diện](#4-kết-quả-kiểm-thử-hệ-thống--nghiệm-thu-toàn-diện)
-  - [4.1. Bảng ma trận kết quả kiểm thử API Tuần 3](#41-bảng-ma-trận-kết-quả-kiểm-thử-api-tuần-3)
-  - [4.2. Minh chứng kiểm thử Postman chi tiết](#42-minh-chứng-kiểm-thử-postman-chi-tiết)
-  - [4.3. Minh chứng 2 luồng Email gửi qua Amazon SNS](#43-minh-chứng-2-luồng-email-gửi-qua-amazon-sns)
-  - [4.4. Rà soát Thực thi trên Amazon CloudWatch Logs](#44-rà-soát-thực-thi-trên-amazon-cloudwatch-logs)
-- [5. Đánh Giá Kết Quả và Kế Hoạch Tuần Tiếp Theo](#5-đánh-giá-kết-quả-và-kế-hoạch-tuần-tiếp-theo)
-  - [5.1. Đánh giá kết quả Tuần 3](#51-đánh-giá-kết-quả-tuần-3)
-  - [5.2. Kế hoạch Tuần 4](#52-kế-hoạch-tuần-4)
+- [Báo Cáo Thực Hiện Tuần 3 - Dự Án CareSync](#báo-cáo-thực-hiện-tuần-3---dự-án-caresync)
+  - [Mục Lục](#mục-lục)
+  - [1. Tổng Quan Nhiệm Vụ Tuần 3](#1-tổng-quan-nhiệm-vụ-tuần-3)
+    - [1.1. Bảng phân công nhiệm vụ chi tiết](#11-bảng-phân-công-nhiệm-vụ-chi-tiết)
+    - [1.2. Kiến trúc giải pháp hệ thống Tuần 3](#12-kiến-trúc-giải-pháp-hệ-thống-tuần-3)
+  - [2. Triển Khai Kỹ Thuật Của SV1 (Bùi Anh Khôi)](#2-triển-khai-kỹ-thuật-của-sv1-bùi-anh-khôi)
+    - [2.1. Triển khai Mã hóa Dữ liệu Nhạy cảm bằng AWS KMS](#21-triển-khai-mã-hóa-dữ-liệu-nhạy-cảm-bằng-aws-kms)
+    - [2.2. Tích hợp Thông báo Tự động SNS \& EventBridge Scheduler](#22-tích-hợp-thông-báo-tự-động-sns--eventbridge-scheduler)
+    - [2.3. Module Lưu trữ và Đồng bộ Hồ sơ Bệnh nhân (patient.service.js)](#23-module-lưu-trữ-và-đồng-bộ-hồ-sơ-bệnh-nhân-patientservicejs)
+    - [2.4. Xây dựng Giao diện Form Tra Cứu "Lịch hẹn của tôi"](#24-xây-dựng-giao-diện-form-tra-cứu-lịch-hẹn-của-tôi)
+  - [3. Triển Khai Kỹ Thuật Của SV2 (Huỳnh Ngọc Bảo Khang)](#3-triển-khai-kỹ-thuật-của-sv2-huỳnh-ngọc-bảo-khang)
+    - [3.1. Cấu hình Global Secondary Index (GSI) trên DynamoDB](#31-cấu-hình-global-secondary-index-gsi-trên-dynamodb)
+    - [3.2. Lập trình API Backend Tra cứu Lịch hẹn theo Số điện thoại](#32-lập-trình-api-backend-tra-cứu-lịch-hẹn-theo-số-điện-thoại)
+    - [3.3. Cấu hình Amazon SNS Topic \& Deploy Lambda Backend](#33-cấu-hình-amazon-sns-topic--deploy-lambda-backend)
+    - [3.4. Triển khai Hosting S3 và Phân tích Rào cản Phân quyền CloudFront](#34-triển-khai-hosting-s3-và-phân-tích-rào-cản-phân-quyền-cloudfront)
+  - [4. Kết Quả Kiểm Thử Hệ Thống \& Nghiệm Thu Toàn Diện](#4-kết-quả-kiểm-thử-hệ-thống--nghiệm-thu-toàn-diện)
+    - [4.1. Bảng ma trận kết quả kiểm thử API Tuần 3](#41-bảng-ma-trận-kết-quả-kiểm-thử-api-tuần-3)
+    - [4.2. Minh chứng kiểm thử Postman chi tiết](#42-minh-chứng-kiểm-thử-postman-chi-tiết)
+    - [4.3. Minh chứng 2 luồng Email gửi qua Amazon SNS](#43-minh-chứng-2-luồng-email-gửi-qua-amazon-sns)
+    - [4.4. Rà soát Thực thi trên Amazon CloudWatch Logs](#44-rà-soát-thực-thi-trên-amazon-cloudwatch-logs)
+  - [5. Đánh Giá Kết Quả và Kế Hoạch Tuần Tiếp Theo](#5-đánh-giá-kết-quả-và-kế-hoạch-tuần-tiếp-theo)
+    - [5.1. Đánh giá kết quả Tuần 3](#51-đánh-giá-kết-quả-tuần-3)
+    - [5.2. Kế hoạch Tuần 4: Kiểm Thử Toàn Diện, Tối Ưu Chi Phí, Dọn Dẹp Tài Nguyên, Báo Cáo \& Demo](#52-kế-hoạch-tuần-4-kiểm-thử-toàn-diện-tối-ưu-chi-phí-dọn-dẹp-tài-nguyên-báo-cáo--demo)
+      - [1. Kiểm thử tổng thể hệ thống (Comprehensive End-to-End \& Load Testing)](#1-kiểm-thử-tổng-thể-hệ-thống-comprehensive-end-to-end--load-testing)
+      - [2. Phân tích và tối ưu hóa chi phí vận hành (Cost Optimization)](#2-phân-tích-và-tối-ưu-hóa-chi-phí-vận-hành-cost-optimization)
+      - [3. Quy trình dọn dẹp và thu hồi tài nguyên (Resource Cleanup \& Teardown)](#3-quy-trình-dọn-dẹp-và-thu-hồi-tài-nguyên-resource-cleanup--teardown)
+      - [4. Hoàn thiện tài liệu và báo cáo tổng kết đồ án (Final Report \& Documentation)](#4-hoàn-thiện-tài-liệu-và-báo-cáo-tổng-kết-đồ-án-final-report--documentation)
 
 ---
 
@@ -43,17 +50,17 @@
 
 > Xem chi tiết kế hoạch và phân bổ công việc của nhóm: [BangPhanCongWeek3.md](BangPhanCongWeek3.md)
 
-| STT | Thành viên | Nhiệm vụ cụ thể | Tài nguyên AWS / File mã nguồn | Kết quả đạt được |
-| :-: | :--- | :--- | :--- | :--- |
-| 1 | **Bùi Anh Khôi (SV1)** | Triển khai mã hóa dữ liệu nhạy cảm bằng AWS KMS | `server/lambda/service/kms.service.js`, `test-kms.js`, AWS KMS | Khởi tạo CMK `alias/caresync-patient-key` (Enabled), viết module mã hóa envelope và test script PASS 100%. |
-| 2 | **Bùi Anh Khôi (SV1)** | Tích hợp SNS & Scheduler vào quy trình đặt lịch | `server/lambda/service/appointment.service.js` | Gửi email xác nhận tức thì qua `PublishCommand` và tạo lịch nhắc sau 2 phút qua EventBridge `CreateScheduleCommand`. |
-| 3 | **Bùi Anh Khôi (SV1)** | Viết module lưu trữ hồ sơ bệnh nhân song song | `server/lambda/service/patient.service.js` | Tự động sinh `PAT-<cleanPhone>`, lưu/cập nhật bảng `Patients` song song qua `Promise.all`. |
-| 4 | **Bùi Anh Khôi (SV1)** | Xây dựng giao diện Form & Thẻ tra cứu "Lịch hẹn của tôi" | `client/index.html`, `client/js/lookup.js`, `client/js/api.js` | Giao diện tra cứu theo SĐT chuẩn Regex VN, tích hợp API SV2, mapper dữ liệu, cơ chế fallback và Toast. |
-| 5 | **Huỳnh Ngọc Bảo Khang (SV2)** | Cấu hình Global Secondary Index (GSI) trên DynamoDB | AWS DynamoDB Console (Bảng `Appointments`) | Thiết lập GSI `PatientPhone-index` (Partition Key: `PatientPhone`, Projections: `All`) ở trạng thái `Active`. |
-| 6 | **Huỳnh Ngọc Bảo Khang (SV2)** | Viết API Backend tra cứu lịch hẹn theo SĐT | `routes/`, `controller/`, `service/appointment.service.js` | Xây dựng endpoint `GET /appointments?phone=...` qua `QueryCommand` GSI $O(1)$, response chuẩn Native Lambda. |
-| 7 | **Huỳnh Ngọc Bảo Khang (SV2)** | Cấu hình Amazon SNS Topic & Deploy Lambda Backend | Amazon SNS, AWS Lambda Console | Khởi tạo Topic `CareSync-AppointmentNotice`, Email Confirmed, cấu hình biến môi trường và deploy code. |
-| 8 | **Huỳnh Ngọc Bảo Khang (SV2)** | Triển khai Hosting S3 kết hợp phân tích CloudFront OAC | Amazon S3, Amazon CloudFront | Upload 19 file `client/` lên S3, phân tích rào cản IAM CloudFront và kích hoạt S3 Static Website Hosting dự phòng. |
-| 9 | **Cả hai thành viên** | Kiểm thử End-to-End, xuất Postman Collection & Báo cáo | `docs/CareSync_Week3.postman_collection.json`, CloudWatch Logs | Nghiệm thu 100% các ca kiểm thử đạt chuẩn (200 OK, 201 Created, 409 Conflict, 400 Bad Request). |
+| STT | Thành viên                     | Nhiệm vụ cụ thể                                          | Tài nguyên AWS / File mã nguồn                                 | Kết quả đạt được                                                                                                     |
+| :-: | :----------------------------- | :------------------------------------------------------- | :------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------- |
+|  1  | **Bùi Anh Khôi (SV1)**         | Triển khai mã hóa dữ liệu nhạy cảm bằng AWS KMS          | `server/lambda/service/kms.service.js`, `test-kms.js`, AWS KMS | Khởi tạo CMK `alias/caresync-patient-key` (Enabled), viết module mã hóa envelope và test script PASS 100%.           |
+|  2  | **Bùi Anh Khôi (SV1)**         | Tích hợp SNS & Scheduler vào quy trình đặt lịch          | `server/lambda/service/appointment.service.js`                 | Gửi email xác nhận tức thì qua `PublishCommand` và tạo lịch nhắc sau 2 phút qua EventBridge `CreateScheduleCommand`. |
+|  3  | **Bùi Anh Khôi (SV1)**         | Viết module lưu trữ hồ sơ bệnh nhân song song            | `server/lambda/service/patient.service.js`                     | Tự động sinh `PAT-<cleanPhone>`, lưu/cập nhật bảng `Patients` song song qua `Promise.all`.                           |
+|  4  | **Bùi Anh Khôi (SV1)**         | Xây dựng giao diện Form & Thẻ tra cứu "Lịch hẹn của tôi" | `client/index.html`, `client/js/lookup.js`, `client/js/api.js` | Giao diện tra cứu theo SĐT chuẩn Regex VN, tích hợp API SV2, mapper dữ liệu, cơ chế fallback và Toast.               |
+|  5  | **Huỳnh Ngọc Bảo Khang (SV2)** | Cấu hình Global Secondary Index (GSI) trên DynamoDB      | AWS DynamoDB Console (Bảng `Appointments`)                     | Thiết lập GSI `PatientPhone-index` (Partition Key: `PatientPhone`, Projections: `All`) ở trạng thái `Active`.        |
+|  6  | **Huỳnh Ngọc Bảo Khang (SV2)** | Viết API Backend tra cứu lịch hẹn theo SĐT               | `routes/`, `controller/`, `service/appointment.service.js`     | Xây dựng endpoint `GET /appointments?phone=...` qua `QueryCommand` GSI $O(1)$, response chuẩn Native Lambda.         |
+|  7  | **Huỳnh Ngọc Bảo Khang (SV2)** | Cấu hình Amazon SNS Topic & Deploy Lambda Backend        | Amazon SNS, AWS Lambda Console                                 | Khởi tạo Topic `CareSync-AppointmentNotice`, Email Confirmed, cấu hình biến môi trường và deploy code.               |
+|  8  | **Huỳnh Ngọc Bảo Khang (SV2)** | Triển khai Hosting S3 kết hợp phân tích CloudFront OAC   | Amazon S3, Amazon CloudFront                                   | Upload 19 file `client/` lên S3, phân tích rào cản IAM CloudFront và kích hoạt S3 Static Website Hosting dự phòng.   |
+|  9  | **Cả hai thành viên**          | Kiểm thử End-to-End, xuất Postman Collection & Báo cáo   | `docs/CareSync_Week3.postman_collection.json`, CloudWatch Logs | Nghiệm thu 100% các ca kiểm thử đạt chuẩn (200 OK, 201 Created, 409 Conflict, 400 Bad Request).                      |
 
 ---
 
@@ -134,6 +141,7 @@ Trong hệ thống y tế CareSync, các thông tin định danh cá nhân ngư�
 ### 2.2. Tích hợp Thông báo Tự động SNS & EventBridge Scheduler
 
 SV1 đã trực tiếp tích hợp luồng xử lý thông báo bất đồng bộ vào hàm `createAppointment` trong [`server/lambda/service/appointment.service.js`](../../server/lambda/service/appointment.service.js):
+
 - **Amazon SNS (Email tức thời):** Sau khi phiếu khám được lưu vào DynamoDB, hệ thống tự động gọi lệnh `PublishCommand` gửi email định dạng trang trọng thông báo Mã lịch hẹn, Bác sĩ, Ngày khám và Giờ khám đến người bệnh.
 - **Amazon EventBridge Scheduler (Nhắc lịch tự động):** Tạo One-time schedule `at(YYYY-MM-DDTHH:mm:ss)` với thời gian sau 2 phút, tự động kích hoạt thông báo nhắc hẹn vào SNS Topic và tự xóa lịch trình sau khi chạy xong (`ActionAfterCompletion: DELETE`).
 - **Thực thi bất đồng bộ:** Áp dụng `Promise.all` cho các tác vụ gửi thông báo giúp phản hồi HTTP `201 Created` trả về Frontend gần như tức thì mà không phải chờ độ trễ mạng email.
@@ -143,6 +151,7 @@ SV1 đã trực tiếp tích hợp luồng xử lý thông báo bất đồng b�
 ### 2.3. Module Lưu trữ và Đồng bộ Hồ sơ Bệnh nhân (patient.service.js)
 
 Tại [`server/lambda/service/patient.service.js`](../../server/lambda/service/patient.service.js), SV1 xây dựng kiến trúc tách biệt hồ sơ bệnh nhân:
+
 - **Mã định danh duy nhất `PAT-<cleanPhone>`:** Tự động chuẩn hóa từ số điện thoại người bệnh (ví dụ: `PAT-0909999888`), giúp hệ thống tự động nhận diện bệnh nhân cũ khi tái khám ở các chuyên khoa khác nhau.
 - **Ghi dữ liệu song song:** Tích hợp `saveOrUpdatePatient` cùng lúc với thao tác đặt lịch qua `Promise.all([appointmentTask, patientTask])`, vừa đảm bảo tính toàn vẹn dữ liệu ở bảng `Patients`, vừa duy trì điều kiện chống trùng lịch `ConditionalCheckFailedException` ở bảng `Appointments`.
 
@@ -151,6 +160,7 @@ Tại [`server/lambda/service/patient.service.js`](../../server/lambda/service/p
 ### 2.4. Xây dựng Giao diện Form Tra Cứu "Lịch hẹn của tôi"
 
 SV1 nâng cấp toàn diện Section **"Lịch hẹn của tôi"** trên giao diện website ([`client/index.html`](../../client/index.html)):
+
 - **Form kiểm tra SĐT chuẩn Việt Nam:** Dùng biểu thức chính quy Regex `/^(0|\+84)(3|5|7|8|9)[0-9]{8}$/` kiểm tra số điện thoại 10 số hợp lệ, tích hợp hiệu ứng rung đỏ cảnh báo (`lookupShake`) và nút xóa nhanh nội dung.
 - **Tích hợp API của SV2 & Mapper:** Kết nối với hàm `appointmentApi.getByPhone(phone)`, tự động bóc tách `SlotKey` thành ngày/giờ qua `mapAppointmentFromDynamoDB`.
 - **Cơ chế Fallback thông minh:** Tự động fallback truy vấn từ `localStorage` khi mất mạng hoặc phiên Lab AWS tạm dừng, giúp việc nghiệm thu giao diện luôn ổn định.
@@ -182,6 +192,7 @@ SV1 nâng cấp toàn diện Section **"Lịch hẹn của tôi"** trên giao di
 ### 3.2. Lập trình API Backend Tra cứu Lịch hẹn theo Số điện thoại
 
 SV2 triển khai endpoint `GET /appointments?phone=<Số_điện_thoại>` phân tách chuẩn theo kiến trúc **Clean Architecture**:
+
 - **Tầng Service (`appointment.service.js`):** Sử dụng `QueryCommand` từ `@aws-sdk/lib-dynamodb` truy vấn trực tiếp vào GSI:
   ```javascript
   const getAppointmentsByPhone = async (phone) => {
@@ -267,15 +278,15 @@ SV2 triển khai endpoint `GET /appointments?phone=<Số_điện_thoại>` phân
 
 ### 4.1. Bảng ma trận kết quả kiểm thử API Tuần 3
 
-| STT | Phương thức & Endpoint | Mục đích kiểm thử | Mã phản hồi kỳ vọng | Kết quả thực tế | Trạng thái |
-| :-: | :--- | :--- | :---: | :---: | :---: |
-| 1 | `GET /doctors` | Lấy danh sách 10 bác sĩ từ DynamoDB | 200 OK | Trả về 10 bản ghi bác sĩ đầy đủ thông tin | **Đạt** |
-| 2 | `POST /appointments` | Đặt lịch khám mới, kích hoạt SNS & Scheduler | 201 Created | Ghi nhận DB, mã `APT-...`, gửi email thành công | **Đạt** |
-| 3 | `POST /appointments` | Kiểm thử cơ chế chặn trùng lịch khám | 409 Conflict | Bắt lỗi `ConditionalCheckFailedException` | **Đạt** |
-| 4 | `GET /appointments?phone=0934567803` | Tra cứu lịch hẹn theo SĐT qua GSI | 200 OK | Trích xuất chính xác danh sách ca khám | **Đạt** |
-| 5 | `GET /appointments` | Kiểm tra validation khi thiếu SĐT | 400 Bad Request | Báo lỗi yêu cầu cung cấp số điện thoại | **Đạt** |
+| STT | Phương thức & Endpoint               | Mục đích kiểm thử                            | Mã phản hồi kỳ vọng |                 Kết quả thực tế                 | Trạng thái |
+| :-: | :----------------------------------- | :------------------------------------------- | :-----------------: | :---------------------------------------------: | :--------: |
+|  1  | `GET /doctors`                       | Lấy danh sách 10 bác sĩ từ DynamoDB          |       200 OK        |    Trả về 10 bản ghi bác sĩ đầy đủ thông tin    |  **Đạt**   |
+|  2  | `POST /appointments`                 | Đặt lịch khám mới, kích hoạt SNS & Scheduler |     201 Created     | Ghi nhận DB, mã `APT-...`, gửi email thành công |  **Đạt**   |
+|  3  | `POST /appointments`                 | Kiểm thử cơ chế chặn trùng lịch khám         |    409 Conflict     |    Bắt lỗi `ConditionalCheckFailedException`    |  **Đạt**   |
+|  4  | `GET /appointments?phone=0934567803` | Tra cứu lịch hẹn theo SĐT qua GSI            |       200 OK        |     Trích xuất chính xác danh sách ca khám      |  **Đạt**   |
+|  5  | `GET /appointments`                  | Kiểm tra validation khi thiếu SĐT            |   400 Bad Request   |     Báo lỗi yêu cầu cung cấp số điện thoại      |  **Đạt**   |
 
-*(Bộ sưu tập Postman collection đầy đủ đã được xuất và lưu trữ tại [`docs/CareSync_Week3.postman_collection.json`](../../docs/CareSync_Week3.postman_collection.json))*.
+_(Bộ sưu tập Postman collection đầy đủ đã được xuất và lưu trữ tại [`docs/CareSync_Week3.postman_collection.json`](../../docs/CareSync_Week3.postman_collection.json))_.
 
 ---
 
@@ -310,6 +321,7 @@ SV2 triển khai endpoint `GET /appointments?phone=<Số_điện_thoại>` phân
 ### 4.4. Rà soát Thực thi trên Amazon CloudWatch Logs
 
 Kiểm tra nhóm log `/aws/lambda/AppointmentBookingFunction` ghi nhận đầy đủ luồng thực thi:
+
 - Ghi nhận `QueryCommand` truy vấn GSI `PatientPhone-index` đạt độ trễ thấp dưới 30ms.
 - Lệnh `PublishCommand` đẩy email xác nhận tức thì tới Amazon SNS Topic thành công.
 - Lệnh `CreateScheduleCommand` khởi tạo One-time schedule nhắc hẹn thành công trên Amazon EventBridge Scheduler.
@@ -330,9 +342,43 @@ Kiểm tra nhóm log `/aws/lambda/AppointmentBookingFunction` ghi nhận đầy 
   - Giao diện tra cứu lịch hẹn trực quan, trải nghiệm người dùng mượt mà với cơ chế fallback và thông báo Toast.
 - **Tỷ lệ hoàn thành nhiệm vụ:** **100%**.
 
-### 5.2. Kế hoạch Tuần 4
+### 5.2. Kế hoạch Tuần 4: Kiểm Thử Toàn Diện, Tối Ưu Chi Phí, Dọn Dẹp Tài Nguyên, Báo Cáo & Demo
 
-- Hoàn thiện mã hóa toàn diện dữ liệu nhạy cảm trước khi ghi nhận vào bảng `Patients` và `Appointments`.
-- Kiểm thử tải (Load Testing) và tối ưu hóa chi phí vận hành dịch vụ Serverless.
-- Tinh chỉnh giao diện người dùng, bổ sung tính năng hủy lịch khám bệnh trực tuyến.
-- Hoàn thiện tài liệu tổng kết dự án, slide thuyết trình và video demo sản phẩm cuối kỳ.
+Bước sang tuần cuối của đề tài, nhóm tập trung nghiệm thu chất lượng hệ thống, đánh giá chi phí vận hành đám mây, chuẩn bị kịch bản dọn dẹp tài nguyên an toàn và hoàn thiện hồ sơ nghiệm thu môn học:
+
+#### 1. Kiểm thử tổng thể hệ thống (Comprehensive End-to-End & Load Testing)
+
+- **Kiểm thử chức năng E2E (End-to-End Functionality):**
+  - Rà soát toàn bộ chu trình người dùng: Giao diện S3 Hosting $\rightarrow$ Gọi API Gateway $\rightarrow$ Xử lý nghiệp vụ Lambda $\rightarrow$ Ghi dữ liệu DynamoDB & Mã hóa KMS $\rightarrow$ Bắn thông báo SNS & Thiết lập nhắc hẹn EventBridge $\rightarrow$ Tra cứu lịch qua GSI `PatientPhone-index`.
+  - Kiểm tra độ bền với các ca ngoại lệ: Đặt trùng lịch (bắt lỗi `ConditionalCheckFailedException` - 409 Conflict), sai định dạng số điện thoại VN, thiếu trường bắt buộc (400 Bad Request), và cơ chế Fallback Offline trên Frontend.
+- **Kiểm thử hiệu năng và chịu tải (Load & Concurrency Testing):**
+  - Sử dụng Postman Runner / Artillery gửi đồng thời từ 50 đến 100 requests để đánh giá độ trễ trung bình, hiện tượng Cold Start của Lambda và phản hồi của DynamoDB dưới chế độ On-Demand.
+  - Phân tích giám sát qua CloudWatch Metrics: Invocations, Duration, Error Count, Throttles.
+
+#### 2. Phân tích và tối ưu hóa chi phí vận hành (Cost Optimization)
+
+- **Đánh giá theo AWS Well-Architected Framework (Trụ cột Cost Optimization):**
+  - Lập bảng ước tính chi phí thực tế theo mô hình Serverless Pay-as-you-go (Lambda, DynamoDB On-Demand, S3 Website Hosting, KMS API calls, SNS, CloudWatch Logs).
+  - So sánh chi phí giữa môi trường phát triển (Free Tier / Learner Lab) và môi trường sản xuất (Production ước tính 10.000 lượt đặt lịch/tháng).
+- **Giải pháp tối ưu tài nguyên:**
+  - Tối ưu thời gian giữ log (Log Retention Period) trên CloudWatch từ _Never Expire_ về _3 - 7 ngày_ để tiết kiệm dung lượng lưu trữ.
+  - Rà soát cấu hình bộ nhớ Lambda (Memory Allocation 128MB - 256MB) nhằm cân bằng giữa chi phí thực thi ($GB \cdot s$) và tốc độ phản hồi.
+  - Thiết lập cảnh báo chi phí (AWS Budgets / CloudWatch Billing Alarm) để ngăn chặn rủi ro vượt ngân sách phòng lab.
+
+#### 3. Quy trình dọn dẹp và thu hồi tài nguyên (Resource Cleanup & Teardown)
+
+- **Kiểm kê danh mục tài nguyên đám mây (Cloud Resource Inventory):**
+  - Lập checklist toàn bộ tài nguyên đã tạo: S3 Bucket (`appointment-booking-web-demo`), Lambda Function (`AppointmentBookingFunction`), HTTP API Gateway (`2q1b3nxtkg`), DynamoDB Tables (`Appointments`, `Patients`, `Doctors`) & GSI, SNS Topic & Subscriptions, EventBridge Schedules, KMS CMK (`alias/caresync-patient-key`), và CloudWatch Log Groups.
+- **Quy trình giải phóng tài nguyên an toàn:**
+  - Xuất bản sao lưu dự phòng dữ liệu bảng DynamoDB sang định dạng JSON/CSV trước khi hủy.
+  - Xây dựng kịch bản dọn dẹp từng bước (Teardown Checklist / CLI Script) theo đúng thứ tự phụ thuộc để tránh xung đột quyền IAM và tránh phát sinh chi phí duy trì ngầm sau khi kết thúc môn học.
+  - Đặt lịch thu hồi khóa AWS KMS (`ScheduleKeyDeletion` 7 ngày) theo khuyến nghị an toàn của AWS.
+
+#### 4. Hoàn thiện tài liệu và báo cáo tổng kết đồ án (Final Report & Documentation)
+
+- **Biên soạn Báo cáo tổng kết đồ án (Final Project Report):**
+  - Tổng hợp kiến trúc toàn cảnh hệ thống (High-Level & Component Architecture Diagram).
+  - Tài liệu hóa toàn bộ kỹ thuật áp dụng: Serverless Architecture, DynamoDB NoSQL Design (Single Table / GSI), Envelope Encryption với AWS KMS, Asynchronous Decoupled Messaging (SNS & EventBridge Scheduler).
+  - Báo cáo kết quả kiểm thử, bảng thống kê lỗi và giải pháp xử lý rào cản phân quyền phòng lab (CloudFront OAC $\rightarrow$ S3 Static Website Hosting).
+- **Hoàn thiện tài liệu kỹ thuật Repository:**
+  - Viết lại file `README.md` chuẩn dự án mã nguồn mở: Hướng dẫn cài đặt local, các biến môi trường cần thiết, hướng dẫn deploy và tài liệu mô tả API endpoints.
