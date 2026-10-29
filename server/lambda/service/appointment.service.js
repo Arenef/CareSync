@@ -38,6 +38,11 @@ const createAppointment = async (data) => {
 
   const newAppointmentItem = {
     DoctorId: doctorId,
+    DoctorName: data.DoctorName || data.doctorName || "",          // Bổ sung lưu tên bác sĩ
+    DoctorSpecialty: data.DoctorSpecialty || data.doctorSpecialty || "", // Bổ sung lưu chuyên khoa
+    DoctorRoom: data.DoctorRoom || data.doctorRoom || "Phòng khám 101", // Bổ sung phòng khám
+    DoctorAvatar: data.DoctorAvatar || data.doctorAvatar || "",     // Bổ sung ảnh bác sĩ
+    Reason: data.Reason || data.reason || data.patientReason || "",  // Bổ sung lý do khám
     SlotKey: slotKey,
     AppointmentId: appointmentId,
     PatientId: patientId,
@@ -49,6 +54,7 @@ const createAppointment = async (data) => {
     Status: data.Status || "CONFIRMED",
     CreatedAt: new Date().toISOString(),
   };
+
 
   // Ghi vào DynamoDB APPOINTMENTS (chặn trùng lịch khám) và ghi nhận hồ sơ PATIENTS song song
   const appointmentTask = docClient.send(
