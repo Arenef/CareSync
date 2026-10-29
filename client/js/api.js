@@ -109,14 +109,35 @@ function mapAppointmentFromDynamoDB(appt) {
     date = date || parts[0];
     time = time || parts[1];
   }
+  const doctorId = appt.DoctorId || appt.doctorId || "";
+  const doctor =
+    typeof window.getDoctorById === "function"
+      ? window.getDoctorById(doctorId)
+      : null;
+
   return {
     id: appt.AppointmentId || appt.id || `APT-${Date.now()}`,
-    doctorId: appt.DoctorId || appt.doctorId,
-    doctorName: appt.DoctorName || appt.doctorName || "Bác sĩ phụ trách",
-    doctorSpecialty: appt.DoctorSpecialty || appt.doctorSpecialty || "",
-    doctorRoom: appt.DoctorRoom || appt.doctorRoom || "Phòng khám 101",
+    doctorId: doctorId,
+    doctorName:
+      appt.DoctorName ||
+      appt.doctorName ||
+      (doctor && doctor.name) ||
+      "Bác sĩ phụ trách",
+    doctorSpecialty:
+      appt.DoctorSpecialty ||
+      appt.doctorSpecialty ||
+      (doctor && doctor.specialty) ||
+      "",
+    doctorRoom:
+      appt.DoctorRoom ||
+      appt.doctorRoom ||
+      (doctor && doctor.room) ||
+      "Phòng khám 101",
     doctorAvatar:
-      appt.DoctorAvatar || appt.doctorAvatar || "assets/images/doctor-1.jpg",
+      appt.DoctorAvatar ||
+      appt.doctorAvatar ||
+      (doctor && doctor.avatar) ||
+      "assets/images/doctor-1.jpg",
     date: date,
     time: time,
     slotKey: appt.SlotKey || `${date}#${time}`,
@@ -178,6 +199,14 @@ const appointmentApi = {
       DoctorName: bookingData.doctorName || bookingData.DoctorName,
       DoctorSpecialty:
         bookingData.doctorSpecialty || bookingData.DoctorSpecialty,
+      DoctorRoom:
+        bookingData.doctorRoom ||
+        bookingData.DoctorRoom ||
+        "Phòng khám 101",
+      DoctorAvatar:
+        bookingData.doctorAvatar ||
+        bookingData.DoctorAvatar ||
+        "",
       AppointmentDate:
         bookingData.appointmentDate || bookingData.AppointmentDate,
       SlotTime: bookingData.slotTime || bookingData.SlotTime,

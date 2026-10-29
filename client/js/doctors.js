@@ -61,7 +61,7 @@ let DOCTORS_DATA = [
   },
 ];
 
-let selectedDoctorId = DOCTORS_DATA[0].id;
+let selectedDoctorId = null;
 let onDoctorChangeCallback = null;
 
 let directorySpecialtyFilter = "all";
@@ -79,7 +79,6 @@ async function initDoctors(onSelectCallback) {
       const apiDoctors = await window.CareSyncAPI.doctorApi.getAll();
       if (apiDoctors && apiDoctors.length > 0) {
         DOCTORS_DATA = apiDoctors;
-        selectedDoctorId = DOCTORS_DATA[0].id;
       }
     }
   } catch (error) {
@@ -109,8 +108,8 @@ async function initDoctors(onSelectCallback) {
   // Khởi tạo danh bạ bác sĩ
   initDoctorDirectory();
 
-  // Kích hoạt callback ban đầu với lựa chọn mặc định
-  if (typeof onDoctorChangeCallback === "function") {
+  // Kích hoạt callback ban đầu nếu có bác sĩ được chọn
+  if (typeof onDoctorChangeCallback === "function" && selectedDoctorId) {
     onDoctorChangeCallback(getSelectedDoctor());
   }
 }
@@ -404,15 +403,15 @@ function showDoctorDetailModal(doctorId) {
       doc.workingSlots && doc.workingSlots.length > 0
         ? doc.workingSlots
         : [
-            "08:00",
-            "08:30",
-            "09:00",
-            "09:30",
-            "10:00",
-            "14:00",
-            "14:30",
-            "15:00",
-          ];
+          "08:00",
+          "08:30",
+          "09:00",
+          "09:30",
+          "10:00",
+          "14:00",
+          "14:30",
+          "15:00",
+        ];
 
     slots.forEach((s) => {
       const chip = document.createElement("span");
@@ -480,17 +479,23 @@ function getSelectedDoctor() {
 
 // Reset lại lựa chọn bác sĩ
 function resetDoctorSelection() {
-  selectedDoctorId = DOCTORS_DATA[0].id;
+  selectedDoctorId = null;
   const searchInput = document.getElementById("doctorSearchInput");
   if (searchInput) {
     searchInput.value = "";
   }
   renderDoctors(DOCTORS_DATA);
   if (typeof onDoctorChangeCallback === "function") {
-    onDoctorChangeCallback(getSelectedDoctor());
+    onDoctorChangeCallback(null);
   }
 }
 
 // Xuất hàm ra phạm vi toàn cục để tương tác từ các module khác
 window.showDoctorDetailModal = showDoctorDetailModal;
 window.selectDoctor = selectDoctor;
+window.getDoctorById = function (id) {
+  if (!id) return null;
+  return DOCTORS_DATA.find((d) => d.id === id || d.doctorId === id) || null;
+};
+window.DOCTORS_DATA = DOCTORS_DATA;
+
