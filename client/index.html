@@ -77,6 +77,44 @@
         </nav>
         <!-- Header Actions -->
         <div class="header-actions">
+          <!-- Nút kích hoạt Đăng nhập Bác sĩ -->
+          <button
+            type="button"
+            class="btn btn-outline btn-sm doctor-login-trigger"
+            id="doctorLoginTriggerBtn"
+            title="Dành cho Bác sĩ công tác tại phòng khám"
+          >
+            Bác sĩ đăng nhập
+          </button>
+
+          <!-- Profile Bác Sĩ khi đã đăng nhập thành công -->
+          <div
+            class="doctor-profile-header"
+            id="doctorProfileHeader"
+            style="display: none"
+          >
+            <img
+              src="assets/images/doctor-1.jpg"
+              alt="Avatar Bác sĩ"
+              class="doctor-header-avatar"
+              id="doctorHeaderAvatar"
+            />
+            <div class="doctor-header-info">
+              <span class="doctor-header-name" id="doctorHeaderName"
+                >BS. Nguyễn Văn Bình</span
+              >
+              <span class="doctor-header-badge">Bác sĩ khám</span>
+            </div>
+            <button
+              type="button"
+              class="btn-doctor-logout"
+              id="doctorLogoutBtn"
+              title="Đăng xuất khỏi Cổng Bác sĩ"
+            >
+              Đăng xuất
+            </button>
+          </div>
+
           <!-- Mobile Hamburger Button -->
           <button
             type="button"
@@ -662,11 +700,19 @@
             </a>
           </div>
           <!-- Form Tra Cứu Số Điện Thoại & Bộ Lọc -->
-          <form id="appointmentLookupForm" class="appointment-lookup-form" novalidate>
+          <form
+            id="appointmentLookupForm"
+            class="appointment-lookup-form"
+            novalidate
+          >
             <div class="appointments-toolbar">
               <div class="appointments-search-wrapper">
                 <div class="input-icon-wrapper lookup-field-wrap">
-                  <span class="material-symbols-rounded input-icon" style="font-size: 20px;">call</span>
+                  <span
+                    class="material-symbols-rounded input-icon"
+                    style="font-size: 20px"
+                    >call</span
+                  >
                   <input
                     type="tel"
                     id="appointmentSearchInput"
@@ -680,7 +726,7 @@
                     type="button"
                     class="lookup-clear-btn"
                     id="appointmentSearchClearBtn"
-                    style="display: none;"
+                    style="display: none"
                     aria-label="Xóa nội dung"
                   >
                     &times;
@@ -691,7 +737,11 @@
                   class="btn btn-primary"
                   id="sectionLookupSubmitBtn"
                 >
-                  <span class="material-symbols-rounded" style="font-size: 18px; margin-right: 4px;">search</span>
+                  <span
+                    class="material-symbols-rounded"
+                    style="font-size: 18px; margin-right: 4px"
+                    >search</span
+                  >
                   <span>Tra cứu</span>
                 </button>
               </div>
@@ -700,7 +750,11 @@
                 role="tablist"
                 aria-label="Bộ lọc trạng thái"
               >
-                <button type="button" class="tab-btn is-active" data-filter="all">
+                <button
+                  type="button"
+                  class="tab-btn is-active"
+                  data-filter="all"
+                >
                   Tất cả (<span id="countAll">0</span>)
                 </button>
                 <button type="button" class="tab-btn" data-filter="upcoming">
@@ -711,7 +765,10 @@
                 </button>
               </div>
             </div>
-            <span class="form-error-msg lookup-error-msg" id="sectionLookupError">
+            <span
+              class="form-error-msg lookup-error-msg"
+              id="sectionLookupError"
+            >
               Số điện thoại không hợp lệ (Cần 10 chữ số, ví dụ: 0912345678)
             </span>
           </form>
@@ -1153,6 +1210,185 @@
       </div>
     </div>
 
+    <!-- =================================================================== -->
+    <!-- Modal Đăng Nhập Dành Cho Bác Sĩ (Xác thực qua OTP Email) -->
+    <!-- =================================================================== -->
+    <div
+      class="modal-overlay doctor-login-modal"
+      id="doctorLoginModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="doctorLoginModalTitle"
+    >
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 class="modal-title" id="doctorLoginModalTitle">
+            Cổng Đăng Nhập Bác Sĩ
+          </h3>
+          <button
+            type="button"
+            class="modal-close-btn"
+            data-action="close-doctor-login"
+            aria-label="Đóng popup"
+          >
+            &times;
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Bước 1: Nhập email bác sĩ -->
+          <form id="doctorEmailStepForm">
+            <p
+              style="
+                font-size: var(--font-size-sm);
+                color: var(--color-text-secondary);
+                margin-bottom: var(--spacing-sm);
+              "
+            >
+              Vui lòng nhập địa chỉ email công tác của bác sĩ để nhận mã xác
+              thực OTP.
+            </p>
+
+            <!-- Hộp tài khoản cứng để test nhanh -->
+            <div
+              style="
+                background-color: var(--color-bg-muted);
+                border: 1px solid var(--color-border);
+                border-radius: var(--radius-md);
+                padding: 10px 14px;
+                margin-bottom: var(--spacing-md);
+                font-size: 13px;
+              "
+            >
+              <span style="font-weight: 600; color: var(--color-primary)"
+                >Tài khoản thử nghiệm nhanh:</span
+              ><br />
+              Email:
+              <code style="font-weight: 700; color: var(--color-text)"
+                >doc1@caresync.vn</code
+              >
+              &nbsp;|&nbsp; OTP:
+              <code style="font-weight: 700; color: var(--color-text)"
+                >123456</code
+              >
+              <div style="margin-top: 6px">
+                <button
+                  type="button"
+                  id="btnFillDemoDoctor"
+                  style="
+                    font-size: 12px;
+                    color: var(--color-primary);
+                    background: none;
+                    border: none;
+                    padding: 0;
+                    cursor: pointer;
+                    text-decoration: underline;
+                  "
+                >
+                  [Bấm vào đây để tự động điền tài khoản này]
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: var(--spacing-md)">
+              <label for="doctorLoginEmailInput" class="form-label">
+                Email Bác sĩ <span style="color: var(--color-danger)">*</span>
+              </label>
+              <input
+                type="email"
+                id="doctorLoginEmailInput"
+                class="form-input"
+                placeholder="ví dụ: doc1@caresync.vn"
+                required
+                autocomplete="email"
+              />
+              <span
+                class="form-error-msg"
+                id="doctorEmailError"
+                style="
+                  display: none;
+                  color: var(--color-danger);
+                  font-size: 12px;
+                  margin-top: 4px;
+                "
+              ></span>
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-primary"
+              id="btnSendDoctorOtp"
+              style="width: 100%"
+            >
+              Gửi mã xác thực OTP
+            </button>
+          </form>
+
+          <!-- Bước 2: Nhập mã OTP -->
+          <form id="doctorOtpStepForm" style="display: none">
+            <p
+              style="
+                font-size: var(--font-size-sm);
+                color: var(--color-text-secondary);
+                margin-bottom: var(--spacing-md);
+              "
+            >
+              Mã xác thực 6 số đã được gửi tới:
+              <strong
+                id="otpTargetEmailText"
+                style="color: var(--color-text)"
+              ></strong>
+            </p>
+
+            <div class="form-group" style="margin-bottom: var(--spacing-md)">
+              <label for="doctorLoginOtpInput" class="form-label">
+                Mã OTP (6 chữ số)
+                <span style="color: var(--color-danger)">*</span>
+              </label>
+              <input
+                type="text"
+                id="doctorLoginOtpInput"
+                class="form-input"
+                placeholder="Nhập 6 số OTP (ví dụ: 123456)"
+                maxlength="6"
+                required
+                style="text-align: center; font-size: 18px; font-weight: 600"
+              />
+              <span
+                class="form-error-msg"
+                id="doctorOtpError"
+                style="
+                  display: none;
+                  color: var(--color-danger);
+                  font-size: 12px;
+                  margin-top: 4px;
+                "
+              ></span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <button
+                type="submit"
+                class="btn btn-primary"
+                id="btnVerifyDoctorOtp"
+                style="width: 100%"
+              >
+                Xác nhận & Đăng nhập
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                id="btnBackToEmailStep"
+                style="width: 100%"
+              >
+                Quay lại đổi email khác
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <!-- Container chứa Toast Notifications -->
     <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
@@ -1161,6 +1397,7 @@
     <script src="js/doctors.js" defer></script>
     <script src="js/booking.js" defer></script>
     <script src="js/lookup.js" defer></script>
+    <script src="js/doctor-auth.js" defer></script>
     <script src="js/navigation.js" defer></script>
     <script src="js/app.js" defer></script>
   </body>

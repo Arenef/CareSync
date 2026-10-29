@@ -491,30 +491,9 @@ const STORAGE_KEY_APPOINTMENTS = "caresync_appointments";
 let currentAppointmentFilter = "all";
 let currentAppointmentSearch = "";
 
-// Khởi tạo
+// Khởi tạo lịch hẹn
 function initMyAppointments() {
   seedInitialAppointments();
-
-  const searchInput = document.getElementById("appointmentSearchInput");
-  const tabButtons = document.querySelectorAll(".appointments-tabs .tab-btn");
-
-  if (searchInput) {
-    searchInput.addEventListener("input", (e) => {
-      currentAppointmentSearch = e.target.value.trim().toLowerCase();
-      renderMyAppointments();
-    });
-  }
-
-  tabButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      tabButtons.forEach((b) => b.classList.remove("is-active"));
-      btn.classList.add("is-active");
-      currentAppointmentFilter = btn.dataset.filter || "all";
-      renderMyAppointments();
-    });
-  });
-
-  renderMyAppointments();
 }
 
 // tạo cuộc hẹn demo
@@ -592,190 +571,18 @@ function updateAppointmentInStorage(id, updates) {
   }
 }
 
-// Render danh sách
+// Đồng bộ danh sách ca khám (ủy thác cho module lookup)
 function renderMyAppointments() {
-  const container = document.getElementById("myAppointmentsList");
-  const emptyNotice = document.getElementById("emptyAppointmentsNotice");
-  const countAllEl = document.getElementById("countAll");
-  const countUpcomingEl = document.getElementById("countUpcoming");
-  const countCancelledEl = document.getElementById("countCancelled");
-
-  if (!container) return;
-
-  const allAppointments = getAppointmentsFromStorage();
-
-  // Đếm cuộc hẹn
-  const upcomingCount = allAppointments.filter(
-    (a) => a.status === "upcoming",
-  ).length;
-  const cancelledCount = allAppointments.filter(
-    (a) => a.status === "cancelled",
-  ).length;
-
-  if (countAllEl) countAllEl.textContent = allAppointments.length;
-  if (countUpcomingEl) countUpcomingEl.textContent = upcomingCount;
-  if (countCancelledEl) countCancelledEl.textContent = cancelledCount;
-
-  // Filter by status tab
-  let filtered = allAppointments;
-  if (currentAppointmentFilter === "upcoming") {
-    filtered = filtered.filter((a) => a.status === "upcoming");
-  } else if (currentAppointmentFilter === "cancelled") {
-    filtered = filtered.filter((a) => a.status === "cancelled");
-  }
-
-  // Filter by search query (phone, ID, doctor name, patient name)
-  if (currentAppointmentSearch) {
-    filtered = filtered.filter((a) => {
-      const q = currentAppointmentSearch;
-      return (
-        (a.id && a.id.toLowerCase().includes(q)) ||
-        (a.patientPhone && a.patientPhone.includes(q)) ||
-        (a.patientName && a.patientName.toLowerCase().includes(q)) ||
-        (a.doctorName && a.doctorName.toLowerCase().includes(q))
-      );
-    });
-  }
-
-  container.innerHTML = "";
-
-  if (filtered.length === 0) {
-    if (emptyNotice) emptyNotice.classList.add("show");
-    return;
-  }
-
-  if (emptyNotice) emptyNotice.classList.remove("show");
-
-  filtered.forEach((appt) => {
-    const isCancelled = appt.status === "cancelled";
-    const statusBadge = isCancelled
-      ? '<span class="badge badge-neutral">Đã hủy</span>'
-      : '<span class="badge badge-success">Sắp tới</span>';
-
-    const card = document.createElement("div");
-    card.className = "appointment-card";
-    card.dataset.id = appt.id;
-
-    card.innerHTML = `
-      <div class="appointment-card-header">
-        <span class="appointment-code-badge">${appt.id}</span>
-        ${statusBadge}
-      </div>
-
-      <div class="appointment-doctor-row">
-        <img src="${appt.doctorAvatar || "assets/images/doctor-1.jpg"}" alt="${appt.doctorName}" class="appointment-doc-avatar" loading="lazy">
-        <div class="appointment-doc-meta">
-          <h4 class="appointment-doc-name">${appt.doctorName}</h4>
-          <span class="appointment-doc-spec">${appt.doctorSpecialty} &bull; ${appt.doctorRoom || "Phòng khám đa khoa"}</span>
-        </div>
-      </div>
-
-      <div class="appointment-info-grid">
-        <div class="appointment-info-col">
-          <span class="appointment-info-label">Thời gian khám:</span>
-          <span class="appointment-info-value">${appt.time}, ${appt.date}</span>
-        </div>
-        <div class="appointment-info-col">
-          <span class="appointment-info-label">Bệnh nhân:</span>
-          <span class="appointment-info-value">${appt.patientName}</span>
-        </div>
-        <div class="appointment-info-col">
-          <span class="appointment-info-label">Số điện thoại:</span>
-          <span class="appointment-info-value">${appt.patientPhone}</span>
-        </div>
-        <div class="appointment-info-col">
-          <span class="appointment-info-label">Email:</span>
-          <span class="appointment-info-value">${appt.patientEmail || "--"}</span>
-        </div>
-      </div>
-
-      ${
-        appt.patientReason
-          ? `
-        <div class="appointment-reason-note">
-          <strong>Lý do khám:</strong> ${appt.patientReason}
-        </div>
-      `
-          : ""
-      }
-
-      <div class="appointment-card-actions">
-        <button type="button" class="btn btn-outline btn-sm action-view-ticket" data-id="${appt.id}">
-          Xem phiếu khám
-        </button>
-        ${
-          !isCancelled
-            ? `
-          <button type="button" class="btn btn-secondary btn-sm action-cancel-appt" data-id="${appt.id}" style="color: var(--color-danger);">
-            Hủy lịch
-          </button>
-        `
-            : ""
-        }
-      </div>
-    `;
-
-    // Xem phiếu khám
-    const viewBtn = card.querySelector(".action-view-ticket");
-    if (viewBtn) {
-      viewBtn.addEventListener("click", () => openAppointmentTicketModal(appt));
-    }
-
-    // Hủy lịch
-    const cancelBtn = card.querySelector(".action-cancel-appt");
-    if (cancelBtn) {
-      cancelBtn.addEventListener("click", () =>
-        handleCancelAppointment(appt.id),
-      );
-    }
-
-    container.appendChild(card);
-  });
-}
-
-// Xử lý hủy lịch hẹn
-function handleCancelAppointment(id) {
-  const confirmed = confirm(
-    `Bạn có chắc chắn muốn hủy lịch hẹn khám ${id} không?`,
-  );
-  if (!confirmed) return;
-
-  updateAppointmentInStorage(id, { status: "cancelled" });
-  renderMyAppointments();
-  showToast(
-    "Đã hủy lịch khám",
-    `Phiếu hẹn ${id} đã được chuyển sang trạng thái đã hủy`,
-    "info",
-  );
-}
-
-// Mở phiếu khám
-function openAppointmentTicketModal(appt) {
-  const ticketCodeEl = document.getElementById("ticketCode");
-  const ticketDoctorEl = document.getElementById("ticketDoctor");
-  const ticketSpecialtyEl = document.getElementById("ticketSpecialty");
-  const ticketRoomEl = document.getElementById("ticketRoom");
-  const ticketDateEl = document.getElementById("ticketDate");
-  const ticketTimeEl = document.getElementById("ticketTime");
-  const ticketPatientEl = document.getElementById("ticketPatient");
-  const ticketPhoneEl = document.getElementById("ticketPhone");
-  const ticketReasonEl = document.getElementById("ticketReason");
-
-  if (ticketCodeEl) ticketCodeEl.textContent = appt.id;
-  if (ticketDoctorEl) ticketDoctorEl.textContent = appt.doctorName;
-  if (ticketSpecialtyEl) ticketSpecialtyEl.textContent = appt.doctorSpecialty;
-  if (ticketRoomEl)
-    ticketRoomEl.textContent = appt.doctorRoom || "Phòng khám đa khoa";
-  if (ticketDateEl) ticketDateEl.textContent = appt.date;
-  if (ticketTimeEl) ticketTimeEl.textContent = appt.time;
-  if (ticketPatientEl) ticketPatientEl.textContent = appt.patientName;
-  if (ticketPhoneEl) ticketPhoneEl.textContent = appt.patientPhone;
-  if (ticketReasonEl)
-    ticketReasonEl.textContent = appt.patientReason || "Khám định kỳ";
-
-  const confirmationModal = document.getElementById("confirmationModal");
-  if (confirmationModal) {
-    confirmationModal.classList.add("is-open");
-    confirmationModal.setAttribute("aria-hidden", "false");
+  const searchInput = document.getElementById("appointmentSearchInput");
+  const phone = searchInput ? searchInput.value.trim() : "";
+  if (phone && window.CareSyncLookup && typeof window.CareSyncLookup.lookupByPhone === "function") {
+    window.CareSyncLookup.lookupByPhone(phone);
   }
 }
+
+// Xuất các hàm lưu trữ cho toàn ứng dụng sử dụng
+window.getAppointmentsFromStorage = getAppointmentsFromStorage;
+window.saveNewAppointment = saveNewAppointment;
+window.updateAppointmentInStorage = updateAppointmentInStorage;
+window.renderMyAppointments = renderMyAppointments;
+window.showToast = showToast;

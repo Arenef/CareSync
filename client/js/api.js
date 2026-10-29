@@ -221,6 +221,43 @@ const patientApi = {
     },
 };
 
+const doctorAuthApi = {
+    /**
+     * Gửi yêu cầu mã OTP đăng nhập về email bác sĩ
+     * @param {string} email
+     */
+    async sendOtp(email) {
+        return await request("/auth/doctor/send-otp", {
+            method: "POST",
+            body: JSON.stringify({ email }),
+        });
+    },
+
+    /**
+     * Xác thực mã OTP để đăng nhập bác sĩ
+     * @param {string} email
+     * @param {string} otp
+     */
+    async verifyOtp(email, otp) {
+        return await request("/auth/doctor/verify-otp", {
+            method: "POST",
+            body: JSON.stringify({ email, otp }),
+        });
+    },
+
+    /**
+     * Lấy danh sách toàn bộ các ca hẹn của một bác sĩ
+     * @param {string} doctorId
+     */
+    async getAppointments(doctorId) {
+        const res = await request(`/doctors/${doctorId}/appointments`, {
+            method: "GET",
+        });
+        const rawList = res.data || res.Items || (Array.isArray(res) ? res : []);
+        return Array.isArray(rawList) ? rawList.map(mapAppointmentFromDynamoDB) : [];
+    },
+};
+
 // ============================================================================
 // 5. XUẤT RA BIẾN TOÀN CỤC CHO TRÌNH DUYỆT (GLOBAL EXPORT)
 // ============================================================================
@@ -228,5 +265,6 @@ window.CareSyncAPI = {
     doctorApi,
     appointmentApi,
     patientApi,
+    doctorAuthApi,
     API_CONFIG,
 };
