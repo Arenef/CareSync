@@ -7,6 +7,44 @@
   margin-bottom: var(--spacing-lg);
 }
 
+/* Tab chuyển đổi vai trò tra cứu: Bệnh nhân vs Bác sĩ */
+.lookup-role-tabs {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--color-bg-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: var(--spacing-md);
+}
+
+.lookup-role-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.lookup-role-btn:hover {
+  color: var(--color-text);
+}
+
+.lookup-role-btn.is-active {
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
 .appointments-toolbar {
   display: flex;
   align-items: center;
@@ -162,4 +200,138 @@
     justify-content: flex-start;
     overflow-x: auto;
   }
+}
+
+/* 6. Modal Xác Thực Hủy Lịch Khám (OTP) */
+.cancel-summary-box {
+  background-color: var(--color-bg-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cancel-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-sm);
+}
+
+.cancel-summary-label {
+  color: var(--color-text-secondary);
+}
+
+.cancel-summary-val {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.cancel-summary-val.highlight {
+  color: var(--color-primary);
+}
+
+.cancel-security-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-top: 14px;
+  color: #1e40af;
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+}
+
+.cancel-notice-icon {
+  font-size: 22px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.cancel-otp-header-icon {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.cancel-otp-header-icon .material-symbols-rounded {
+  font-size: 48px;
+  color: var(--color-primary);
+}
+
+.cancel-otp-intro {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.cancel-masked-email {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+  font-size: 15px;
+}
+
+.cancel-otp-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cancel-otp-input {
+  font-size: 26px !important;
+  letter-spacing: 8px !important;
+  text-align: center !important;
+  font-weight: var(--font-weight-bold) !important;
+  max-width: 240px !important;
+  height: 48px !important;
+  margin: 0 auto !important;
+  color: var(--color-text);
+  border-color: var(--color-border-strong);
+  transition: all var(--transition-fast);
+}
+
+.cancel-otp-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+.cancel-otp-error-msg {
+  color: var(--color-danger);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  margin-top: 6px;
+  text-align: center;
+}
+
+.cancel-resend-wrap {
+  text-align: center;
+  margin-top: 12px;
+}
+
+.cancel-resend-btn {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color var(--transition-fast);
+}
+
+.cancel-resend-btn:hover {
+  color: var(--color-primary-dark);
+}
+
+.cancel-resend-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  text-decoration: none;
 }

@@ -95,7 +95,76 @@ const getAppointments = async (event) => {
     }
 };
 
+/**
+ * Controller tiếp nhận yêu cầu gửi mã OTP hủy lịch (POST /appointments/request-cancel)
+ */
+const requestCancel = async (event) => {
+    try {
+        const body = event.body ? (typeof event.body === "string" ? JSON.parse(event.body) : event.body) : {};
+        const doctorId = body.DoctorId || body.doctorId;
+        const slotKey = body.SlotKey || body.slotKey;
+
+        if (!doctorId || !slotKey) {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({ success: false, message: "Thiếu thông tin doctorId hoặc slotKey!" })
+            };
+        }
+
+        const result = await appointmentService.requestCancelAppointment({ doctorId, slotKey });
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify(result)
+        };
+    } catch (error) {
+        console.error("Lỗi requestCancel:", error);
+        return {
+            statusCode: error.statusCode || 500,
+            headers,
+            body: JSON.stringify({ success: false, message: error.message })
+        };
+    }
+};
+
+/**
+ * Controller tiếp nhận xác nhận mã OTP để hủy lịch (POST /appointments/confirm-cancel)
+ */
+const confirmCancel = async (event) => {
+    try {
+        const body = event.body ? (typeof event.body === "string" ? JSON.parse(event.body) : event.body) : {};
+        const doctorId = body.DoctorId || body.doctorId;
+        const slotKey = body.SlotKey || body.slotKey;
+        const otp = body.otp || body.Otp;
+
+        if (!doctorId || !slotKey || !otp) {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({ success: false, message: "Thiếu thông tin doctorId, slotKey hoặc mã otp!" })
+            };
+        }
+
+        const result = await appointmentService.confirmCancelAppointment({ doctorId, slotKey, otp });
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify(result)
+        };
+    } catch (error) {
+        console.error("Lỗi confirmCancel:", error);
+        return {
+            statusCode: error.statusCode || 500,
+            headers,
+            body: JSON.stringify({ success: false, message: error.message })
+        };
+    }
+};
+
 module.exports = {
     createAppointment,
-    getAppointments
+    getAppointments,
+    requestCancel,
+    confirmCancel
 };

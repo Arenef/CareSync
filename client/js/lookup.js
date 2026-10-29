@@ -27,13 +27,16 @@
 
     setupNavLinks();
     setupLookupForm();
+    initCancelOtpModal();
   }
 
   /**
    * Thiết lập liên kết "Lịch hẹn của tôi" trên Navbar
    */
   function setupNavLinks() {
-    const navLinks = document.querySelectorAll("a[href='#myAppointmentsSection']");
+    const navLinks = document.querySelectorAll(
+      "a[href='#myAppointmentsSection']",
+    );
 
     navLinks.forEach((link) => {
       link.addEventListener("click", (e) => {
@@ -330,14 +333,13 @@
         </div>
       </div>
 
-      ${
-        appt.patientReason
-          ? `
+      ${appt.patientReason
+        ? `
         <div class="appointment-reason-note">
           <strong>Lý do khám:</strong> ${appt.patientReason}
         </div>
       `
-          : ""
+        : ""
       }
 
       <div class="appointment-card-actions">
@@ -345,16 +347,15 @@
           <span class="material-symbols-rounded" style="font-size: 16px; margin-right: 4px;">receipt_long</span>
           <span>Xem phiếu khám</span>
         </button>
-        ${
-          !isCancelled
-            ? `
+        ${!isCancelled
+        ? `
           <button type="button" class="btn btn-secondary btn-sm action-cancel-appt" data-id="${appt.id}" style="color: var(--color-danger);">
             <span class="material-symbols-rounded" style="font-size: 16px; margin-right: 4px;">cancel</span>
             <span>Hủy lịch</span>
           </button>
         `
-            : ""
-        }
+        : ""
+      }
       </div>
     `;
 
@@ -380,31 +381,283 @@
   }
 
   /**
-   * Xử lý hủy lịch
+   * Quản lý trạng thái và logic Modal xác thực OTP hủy lịch
+   */
+  let currentCancelAppt = null;
+  let resendCountdownTimer = null;
+
+  function initCancelOtpModal() {
+    const modal = document.getElementById("cancelOtpModal");
+    const closeBtn = document.getElementById("cancelModalCloseBtn");
+    const requestBtn = document.getElementById("cancelRequestOtpBtn");
+    const confirmBtn = document.getElementById("cancelConfirmOtpBtn");
+    const resendBtn = document.getElementById("cancelResendOtpBtn");
+    const otpInput = document.getElementById("cancelOtpInput");
+
+    if (!modal) return;
+
+    if (closeBtn) {
+      closeBtn.addEventListener("click", closeCancelOtpModal);
+    }
+
+    if (requestBtn) {
+      requestBtn.addEventListener("click", handleRequestOtp);
+    }
+
+    if (confirmBtn) {
+      confirmBtn.addEventListener("click", handleConfirmOtp);
+    }
+
+    if (resendBtn) {
+      resendBtn.addEventListener("click", handleResendOtp);
+    }
+
+    if (otpInput) {
+      otpInput.addEventListener("keyup", (e) => {
+        if (e.key === "Enter") {
+          handleConfirmOtp();
+        }
+      });
+      // Tự động xóa lỗi khi người dùng bắt đầu gõ lại
+      otpInput.addEventListener("input", () => {
+        const errorEl = document.getElementById("cancelOtpError");
+        if (errorEl) errorEl.style.display = "none";
+      });
+    }
+  }
+
+  function openCancelOtpModal(appt) {
+    currentCancelAppt = appt;
+    const modal = document.getElementById("cancelOtpModal");
+    if (!modal) return;
+
+    // Reset về Bước 1
+    const stepRequest = document.getElementById("cancelStepRequest");
+    const stepVerify = document.getElementById("cancelStepVerify");
+    const requestBtn = document.getElementById("cancelRequestOtpBtn");
+    const confirmBtn = document.getElementById("cancelConfirmOtpBtn");
+    const otpInput = document.getElementById("cancelOtpInput");
+    const otpError = document.getElementById("cancelOtpError");
+
+    if (stepRequest) stepRequest.style.display = "block";
+    if (stepVerify) stepVerify.style.display = "none";
+    if (requestBtn) {
+      requestBtn.style.display = "inline-flex";
+      requestBtn.disabled = false;
+      requestBtn.innerHTML =
+        '<span class="material-symbols-rounded" style="font-size: 18px; vertical-align: middle; margin-right: 4px">send</span><span>Gửi mã OTP qua Email</span>';
+    }
+    if (confirmBtn) confirmBtn.style.display = "none";
+    if (otpInput) otpInput.value = "";
+    if (otpError) otpError.style.display = "none";
+
+    // Điền thông tin vào phiếu tóm tắt
+    const targetCode = document.getElementById("cancelTargetCode");
+    const targetDoctor = document.getElementById("cancelTargetDoctor");
+    const targetTime = document.getElementById("cancelTargetTime");
+    const targetPatient = document.getElementById("cancelTargetPatient");
+
+    if (targetCode) targetCode.textContent = appt.id || "APT-...";
+    if (targetDoctor)
+      targetDoctor.textContent = appt.doctorName || appt.doctorId || "--";
+    if (targetTime)
+      targetTime.textContent = `${appt.time || ""}, ${appt.date || ""}`;
+    if (targetPatient) targetPatient.textContent = appt.patientName || "--";
+
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeCancelOtpModal() {
+    const modal = document.getElementById("cancelOtpModal");
+    if (modal) {
+      modal.classList.remove("is-open");
+      modal.setAttribute("aria-hidden", "true");
+    }
+    document.body.style.overflow = "";
+    if (resendCountdownTimer) {
+      clearInterval(resendCountdownTimer);
+      resendCountdownTimer = null;
+    }
+    currentCancelAppt = null;
+  }
+
+  async function handleRequestOtp() {
+    if (!currentCancelAppt) return;
+    const requestBtn = document.getElementById("cancelRequestOtpBtn");
+    const originalText = requestBtn ? requestBtn.innerHTML : "";
+
+    try {
+      if (requestBtn) {
+        requestBtn.disabled = true;
+        requestBtn.innerHTML = "<span>Đang gửi mã qua SNS...</span>";
+      }
+
+      // Gọi API yêu cầu gửi mã OTP
+      const res = await window.CareSyncAPI.appointmentApi.requestCancel({
+        doctorId: currentCancelAppt.doctorId,
+        slotKey:
+          currentCancelAppt.slotKey ||
+          `${currentCancelAppt.date}#${currentCancelAppt.time}`,
+      });
+
+      // Chuyển sang Bước 2: Nhập OTP
+      const stepRequest = document.getElementById("cancelStepRequest");
+      const stepVerify = document.getElementById("cancelStepVerify");
+      const confirmBtn = document.getElementById("cancelConfirmOtpBtn");
+      const maskedEmailEl = document.getElementById("cancelMaskedEmail");
+      const otpInput = document.getElementById("cancelOtpInput");
+
+      if (stepRequest) stepRequest.style.display = "none";
+      if (stepVerify) stepVerify.style.display = "block";
+      if (requestBtn) requestBtn.style.display = "none";
+      if (confirmBtn) {
+        confirmBtn.style.display = "inline-flex";
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML =
+          '<span class="material-symbols-rounded" style="font-size: 18px; vertical-align: middle; margin-right: 4px">check_circle</span><span>Xác nhận hủy lịch</span>';
+      }
+      if (maskedEmailEl) {
+        maskedEmailEl.textContent =
+          res.maskedEmail || currentCancelAppt.patientEmail || "email của bạn";
+      }
+      if (otpInput) {
+        otpInput.value = "";
+        setTimeout(() => otpInput.focus(), 150);
+      }
+
+      startResendCooldown();
+      safeShowToast(
+        "Đã gửi mã OTP",
+        "Vui lòng kiểm tra hộp thư email của bạn để lấy mã xác nhận 6 số.",
+        "info",
+      );
+    } catch (err) {
+      console.error("Lỗi yêu cầu OTP hủy lịch:", err);
+      safeShowToast(
+        "Gửi OTP thất bại",
+        err.message || "Không thể kết nối đến máy chủ AWS.",
+        "danger",
+      );
+      if (requestBtn) {
+        requestBtn.disabled = false;
+        requestBtn.innerHTML = originalText;
+      }
+    }
+  }
+
+  async function handleConfirmOtp() {
+    if (!currentCancelAppt) return;
+    const otpInput = document.getElementById("cancelOtpInput");
+    const otpVal = otpInput ? otpInput.value.trim() : "";
+    const otpError = document.getElementById("cancelOtpError");
+    const confirmBtn = document.getElementById("cancelConfirmOtpBtn");
+
+    if (!otpVal || otpVal.length !== 6) {
+      if (otpError) {
+        otpError.textContent = "Vui lòng nhập đủ 6 chữ số mã OTP!";
+        otpError.style.display = "block";
+      }
+      return;
+    }
+
+    const originalBtnText = confirmBtn ? confirmBtn.innerHTML : "";
+
+    try {
+      if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = "<span>Đang xác thực với AWS...</span>";
+      }
+      if (otpError) otpError.style.display = "none";
+
+      // Gọi API xác thực OTP và hủy lịch trên DynamoDB
+      await window.CareSyncAPI.appointmentApi.confirmCancel({
+        doctorId: currentCancelAppt.doctorId,
+        slotKey:
+          currentCancelAppt.slotKey ||
+          `${currentCancelAppt.date}#${currentCancelAppt.time}`,
+        otp: otpVal,
+      });
+
+      // Cập nhật localStorage
+      if (typeof window.updateAppointmentInStorage === "function") {
+        window.updateAppointmentInStorage(currentCancelAppt.id, {
+          status: "cancelled",
+        });
+      }
+
+      const cancelledId = currentCancelAppt.id;
+      closeCancelOtpModal();
+
+      safeShowToast(
+        "Hủy lịch thành công!",
+        `Lịch hẹn #${cancelledId} đã được hủy trên hệ thống. Email xác nhận đã được gửi về hộp thư.`,
+        "success",
+      );
+
+      // Tải lại danh sách
+      const currentPhone = searchInput ? searchInput.value.trim() : "";
+      if (currentPhone) {
+        executeAppointmentLookup(currentPhone);
+      } else {
+        resetToAllAppointments();
+      }
+    } catch (err) {
+      console.error("Lỗi xác nhận OTP hủy lịch:", err);
+      if (otpError) {
+        otpError.textContent =
+          err.message || "Mã OTP không chính xác hoặc đã hết hạn!";
+        otpError.style.display = "block";
+      }
+      safeShowToast(
+        "Xác thực thất bại",
+        err.message || "Mã OTP không chính xác.",
+        "danger",
+      );
+    } finally {
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = originalBtnText;
+      }
+    }
+  }
+
+  function handleResendOtp() {
+    handleRequestOtp();
+  }
+
+  function startResendCooldown() {
+    const resendBtn = document.getElementById("cancelResendOtpBtn");
+    const timerText = document.getElementById("cancelResendTimerText");
+    const countdownEl = document.getElementById("cancelTimerCountdown");
+
+    if (!resendBtn || !timerText || !countdownEl) return;
+
+    let seconds = 60;
+    resendBtn.style.display = "none";
+    timerText.style.display = "inline";
+    countdownEl.textContent = seconds;
+
+    if (resendCountdownTimer) clearInterval(resendCountdownTimer);
+
+    resendCountdownTimer = setInterval(() => {
+      seconds--;
+      countdownEl.textContent = seconds;
+      if (seconds <= 0) {
+        clearInterval(resendCountdownTimer);
+        resendCountdownTimer = null;
+        timerText.style.display = "none";
+        resendBtn.style.display = "inline";
+      }
+    }, 1000);
+  }
+
+  /**
+   * Xử lý hủy lịch - Mở modal xác thực 2 bước
    */
   function handleCancel(appt) {
-    const confirmed = confirm(
-      `Bạn có chắc chắn muốn hủy lịch hẹn khám "${appt.id}" không?`,
-    );
-    if (!confirmed) return;
-
-    if (typeof window.updateAppointmentInStorage === "function") {
-      window.updateAppointmentInStorage(appt.id, { status: "cancelled" });
-    }
-
-    // Tải lại kết quả theo số điện thoại hiện tại
-    const currentVal = searchInput ? searchInput.value.trim() : "";
-    if (currentVal) {
-      executeAppointmentLookup(currentVal);
-    } else {
-      resetToAllAppointments();
-    }
-
-    safeShowToast(
-      "Đã hủy lịch khám",
-      `Phiếu hẹn ${appt.id} đã được chuyển sang trạng thái đã hủy`,
-      "info",
-    );
+    openCancelOtpModal(appt);
   }
 
   /**
@@ -450,8 +703,10 @@
   }
 
   // Xuất ra window
+  window.openCancelOtpModal = openCancelOtpModal;
   window.CareSyncLookup = {
     lookupByPhone: executeAppointmentLookup,
     reset: resetToAllAppointments,
+    openCancelOtpModal: openCancelOtpModal,
   };
 })();
