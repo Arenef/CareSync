@@ -83,7 +83,10 @@ async function initDoctors(onSelectCallback) {
       }
     }
   } catch (error) {
-    console.warn("Không kết nối được API DynamoDB, dùng dữ liệu dự phòng:", error.message);
+    console.warn(
+      "Không kết nối được API DynamoDB, dùng dữ liệu dự phòng:",
+      error.message,
+    );
   }
 
   if (doctorGrid) {
@@ -365,14 +368,17 @@ function showDoctorDetailModal(doctorId) {
   // 5. Trạng thái hoạt động
   if (statusEl) {
     statusEl.className = `badge ${doc.isActive ? "badge-primary" : "badge-neutral"}`;
-    statusEl.textContent = doc.isActive ? "Đang hoạt động" : "Tạm ngưng tiếp nhận";
+    statusEl.textContent = doc.isActive
+      ? "Đang hoạt động"
+      : "Tạm ngưng tiếp nhận";
   }
 
   // 6. Phòng khám tiếp nhận
   if (roomEl) roomEl.textContent = doc.room || "Phòng khám Đa khoa";
 
   // 7. Kinh nghiệm làm việc
-  if (expEl) expEl.textContent = doc.experience || "10+ năm kinh nghiệm trong ngành Y";
+  if (expEl)
+    expEl.textContent = doc.experience || "10+ năm kinh nghiệm trong ngành Y";
 
   // 8. Số điện thoại & Email liên hệ
   if (phoneEl) {
@@ -397,7 +403,16 @@ function showDoctorDetailModal(doctorId) {
     const slots =
       doc.workingSlots && doc.workingSlots.length > 0
         ? doc.workingSlots
-        : ["08:00", "08:30", "09:00", "09:30", "10:00", "14:00", "14:30", "15:00"];
+        : [
+            "08:00",
+            "08:30",
+            "09:00",
+            "09:30",
+            "10:00",
+            "14:00",
+            "14:30",
+            "15:00",
+          ];
 
     slots.forEach((s) => {
       const chip = document.createElement("span");

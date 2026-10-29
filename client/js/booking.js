@@ -319,6 +319,13 @@ async function handleBookingSubmit(e) {
       createdAt: new Date().toISOString(),
     };
     saveNewAppointment(newAppointment);
+    const searchInput = document.getElementById("appointmentSearchInput");
+    if (searchInput) {
+      searchInput.value = patientPhone;
+      currentAppointmentSearch = patientPhone;
+      const clearBtn = document.getElementById("appointmentSearchClearBtn");
+      if (clearBtn) clearBtn.style.display = "flex";
+    }
     renderMyAppointments();
     // 7. Mở cửa sổ popup Vé Khám
     const confirmationModal = document.getElementById("confirmationModal");
@@ -501,7 +508,12 @@ function initMyAppointments() {
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
       currentAppointmentSearch = e.target.value.trim().toLowerCase();
-      renderMyAppointments();
+      const clean = currentAppointmentSearch.replace(/[^0-9]/g, "");
+      if (!clean) {
+        renderPromptState();
+      } else if (clean.length >= 10) {
+        renderMyAppointments();
+      }
     });
   }
 
@@ -517,50 +529,20 @@ function initMyAppointments() {
   renderMyAppointments();
 }
 
-// tạo cuộc hẹn demo
+// Khởi tạo dữ liệu sạch (không nạp lịch hẹn của người khác để bảo vệ thông tin cá nhân)
 function seedInitialAppointments() {
   const existing = localStorage.getItem(STORAGE_KEY_APPOINTMENTS);
-  if (!existing || JSON.parse(existing).length === 0) {
-    const sampleAppointments = [
-      {
-        id: "CS-108234",
-        doctorId: "doc-1",
-        doctorName: "BS.CKII Nguyễn Văn Bình",
-        doctorSpecialty: "Chuyên khoa Tim mạch",
-        doctorRoom: "Phòng khám 201 (Tầng 2)",
-        doctorAvatar: "assets/images/doctor-1.jpg",
-        date: "25/10/2026",
-        rawDate: "2026-10-25",
-        time: "08:30",
-        patientName: "Trần Mai Anh",
-        patientPhone: "0987654321",
-        patientEmail: "maianh.tran@gmail.com",
-        patientReason: "Tái khám theo dõi huyết áp định kỳ",
-        status: "upcoming",
-        createdAt: "2026-10-15T08:00:00.000Z",
-      },
-      {
-        id: "CS-902145",
-        doctorId: "doc-4",
-        doctorName: "BS.CKI Phạm Thị Lan",
-        doctorSpecialty: "Chuyên khoa Da liễu",
-        doctorRoom: "Phòng khám 402 (Tầng 4)",
-        doctorAvatar: "assets/images/doctor-4.jpg",
-        date: "28/10/2026",
-        rawDate: "2026-10-28",
-        time: "14:30",
-        patientName: "Lê Hoàng Nam",
-        patientPhone: "0912345678",
-        patientEmail: "hoangnam.le@gmail.com",
-        patientReason: "Tư vấn điều trị viêm da dị ứng",
-        status: "upcoming",
-        createdAt: "2026-10-14T10:30:00.000Z",
-      },
-    ];
-    localStorage.setItem(
-      STORAGE_KEY_APPOINTMENTS,
-      JSON.stringify(sampleAppointments),
-    );
+  if (existing) {
+    try {
+      const list = JSON.parse(existing);
+      // Dọn dẹp các lịch hẹn mẫu demo của người khác (Trần Mai Anh CS-108234 và Lê Hoàng Nam CS-902145)
+      const cleaned = list.filter(
+        (a) => a.id !== "CS-108234" && a.id !== "CS-902145",
+      );
+      localStorage.setItem(STORAGE_KEY_APPOINTMENTS, JSON.stringify(cleaned));
+    } catch (e) {}
+  } else {
+    localStorage.setItem(STORAGE_KEY_APPOINTMENTS, JSON.stringify([]));
   }
 }
 
@@ -592,6 +574,32 @@ function updateAppointmentInStorage(id, updates) {
   }
 }
 
+// Hiển thị trạng thái bảo mật ban đầu khi chưa nhập số điện thoại
+function renderPromptState() {
+  const container = document.getElementById("myAppointmentsList");
+  const emptyNotice = document.getElementById("emptyAppointmentsNotice");
+  const countAllEl = document.getElementById("countAll");
+  const countUpcomingEl = document.getElementById("countUpcoming");
+  const countCancelledEl = document.getElementById("countCancelled");
+
+  if (countAllEl) countAllEl.textContent = "0";
+  if (countUpcomingEl) countUpcomingEl.textContent = "0";
+  if (countCancelledEl) countCancelledEl.textContent = "0";
+  if (emptyNotice) emptyNotice.classList.remove("show");
+
+  if (container) {
+    container.innerHTML = `
+      <div class="appointments-prompt-state" style="grid-column: 1 / -1; text-align: center; padding: 48px var(--spacing-md); background: var(--color-bg-muted); border: 1px dashed var(--color-border); border-radius: var(--radius-lg);">
+        <span class="material-symbols-rounded" style="font-size: 48px; color: var(--color-primary); margin-bottom: 12px; display: inline-block;">lock_person</span>
+        <h4 style="font-size: var(--font-size-base); font-weight: 600; color: var(--color-text); margin-bottom: 6px;">Tra cứu lịch hẹn cá nhân</h4>
+        <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary); max-width: 500px; margin: 0 auto; line-height: 1.6;">
+          Vì lý do bảo mật thông tin y tế, danh sách lịch hẹn không hiển thị công khai. Vui lòng <strong>nhập số điện thoại</strong> của bạn vào ô tìm kiếm bên trên và bấm nút <strong>Tra cứu</strong> để xem lịch khám.
+        </p>
+      </div>
+    `;
+  }
+}
+
 // Render danh sách
 function renderMyAppointments() {
   const container = document.getElementById("myAppointmentsList");
@@ -602,52 +610,71 @@ function renderMyAppointments() {
 
   if (!container) return;
 
+  const searchInput = document.getElementById("appointmentSearchInput");
+  const query = (
+    searchInput ? searchInput.value : currentAppointmentSearch
+  ).trim();
+  const cleanPhone = query.replace(/[^0-9]/g, "");
+
+  // 🛡️ BẢO MẬT: NẾU CHƯA NHẬP ĐỦ SỐ ĐIỆN THOẠI (10 SỐ), KHÔNG HIỂN THỊ BẤT KỲ LỊCH CỦA AI CẢ
+  if (!cleanPhone || cleanPhone.length < 10) {
+    renderPromptState();
+    return;
+  }
+
   const allAppointments = getAppointmentsFromStorage();
 
-  // Đếm cuộc hẹn
-  const upcomingCount = allAppointments.filter(
-    (a) => a.status === "upcoming",
+  // CHỈ LỌC RA CÁC LỊCH HẸN TRÙNG KHỚP VỚI SỐ ĐIỆN THOẠI ĐANG TRA CỨU
+  const phoneMatchedAppointments = allAppointments.filter((a) => {
+    const apptPhone = (a.patientPhone || "").replace(/[^0-9]/g, "");
+    return (
+      apptPhone === cleanPhone ||
+      (apptPhone && cleanPhone.endsWith(apptPhone.slice(-9)))
+    );
+  });
+
+  // Đếm cuộc hẹn chỉ của số điện thoại này
+  const upcomingCount = phoneMatchedAppointments.filter(
+    (a) => a.status === "upcoming" || a.status === "confirmed",
   ).length;
-  const cancelledCount = allAppointments.filter(
-    (a) => a.status === "cancelled",
+  const cancelledCount = phoneMatchedAppointments.filter(
+    (a) => a.status === "cancelled" || a.status === "da_huy",
   ).length;
 
-  if (countAllEl) countAllEl.textContent = allAppointments.length;
+  if (countAllEl) countAllEl.textContent = phoneMatchedAppointments.length;
   if (countUpcomingEl) countUpcomingEl.textContent = upcomingCount;
   if (countCancelledEl) countCancelledEl.textContent = cancelledCount;
 
   // Filter by status tab
-  let filtered = allAppointments;
+  let filtered = phoneMatchedAppointments;
   if (currentAppointmentFilter === "upcoming") {
-    filtered = filtered.filter((a) => a.status === "upcoming");
+    filtered = filtered.filter(
+      (a) => a.status === "upcoming" || a.status === "confirmed",
+    );
   } else if (currentAppointmentFilter === "cancelled") {
-    filtered = filtered.filter((a) => a.status === "cancelled");
-  }
-
-  // Filter by search query (phone, ID, doctor name, patient name)
-  if (currentAppointmentSearch) {
-    filtered = filtered.filter((a) => {
-      const q = currentAppointmentSearch;
-      return (
-        (a.id && a.id.toLowerCase().includes(q)) ||
-        (a.patientPhone && a.patientPhone.includes(q)) ||
-        (a.patientName && a.patientName.toLowerCase().includes(q)) ||
-        (a.doctorName && a.doctorName.toLowerCase().includes(q))
-      );
-    });
+    filtered = filtered.filter(
+      (a) => a.status === "cancelled" || a.status === "da_huy",
+    );
   }
 
   container.innerHTML = "";
 
   if (filtered.length === 0) {
-    if (emptyNotice) emptyNotice.classList.add("show");
+    if (emptyNotice) {
+      emptyNotice.classList.add("show");
+      const emptyTitle = emptyNotice.querySelector("h4");
+      const emptyDesc = emptyNotice.querySelector("p");
+      if (emptyTitle) emptyTitle.textContent = "Không tìm thấy lịch hẹn";
+      if (emptyDesc)
+        emptyDesc.textContent = `Không tìm thấy lịch hẹn nào gắn với số điện thoại ${cleanPhone}.`;
+    }
     return;
   }
 
   if (emptyNotice) emptyNotice.classList.remove("show");
 
   filtered.forEach((appt) => {
-    const isCancelled = appt.status === "cancelled";
+    const isCancelled = appt.status === "cancelled" || appt.status === "da_huy";
     const statusBadge = isCancelled
       ? '<span class="badge badge-neutral">Đã hủy</span>'
       : '<span class="badge badge-success">Sắp tới</span>';
@@ -663,7 +690,7 @@ function renderMyAppointments() {
       </div>
 
       <div class="appointment-doctor-row">
-        <img src="${appt.doctorAvatar || "assets/images/doctor-1.jpg"}" alt="${appt.doctorName}" class="appointment-doc-avatar" loading="lazy">
+        <img src="${appt.doctorAvatar || "assets/images/doctor-1.jpg"}" alt="${appt.doctorName}" class="appointment-doc-avatar" loading="lazy" onerror="this.src='assets/images/doctor-1.jpg'">
         <div class="appointment-doc-meta">
           <h4 class="appointment-doc-name">${appt.doctorName}</h4>
           <span class="appointment-doc-spec">${appt.doctorSpecialty} &bull; ${appt.doctorRoom || "Phòng khám đa khoa"}</span>
@@ -701,13 +728,15 @@ function renderMyAppointments() {
 
       <div class="appointment-card-actions">
         <button type="button" class="btn btn-outline btn-sm action-view-ticket" data-id="${appt.id}">
-          Xem phiếu khám
+          <span class="material-symbols-rounded" style="font-size: 16px; margin-right: 4px;">receipt_long</span>
+          <span>Xem phiếu khám</span>
         </button>
         ${
           !isCancelled
             ? `
           <button type="button" class="btn btn-secondary btn-sm action-cancel-appt" data-id="${appt.id}" style="color: var(--color-danger);">
-            Hủy lịch
+            <span class="material-symbols-rounded" style="font-size: 16px; margin-right: 4px;">cancel</span>
+            <span>Hủy lịch</span>
           </button>
         `
             : ""
@@ -718,20 +747,34 @@ function renderMyAppointments() {
     // Xem phiếu khám
     const viewBtn = card.querySelector(".action-view-ticket");
     if (viewBtn) {
-      viewBtn.addEventListener("click", () => openAppointmentTicketModal(appt));
+      viewBtn.addEventListener("click", () => {
+        if (typeof window.openAppointmentTicketModal === "function") {
+          window.openAppointmentTicketModal(appt);
+        } else if (typeof openAppointmentTicketModal === "function") {
+          openAppointmentTicketModal(appt);
+        }
+      });
     }
 
     // Hủy lịch
     const cancelBtn = card.querySelector(".action-cancel-appt");
     if (cancelBtn) {
-      cancelBtn.addEventListener("click", () =>
-        handleCancelAppointment(appt.id),
-      );
+      cancelBtn.addEventListener("click", () => {
+        if (typeof window.openCancelOtpModal === "function") {
+          window.openCancelOtpModal(appt);
+        } else {
+          handleCancelAppointment(appt.id);
+        }
+      });
     }
 
     container.appendChild(card);
   });
 }
+
+// Export ra window để các file khác (lookup.js, ticket modal) có thể tương tác nhất quán
+window.renderMyAppointments = renderMyAppointments;
+window.renderPromptState = renderPromptState;
 
 // Xử lý hủy lịch hẹn
 function handleCancelAppointment(id) {

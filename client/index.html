@@ -662,11 +662,53 @@
             </a>
           </div>
           <!-- Form Tra Cứu Số Điện Thoại & Bộ Lọc -->
-          <form id="appointmentLookupForm" class="appointment-lookup-form" novalidate>
+          <form
+            id="appointmentLookupForm"
+            class="appointment-lookup-form"
+            novalidate
+          >
+            <!-- Tab chuyển đổi vai trò: Bệnh nhân vs Bác sĩ -->
+            <div
+              class="lookup-role-tabs"
+              role="tablist"
+              aria-label="Vai trò tra cứu"
+            >
+              <button
+                type="button"
+                class="lookup-role-btn is-active"
+                id="roleTabPatient"
+                data-role="patient"
+              >
+                <span
+                  class="material-symbols-rounded"
+                  style="font-size: 18px; vertical-align: middle"
+                  >person</span
+                >
+                <span>Bệnh nhân tra cứu</span>
+              </button>
+              <button
+                type="button"
+                class="lookup-role-btn"
+                id="roleTabDoctor"
+                data-role="doctor"
+              >
+                <span
+                  class="material-symbols-rounded"
+                  style="font-size: 18px; vertical-align: middle"
+                  >stethoscope</span
+                >
+                <span>Bác sĩ phụ trách</span>
+              </button>
+            </div>
+
             <div class="appointments-toolbar">
               <div class="appointments-search-wrapper">
                 <div class="input-icon-wrapper lookup-field-wrap">
-                  <span class="material-symbols-rounded input-icon" style="font-size: 20px;">call</span>
+                  <span
+                    class="material-symbols-rounded input-icon"
+                    style="font-size: 20px"
+                    >call</span
+                  >
                   <input
                     type="tel"
                     id="appointmentSearchInput"
@@ -680,7 +722,7 @@
                     type="button"
                     class="lookup-clear-btn"
                     id="appointmentSearchClearBtn"
-                    style="display: none;"
+                    style="display: none"
                     aria-label="Xóa nội dung"
                   >
                     &times;
@@ -691,7 +733,11 @@
                   class="btn btn-primary"
                   id="sectionLookupSubmitBtn"
                 >
-                  <span class="material-symbols-rounded" style="font-size: 18px; margin-right: 4px;">search</span>
+                  <span
+                    class="material-symbols-rounded"
+                    style="font-size: 18px; margin-right: 4px"
+                    >search</span
+                  >
                   <span>Tra cứu</span>
                 </button>
               </div>
@@ -700,7 +746,11 @@
                 role="tablist"
                 aria-label="Bộ lọc trạng thái"
               >
-                <button type="button" class="tab-btn is-active" data-filter="all">
+                <button
+                  type="button"
+                  class="tab-btn is-active"
+                  data-filter="all"
+                >
                   Tất cả (<span id="countAll">0</span>)
                 </button>
                 <button type="button" class="tab-btn" data-filter="upcoming">
@@ -711,7 +761,10 @@
                 </button>
               </div>
             </div>
-            <span class="form-error-msg lookup-error-msg" id="sectionLookupError">
+            <span
+              class="form-error-msg lookup-error-msg"
+              id="sectionLookupError"
+            >
               Số điện thoại không hợp lệ (Cần 10 chữ số, ví dụ: 0912345678)
             </span>
           </form>
@@ -1038,6 +1091,181 @@
               >event_available</span
             >
             <span>Chọn bác sĩ này & Đặt lịch</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Xác Thực Hủy Lịch Khám Qua Email (Mã OTP) -->
+    <div
+      class="modal-overlay"
+      id="cancelOtpModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cancelOtpModalTitle"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog cancel-otp-dialog" style="max-width: 460px">
+        <div class="modal-header">
+          <div class="modal-header-title-wrap">
+            <span
+              class="material-symbols-rounded modal-header-icon"
+              style="color: var(--color-danger)"
+              >cancel</span
+            >
+            <h3 class="modal-title" id="cancelOtpModalTitle">
+              Hủy Lịch Hẹn Khám Bệnh
+            </h3>
+          </div>
+          <button
+            type="button"
+            class="modal-close-btn"
+            data-action="close-modal"
+            aria-label="Đóng cửa sổ"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- BƯỚC 1: Xác nhận thông tin và gửi OTP qua Email -->
+          <div id="cancelStepRequest" class="cancel-step-pane">
+            <div class="cancel-summary-box">
+              <div class="cancel-summary-row">
+                <span class="cancel-summary-label">Mã phiếu khám:</span>
+                <strong
+                  id="cancelTargetCode"
+                  class="cancel-summary-val"
+                  style="
+                    font-family: var(--font-mono);
+                    color: var(--color-primary);
+                  "
+                  >APT-...</strong
+                >
+              </div>
+              <div class="cancel-summary-row">
+                <span class="cancel-summary-label">Bác sĩ khám:</span>
+                <span id="cancelTargetDoctor" class="cancel-summary-val"
+                  >--</span
+                >
+              </div>
+              <div class="cancel-summary-row">
+                <span class="cancel-summary-label">Thời gian khám:</span>
+                <span id="cancelTargetTime" class="cancel-summary-val highlight"
+                  >--</span
+                >
+              </div>
+              <div class="cancel-summary-row">
+                <span class="cancel-summary-label">Người đặt:</span>
+                <span id="cancelTargetPatient" class="cancel-summary-val"
+                  >--</span
+                >
+              </div>
+            </div>
+
+            <div class="cancel-security-notice">
+              <span class="material-symbols-rounded cancel-notice-icon"
+                >verified_user</span
+              >
+              <p>
+                Để bảo vệ thông tin và tránh việc người khác hủy trộm lịch khám
+                của bạn, hệ thống sẽ gửi <strong>mã OTP 6 chữ số</strong> về hộp
+                thư email của bạn qua dịch vụ <strong>Amazon SNS</strong>.
+              </p>
+            </div>
+          </div>
+
+          <!-- BƯỚC 2: Nhập mã OTP đã nhận qua Email -->
+          <div
+            id="cancelStepVerify"
+            class="cancel-step-pane"
+            style="display: none"
+          >
+            <div class="cancel-otp-header-icon">
+              <span class="material-symbols-rounded">mark_email_read</span>
+            </div>
+            <p class="cancel-otp-intro">
+              Mã xác nhận 6 chữ số đã được gửi tới email:<br />
+              <strong id="cancelMaskedEmail" class="cancel-masked-email"
+                >...</strong
+              >
+            </p>
+
+            <div class="form-group cancel-otp-group">
+              <label
+                for="cancelOtpInput"
+                class="form-label"
+                style="text-align: center; font-weight: 600"
+              >
+                Nhập mã xác nhận (OTP)
+              </label>
+              <input
+                type="text"
+                id="cancelOtpInput"
+                class="form-input cancel-otp-input"
+                placeholder="000000"
+                maxlength="6"
+                autocomplete="one-time-code"
+                inputmode="numeric"
+              />
+              <p
+                id="cancelOtpError"
+                class="cancel-otp-error-msg"
+                style="display: none"
+              ></p>
+            </div>
+
+            <div class="cancel-resend-wrap">
+              <span
+                id="cancelResendTimerText"
+                style="
+                  display: none;
+                  font-size: var(--font-size-xs);
+                  color: var(--color-text-muted);
+                "
+              >
+                Gửi lại mã sau: <span id="cancelTimerCountdown">60</span>s
+              </span>
+              <button
+                type="button"
+                id="cancelResendOtpBtn"
+                class="cancel-resend-btn"
+              >
+                Chưa nhận được mã? Gửi lại OTP
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-action="close-modal"
+            id="cancelModalCloseBtn"
+          >
+            Đóng
+          </button>
+          <!-- Nút kích hoạt Bước 1 -->
+          <button type="button" class="btn btn-danger" id="cancelRequestOtpBtn">
+            <span
+              class="material-symbols-rounded"
+              style="font-size: 18px; vertical-align: middle; margin-right: 4px"
+              >send</span
+            >
+            <span>Gửi mã OTP qua Email</span>
+          </button>
+          <!-- Nút kích hoạt Bước 2 -->
+          <button
+            type="button"
+            class="btn btn-danger"
+            id="cancelConfirmOtpBtn"
+            style="display: none"
+          >
+            <span
+              class="material-symbols-rounded"
+              style="font-size: 18px; vertical-align: middle; margin-right: 4px"
+              >check_circle</span
+            >
+            <span>Xác nhận hủy lịch</span>
           </button>
         </div>
       </div>
