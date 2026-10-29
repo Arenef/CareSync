@@ -53,12 +53,13 @@ const createAppointment = async (data) => {
     }),
   );
 
-  // Gọi trực tiếp hàm lưu/cập nhật hồ sơ bệnh nhân song song
+  // Gọi trực tiếp hàm lưu/cập nhật hồ sơ bệnh nhân song song (có mã hóa KMS cho SĐT)
   const patientTask = saveOrUpdatePatient({
     patientName,
     patientPhone,
     email: patientEmail,
     patientId,
+    ...data,
   }).catch((err) => {
     console.error("[Patient Service Save Error]:", err.message);
     return null;
