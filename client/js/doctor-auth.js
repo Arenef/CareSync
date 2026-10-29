@@ -524,31 +524,32 @@
 
     let list = [];
     try {
+      let isApiSuccess = false;
       if (window.CareSyncAPI && window.CareSyncAPI.doctorAuthApi) {
         try {
-          list =
+          const apiRes =
             await window.CareSyncAPI.doctorAuthApi.getAppointments(doctorId);
+          if (Array.isArray(apiRes)) {
+            list = apiRes;
+            isApiSuccess = true; // Kết nối thành công tới database AWS -> Chỉ hiển thị dữ liệu từ DynamoDB
+          }
         } catch (_) {
-          list = [];
+          isApiSuccess = false;
         }
       }
 
-      // 1. Nếu API không có, kiểm tra ca khám thực tế đã đặt lưu trong localStorage
-      if (!list || list.length === 0) {
+      // CHỈ KHI OFFLINE (KHÔNG KẾT NỐI ĐƯỢC AWS API) MỚI DÙNG LOCALSTORAGE / DATA MẪU
+      if (!isApiSuccess) {
         const localAppts = JSON.parse(
           localStorage.getItem("caresync_appointments") || "[]",
         );
         const localFiltered = localAppts.filter(
           (a) => a.doctorId === doctorId || a.DoctorId === doctorId,
         );
-        if (localFiltered.length > 0) {
-          list = localFiltered;
-        }
-      }
-
-      // 2. CHỈ khi hoàn toàn không có dữ liệu thực tế nào mới nạp dữ liệu mẫu demo
-      if (!list || list.length === 0) {
-        list = getSampleAppointments(doctorId);
+        list =
+          localFiltered.length > 0
+            ? localFiltered
+            : getSampleAppointments(doctorId);
       }
 
       currentDoctorAppointments = list;

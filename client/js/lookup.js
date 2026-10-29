@@ -162,30 +162,30 @@
 
     try {
       let appointments = [];
+      let isApiSuccess = false;
 
-      // 1. Gọi API của SV2 trên AWS API Gateway (GET /appointments?phone=...)
+      // 1. Gọi API trên AWS API Gateway (GET /appointments?phone=...)
       if (
         window.CareSyncAPI &&
         window.CareSyncAPI.appointmentApi &&
         typeof window.CareSyncAPI.appointmentApi.getByPhone === "function"
       ) {
         try {
-          appointments =
+          const apiRes =
             await window.CareSyncAPI.appointmentApi.getByPhone(cleanPhone);
+          if (Array.isArray(apiRes)) {
+            appointments = apiRes;
+            isApiSuccess = true; // Kết nối thành công tới database AWS
+          }
         } catch (apiErr) {
           console.warn("[Lookup API Call Warning]:", apiErr.message || apiErr);
+          isApiSuccess = false;
         }
       }
 
-      // 2. Fallback / Merge với dữ liệu demo trong localStorage
-      const localAppointments = getLocalAppointments(cleanPhone);
-      if (Array.isArray(localAppointments) && localAppointments.length > 0) {
-        const existingIds = new Set(appointments.map((a) => a.id));
-        localAppointments.forEach((localItem) => {
-          if (!existingIds.has(localItem.id)) {
-            appointments.push(localItem);
-          }
-        });
+      // 2. CHỈ KHI AWS KHÔNG KẾT NỐI ĐƯỢC (OFFLINE) MỚI DÙNG LOCAL DỰ PHÒNG
+      if (!isApiSuccess) {
+        appointments = getLocalAppointments(cleanPhone);
       }
 
       // 3. Hiển thị kết quả
