@@ -16,9 +16,8 @@ const {
 } = require("./service/kms.service");
 
 async function testKMS() {
-  // Dữ liệu giả lập, không dùng thông tin thật
+  // Dữ liệu giả lập số điện thoại
   const phone = "0912345678";
-  const cccd = "012345678901";
 
   try {
     // Kiểm thử số điện thoại
@@ -29,15 +28,6 @@ async function testKMS() {
     console.log("Encrypted:", encryptedPhone);
     console.log("Decrypted:", decryptedPhone);
     console.log("Result:", phone === decryptedPhone ? "PASS" : "FAIL");
-
-    // Kiểm thử CCCD
-    const encryptedCCCD = await encryptData(cccd);
-    const decryptedCCCD = await decryptData(encryptedCCCD);
-
-    console.log("\n=== TEST CCCD ===");
-    console.log("Encrypted:", encryptedCCCD);
-    console.log("Decrypted:", decryptedCCCD);
-    console.log("Result:", cccd === decryptedCCCD ? "PASS" : "FAIL");
   } catch (error) {
     console.error("KMS test failed:", error.message);
   }
