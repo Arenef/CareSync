@@ -33,7 +33,6 @@
   const btnVerifyOtp = document.getElementById("btnVerifyDoctorOtp");
   const btnBackToEmail = document.getElementById("btnBackToEmailStep");
   const targetEmailText = document.getElementById("otpTargetEmailText");
-  const btnFillDemo = document.getElementById("btnFillDemoDoctor");
 
   // Các phần tử DOM Section Lịch hẹn
   const apptsTitle = document.querySelector(".appointments-title");
@@ -73,16 +72,6 @@
       });
     }
 
-    // Nút tự động điền tài khoản test nhanh
-    if (btnFillDemo) {
-      btnFillDemo.addEventListener("click", () => {
-        if (emailInput) {
-          emailInput.value = DEMO_EMAIL;
-          clearErrors();
-          emailInput.focus();
-        }
-      });
-    }
 
     // Nút đăng xuất
     if (logoutBtn) {
@@ -205,7 +194,7 @@
     if (!isValidEmail(email)) {
       showError(
         "email",
-        "Định dạng email không hợp lệ (Ví dụ hợp lệ: doc1@caresync.vn)!",
+        "Định dạng email không hợp lệ (Ví dụ: bacsi@caresync.vn)!",
       );
       return;
     }
@@ -538,18 +527,8 @@
         }
       }
 
-      // CHỈ KHI OFFLINE (KHÔNG KẾT NỐI ĐƯỢC AWS API) MỚI DÙNG LOCALSTORAGE / DATA MẪU
       if (!isApiSuccess) {
-        const localAppts = JSON.parse(
-          localStorage.getItem("caresync_appointments") || "[]",
-        );
-        const localFiltered = localAppts.filter(
-          (a) => a.doctorId === doctorId || a.DoctorId === doctorId,
-        );
-        list =
-          localFiltered.length > 0
-            ? localFiltered
-            : getSampleAppointments(doctorId);
+        list = [];
       }
 
       currentDoctorAppointments = list;
