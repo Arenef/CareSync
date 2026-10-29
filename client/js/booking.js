@@ -501,8 +501,6 @@ let currentAppointmentSearch = "";
 // Khởi tạo lịch hẹn
 function initMyAppointments() {
   seedInitialAppointments();
-<<<<<<< HEAD
-=======
 
   const searchInput = document.getElementById("appointmentSearchInput");
   const tabButtons = document.querySelectorAll(".appointments-tabs .tab-btn");
@@ -510,12 +508,7 @@ function initMyAppointments() {
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
       currentAppointmentSearch = e.target.value.trim().toLowerCase();
-      const clean = currentAppointmentSearch.replace(/[^0-9]/g, "");
-      if (!clean) {
-        renderPromptState();
-      } else if (clean.length >= 10) {
-        renderMyAppointments();
-      }
+      renderMyAppointments();
     });
   }
 
@@ -529,23 +522,76 @@ function initMyAppointments() {
   });
 
   renderMyAppointments();
->>>>>>> afb5a076ad6edbefc283918c6a6885e73e5cb115
 }
 
-// Khởi tạo dữ liệu sạch (không nạp lịch hẹn của người khác để bảo vệ thông tin cá nhân)
+// Khởi tạo dữ liệu ca hẹn mẫu
 function seedInitialAppointments() {
   const existing = localStorage.getItem(STORAGE_KEY_APPOINTMENTS);
-  if (existing) {
-    try {
-      const list = JSON.parse(existing);
-      // Dọn dẹp các lịch hẹn mẫu demo của người khác (Trần Mai Anh CS-108234 và Lê Hoàng Nam CS-902145)
-      const cleaned = list.filter(
-        (a) => a.id !== "CS-108234" && a.id !== "CS-902145",
-      );
-      localStorage.setItem(STORAGE_KEY_APPOINTMENTS, JSON.stringify(cleaned));
-    } catch (e) {}
-  } else {
-    localStorage.setItem(STORAGE_KEY_APPOINTMENTS, JSON.stringify([]));
+  let list = [];
+  try {
+    list = existing ? JSON.parse(existing) : [];
+  } catch (e) {
+    list = [];
+  }
+
+  if (!list || list.length === 0) {
+    const sampleAppointments = [
+      {
+        id: "CS-108234",
+        doctorId: "doc-1",
+        doctorName: "BS.CKII Nguyễn Văn Bình",
+        doctorSpecialty: "Chuyên khoa Tim mạch",
+        doctorRoom: "Phòng khám 201 (Tầng 2)",
+        doctorAvatar: "assets/images/doctor-1.jpg",
+        date: "25/10/2026",
+        rawDate: "2026-10-25",
+        time: "08:30",
+        patientName: "Trần Mai Anh",
+        patientPhone: "0987654321",
+        patientEmail: "maianh.tran@gmail.com",
+        patientReason: "Tái khám theo dõi huyết áp định kỳ",
+        status: "upcoming",
+        createdAt: "2026-10-15T08:00:00.000Z",
+      },
+      {
+        id: "CS-902145",
+        doctorId: "doc-4",
+        doctorName: "BS.CKI Phạm Thị Lan",
+        doctorSpecialty: "Chuyên khoa Da liễu",
+        doctorRoom: "Phòng khám 402 (Tầng 4)",
+        doctorAvatar: "assets/images/doctor-4.jpg",
+        date: "28/10/2026",
+        rawDate: "2026-10-28",
+        time: "14:30",
+        patientName: "Lê Hoàng Nam",
+        patientPhone: "0912345678",
+        patientEmail: "hoangnam.le@gmail.com",
+        patientReason: "Tư vấn điều trị viêm da dị ứng",
+        status: "upcoming",
+        createdAt: "2026-10-14T10:30:00.000Z",
+      },
+      {
+        id: "CS-304912",
+        doctorId: "doc-1",
+        doctorName: "BS.CKII Nguyễn Văn Bình",
+        doctorSpecialty: "Chuyên khoa Tim mạch",
+        doctorRoom: "Phòng khám 201 (Tầng 2)",
+        doctorAvatar: "assets/images/doctor-1.jpg",
+        date: "29/10/2026",
+        rawDate: "2026-10-29",
+        time: "09:30",
+        patientName: "Nguyễn Thị Mai",
+        patientPhone: "0912345678",
+        patientEmail: "mai.nguyen@gmail.com",
+        patientReason: "Khám sức khỏe tim mạch định kỳ",
+        status: "upcoming",
+        createdAt: "2026-10-20T09:00:00.000Z",
+      },
+    ];
+    localStorage.setItem(
+      STORAGE_KEY_APPOINTMENTS,
+      JSON.stringify(sampleAppointments),
+    );
   }
 }
 
@@ -619,22 +665,29 @@ function renderMyAppointments() {
   ).trim();
   const cleanPhone = query.replace(/[^0-9]/g, "");
 
-  // 🛡️ BẢO MẬT: NẾU CHƯA NHẬP ĐỦ SỐ ĐIỆN THOẠI (10 SỐ), KHÔNG HIỂN THỊ BẤT KỲ LỊCH CỦA AI CẢ
-  if (!cleanPhone || cleanPhone.length < 10) {
-    renderPromptState();
-    return;
-  }
-
   const allAppointments = getAppointmentsFromStorage();
 
-  // CHỈ LỌC RA CÁC LỊCH HẸN TRÙNG KHỚP VỚI SỐ ĐIỆN THOẠI ĐANG TRA CỨU
-  const phoneMatchedAppointments = allAppointments.filter((a) => {
-    const apptPhone = (a.patientPhone || "").replace(/[^0-9]/g, "");
-    return (
-      apptPhone === cleanPhone ||
-      (apptPhone && cleanPhone.endsWith(apptPhone.slice(-9)))
-    );
-  });
+  // Hiển thị tất cả ca hẹn mẫu mặc định; khi người dùng nhập số điện thoại hoặc từ khóa thì lọc theo dữ liệu đó
+  let phoneMatchedAppointments = allAppointments;
+  if (cleanPhone) {
+    phoneMatchedAppointments = allAppointments.filter((a) => {
+      const apptPhone = (a.patientPhone || "").replace(/[^0-9]/g, "");
+      return (
+        apptPhone === cleanPhone ||
+        apptPhone.includes(cleanPhone) ||
+        (apptPhone && cleanPhone.endsWith(apptPhone.slice(-9)))
+      );
+    });
+  } else if (query) {
+    phoneMatchedAppointments = allAppointments.filter((a) => {
+      const q = query.toLowerCase();
+      return (
+        (a.id && a.id.toLowerCase().includes(q)) ||
+        (a.patientName && a.patientName.toLowerCase().includes(q)) ||
+        (a.doctorName && a.doctorName.toLowerCase().includes(q))
+      );
+    });
+  }
 
   // Đếm cuộc hẹn chỉ của số điện thoại này
   const upcomingCount = phoneMatchedAppointments.filter(
