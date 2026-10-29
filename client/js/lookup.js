@@ -13,6 +13,10 @@
   let appointmentsContainer = null;
   let emptyNotice = null;
 
+  // Dữ liệu bộ nhớ tạm sau khi tra cứu từ DynamoDB (KHÔNG dùng LocalStorage)
+  let currentFetchedAppointments = [];
+  let currentFilterTab = "all";
+
   /**
    * Khởi tạo module tra cứu
    */
@@ -27,7 +31,11 @@
 
     setupNavLinks();
     setupLookupForm();
+    setupFilterTabs();
     initCancelOtpModal();
+
+    // Khởi tạo trạng thái bảo mật ban đầu (chưa tra cứu -> 0 lịch hẹn)
+    renderPromptState();
   }
 
   /**
@@ -56,7 +64,7 @@
   }
 
   /**
-   * Thiết lập sự kiện cho form tra cứu tại Section
+   * Thiết lập sự kiện cho form tra cứu
    */
   function setupLookupForm() {
     if (!lookupForm || !searchInput) return;
@@ -70,14 +78,15 @@
       clearError();
     });
 
-    // Nút xóa nhanh nội dung
+    // Nút xóa nhanh nội dung -> trở về trạng thái yêu cầu nhập SĐT ban đầu
     if (clearBtn) {
       clearBtn.addEventListener("click", () => {
         searchInput.value = "";
         clearBtn.style.display = "none";
         clearError();
         searchInput.focus();
-        resetToAllAppointments();
+        currentFetchedAppointments = [];
+        renderPromptState();
       });
     }
 
@@ -92,6 +101,21 @@
       }
 
       await executeAppointmentLookup(rawPhone);
+    });
+  }
+
+  /**
+   * Thiết lập các Tab lọc trạng thái: Tất cả / Sắp tới / Đã hủy
+   */
+  function setupFilterTabs() {
+    const tabButtons = document.querySelectorAll(".appointments-tabs .tab-btn");
+    tabButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        tabButtons.forEach((b) => b.classList.remove("is-active"));
+        btn.classList.add("is-active");
+        currentFilterTab = btn.dataset.filter || "all";
+        applyCurrentFilter();
+      });
     });
   }
 
@@ -138,7 +162,27 @@
   }
 
   /**
-   * Thực hiện tra cứu qua API của SV2 và cập nhật giao diện
+   * Hiển thị trạng thái bảo mật ban đầu khi chưa nhập số điện thoại
+   */
+  function renderPromptState() {
+    updateCounts(0, 0, 0);
+    if (emptyNotice) emptyNotice.classList.remove("show");
+
+    if (appointmentsContainer) {
+      appointmentsContainer.innerHTML = `
+        <div class="appointments-prompt-state" style="grid-column: 1 / -1; text-align: center; padding: 48px var(--spacing-md); background: var(--color-bg-muted); border: 1px dashed var(--color-border); border-radius: var(--radius-lg);">
+          <span class="material-symbols-rounded" style="font-size: 48px; color: var(--color-primary); margin-bottom: 12px; display: inline-block;">lock_person</span>
+          <h4 style="font-size: var(--font-size-base); font-weight: 600; color: var(--color-text); margin-bottom: 6px;">Tra cứu lịch hẹn cá nhân</h4>
+          <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary); max-width: 500px; margin: 0 auto; line-height: 1.6;">
+            Vì lý do bảo mật thông tin y tế, danh sách lịch hẹn không hiển thị công khai. Vui lòng <strong>nhập số điện thoại</strong> của bạn vào ô tìm kiếm bên trên và bấm nút <strong>Tra cứu</strong> để xem lịch khám.
+          </p>
+        </div>
+      `;
+    }
+  }
+
+  /**
+   * Thực hiện tra cứu 100% từ AWS DynamoDB (GET /appointments?phone=...)
    */
   async function executeAppointmentLookup(phone) {
     const cleanPhone = phone.replace(/\s+/g, "");
@@ -154,7 +198,7 @@
         <div class="appointments-loading-state" style="grid-column: 1 / -1; text-align: center; padding: 48px var(--spacing-md);">
           <div class="lookup-spinner" style="margin: 0 auto var(--spacing-sm);"></div>
           <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm); font-weight: 500;">
-            Đang tra cứu lịch hẹn trên hệ thống CareSync cho số điện thoại <strong>${cleanPhone}</strong>...
+            Đang tra cứu lịch hẹn trên AWS DynamoDB cho số điện thoại <strong>${cleanPhone}</strong>...
           </p>
         </div>
       `;
@@ -162,38 +206,34 @@
 
     try {
       let appointments = [];
-      let isApiSuccess = false;
 
-      // 1. Gọi API trên AWS API Gateway (GET /appointments?phone=...)
+      // Gọi API trên AWS API Gateway (GET /appointments?phone=...)
       if (
         window.CareSyncAPI &&
         window.CareSyncAPI.appointmentApi &&
         typeof window.CareSyncAPI.appointmentApi.getByPhone === "function"
       ) {
-        try {
-          const apiRes =
-            await window.CareSyncAPI.appointmentApi.getByPhone(cleanPhone);
-          if (Array.isArray(apiRes)) {
-            appointments = apiRes;
-            isApiSuccess = true; // Kết nối thành công tới database AWS
-          }
-        } catch (apiErr) {
-          console.warn("[Lookup API Call Warning]:", apiErr.message || apiErr);
-          isApiSuccess = false;
+        const apiRes =
+          await window.CareSyncAPI.appointmentApi.getByPhone(cleanPhone);
+        if (Array.isArray(apiRes)) {
+          appointments = apiRes;
         }
       }
 
-      // 2. CHỈ KHI AWS KHÔNG KẾT NỐI ĐƯỢC (OFFLINE) MỚI DÙNG LOCAL DỰ PHÒNG
-      if (!isApiSuccess) {
-        appointments = getLocalAppointments(cleanPhone);
-      }
+      currentFetchedAppointments = appointments;
 
-      // 3. Hiển thị kết quả
-      if (appointments && appointments.length > 0) {
-        renderFilteredAppointments(appointments, cleanPhone);
+      // Reset về Tab "Tất cả"
+      currentFilterTab = "all";
+      const tabButtons = document.querySelectorAll(".appointments-tabs .tab-btn");
+      tabButtons.forEach((b) => {
+        b.classList.toggle("is-active", (b.dataset.filter || "all") === "all");
+      });
+
+      if (currentFetchedAppointments.length > 0) {
+        applyCurrentFilter();
         safeShowToast(
           "Tra cứu thành công",
-          `Tìm thấy ${appointments.length} lịch hẹn cho số điện thoại ${cleanPhone}`,
+          `Tìm thấy ${currentFetchedAppointments.length} lịch hẹn cho số điện thoại ${cleanPhone}`,
           "success",
         );
       } else {
@@ -203,10 +243,17 @@
         }
         if (emptyNotice) {
           emptyNotice.classList.add("show");
+          const emptyTitle = emptyNotice.querySelector("h4");
+          const emptyDesc = emptyNotice.querySelector("p");
+          if (emptyTitle) {
+            emptyTitle.textContent = "Bạn không có lịch hẹn nào";
+          }
+          if (emptyDesc) {
+            emptyDesc.textContent = `Không tìm thấy bất kỳ lịch hẹn nào gắn với số điện thoại ${cleanPhone}. Vui lòng kiểm tra lại số điện thoại hoặc đặt lịch khám mới.`;
+          }
         }
         updateCounts(0, 0, 0);
 
-        // YÊU CẦU: Bắn Toast khi không tìm thấy lịch hẹn
         safeShowToast(
           "Không tìm thấy lịch hẹn",
           `Không tìm thấy lịch hẹn nào gắn với số điện thoại ${cleanPhone}. Vui lòng kiểm tra lại!`,
@@ -223,7 +270,7 @@
       }
       safeShowToast(
         "Lỗi kết nối",
-        "Không thể tải lịch hẹn lúc này. Vui lòng thử lại sau!",
+        "Không thể tải lịch hẹn từ máy chủ AWS lúc này. Vui lòng thử lại sau!",
         "danger",
       );
     } finally {
@@ -235,57 +282,73 @@
   }
 
   /**
-   * Lấy lịch hẹn từ localStorage
+   * Lọc và hiển thị danh sách cuộc hẹn theo Tab hiện tại
    */
-  function getLocalAppointments(phone) {
-    try {
-      const raw = localStorage.getItem("caresync_appointments");
-      if (!raw) return [];
-      const list = JSON.parse(raw);
-      if (!Array.isArray(list)) return [];
-
-      const cleanTarget = phone.replace(/[^0-9]/g, "");
-      return list.filter((appt) => {
-        const apptPhone = (appt.patientPhone || "").replace(/[^0-9]/g, "");
-        return (
-          apptPhone === cleanTarget ||
-          (appt.id && appt.id.toLowerCase() === phone.toLowerCase())
-        );
-      });
-    } catch (e) {
-      return [];
-    }
-  }
-
-  /**
-   * Render danh sách thẻ lịch hẹn tìm thấy vào #myAppointmentsList
-   */
-  function renderFilteredAppointments(list, phone) {
+  function applyCurrentFilter() {
     if (!appointmentsContainer) return;
+
+    if (!currentFetchedAppointments || currentFetchedAppointments.length === 0) {
+      renderPromptState();
+      return;
+    }
+
+    // Đếm số lượng theo trạng thái
+    const upcomingCount = currentFetchedAppointments.filter(
+      (a) => a.status === "upcoming" || a.status === "confirmed",
+    ).length;
+    const cancelledCount = currentFetchedAppointments.filter(
+      (a) => a.status === "cancelled" || a.status === "da_huy",
+    ).length;
+    updateCounts(
+      currentFetchedAppointments.length,
+      upcomingCount,
+      cancelledCount,
+    );
+
+    // Lọc theo tab
+    let filtered = currentFetchedAppointments;
+    if (currentFilterTab === "upcoming") {
+      filtered = filtered.filter(
+        (a) => a.status === "upcoming" || a.status === "confirmed",
+      );
+    } else if (currentFilterTab === "cancelled") {
+      filtered = filtered.filter(
+        (a) => a.status === "cancelled" || a.status === "da_huy",
+      );
+    }
+
+    appointmentsContainer.innerHTML = "";
+
+    if (filtered.length === 0) {
+      if (emptyNotice) {
+        emptyNotice.classList.add("show");
+        const emptyTitle = emptyNotice.querySelector("h4");
+        const emptyDesc = emptyNotice.querySelector("p");
+        if (emptyTitle) {
+          emptyTitle.textContent = "Không có lịch hẹn nào";
+        }
+        if (emptyDesc) {
+          emptyDesc.textContent =
+            currentFilterTab === "upcoming"
+              ? "Bạn không có lịch hẹn sắp tới nào."
+              : "Bạn không có lịch hẹn nào đã hủy.";
+        }
+      }
+      return;
+    }
 
     if (emptyNotice) {
       emptyNotice.classList.remove("show");
     }
 
-    appointmentsContainer.innerHTML = "";
-
-    // Đếm số lượng theo trạng thái
-    const upcomingCount = list.filter(
-      (a) => a.status === "upcoming" || a.status === "confirmed",
-    ).length;
-    const cancelledCount = list.filter(
-      (a) => a.status === "cancelled" || a.status === "da_huy",
-    ).length;
-    updateCounts(list.length, upcomingCount, cancelledCount);
-
-    list.forEach((appt) => {
+    filtered.forEach((appt) => {
       const card = createAppointmentCard(appt);
       appointmentsContainer.appendChild(card);
     });
   }
 
   /**
-   * Tạo element thẻ lịch hẹn trực quan
+   * Tạo element thẻ lịch hẹn trực quan với thông tin đầy đủ
    */
   function createAppointmentCard(appt) {
     const isCancelled = appt.status === "cancelled" || appt.status === "da_huy";
@@ -297,6 +360,23 @@
     card.className = "appointment-card";
     card.dataset.id = appt.id;
 
+    // Tự động đối chiếu thông tin bác sĩ từ Danh mục nếu thiếu
+    const doctor =
+      typeof window.getDoctorById === "function" && appt.doctorId
+        ? window.getDoctorById(appt.doctorId)
+        : null;
+
+    const docName =
+      appt.doctorName || (doctor && doctor.name) || "Bác sĩ phụ trách";
+    const docSpec =
+      appt.doctorSpecialty || (doctor && doctor.specialty) || "Chuyên khoa đa khoa";
+    const docRoom =
+      appt.doctorRoom || (doctor && doctor.room) || "Phòng khám 101";
+    const docAvatar =
+      appt.doctorAvatar ||
+      (doctor && doctor.avatar) ||
+      "assets/images/doctor-1.jpg";
+
     const dateVal = appt.date || appt.appointmentDate || "--";
     const timeVal = appt.time || appt.slotTime || "--";
 
@@ -307,10 +387,10 @@
       </div>
 
       <div class="appointment-doctor-row">
-        <img src="${appt.doctorAvatar || "assets/images/doctor-1.jpg"}" alt="${appt.doctorName || "Bác sĩ"}" class="appointment-doc-avatar" loading="lazy" onerror="this.src='assets/images/doctor-1.jpg'">
+        <img src="${docAvatar}" alt="${docName}" class="appointment-doc-avatar" loading="lazy" onerror="this.src='assets/images/doctor-1.jpg'">
         <div class="appointment-doc-meta">
-          <h4 class="appointment-doc-name">${appt.doctorName || "Bác sĩ phụ trách"}</h4>
-          <span class="appointment-doc-spec">${appt.doctorSpecialty || "Chuyên khoa đa khoa"} &bull; ${appt.doctorRoom || "Phòng khám đa khoa"}</span>
+          <h4 class="appointment-doc-name">${docName}</h4>
+          <span class="appointment-doc-spec">${docSpec} &bull; ${docRoom}</span>
         </div>
       </div>
 
@@ -333,13 +413,14 @@
         </div>
       </div>
 
-      ${appt.patientReason
-        ? `
+      ${
+        appt.patientReason || appt.reason
+          ? `
         <div class="appointment-reason-note">
-          <strong>Lý do khám:</strong> ${appt.patientReason}
+          <strong>Lý do khám:</strong> ${appt.patientReason || appt.reason}
         </div>
       `
-        : ""
+          : ""
       }
 
       <div class="appointment-card-actions">
@@ -347,15 +428,16 @@
           <span class="material-symbols-rounded" style="font-size: 16px; margin-right: 4px;">receipt_long</span>
           <span>Xem phiếu khám</span>
         </button>
-        ${!isCancelled
-        ? `
+        ${
+          !isCancelled
+            ? `
           <button type="button" class="btn btn-secondary btn-sm action-cancel-appt" data-id="${appt.id}" style="color: var(--color-danger);">
             <span class="material-symbols-rounded" style="font-size: 16px; margin-right: 4px;">cancel</span>
             <span>Hủy lịch</span>
           </button>
         `
-        : ""
-      }
+            : ""
+        }
       </div>
     `;
 
@@ -364,7 +446,13 @@
     if (viewBtn) {
       viewBtn.addEventListener("click", () => {
         if (typeof window.openAppointmentTicketModal === "function") {
-          window.openAppointmentTicketModal(appt);
+          window.openAppointmentTicketModal({
+            ...appt,
+            doctorName: docName,
+            doctorSpecialty: docSpec,
+            doctorRoom: docRoom,
+            doctorAvatar: docAvatar,
+          });
         }
       });
     }
@@ -373,7 +461,13 @@
     const cancelBtn = card.querySelector(".action-cancel-appt");
     if (cancelBtn) {
       cancelBtn.addEventListener("click", () => {
-        handleCancel(appt);
+        openCancelOtpModal({
+          ...appt,
+          doctorName: docName,
+          doctorSpecialty: docSpec,
+          doctorRoom: docRoom,
+          doctorAvatar: docAvatar,
+        });
       });
     }
 
@@ -418,7 +512,6 @@
           handleConfirmOtp();
         }
       });
-      // Tự động xóa lỗi khi người dùng bắt đầu gõ lại
       otpInput.addEventListener("input", () => {
         const errorEl = document.getElementById("cancelOtpError");
         if (errorEl) errorEl.style.display = "none";
@@ -494,12 +587,16 @@
         requestBtn.innerHTML = "<span>Đang gửi mã qua SNS...</span>";
       }
 
+      // Chuẩn hóa slotKey đúng định dạng ISO YYYY-MM-DD#HH:mm
+      let slotKey = currentCancelAppt.slotKey;
+      if (!slotKey && currentCancelAppt.date && currentCancelAppt.time) {
+        slotKey = `${currentCancelAppt.date}#${currentCancelAppt.time}`;
+      }
+
       // Gọi API yêu cầu gửi mã OTP
       const res = await window.CareSyncAPI.appointmentApi.requestCancel({
         doctorId: currentCancelAppt.doctorId,
-        slotKey:
-          currentCancelAppt.slotKey ||
-          `${currentCancelAppt.date}#${currentCancelAppt.time}`,
+        slotKey: slotKey,
       });
 
       // Chuyển sang Bước 2: Nhập OTP
@@ -563,46 +660,44 @@
     }
 
     const originalBtnText = confirmBtn ? confirmBtn.innerHTML : "";
-
     try {
       if (confirmBtn) {
         confirmBtn.disabled = true;
-        confirmBtn.innerHTML = "<span>Đang xác thực với AWS...</span>";
+        confirmBtn.innerHTML = "<span>Đang xác thực OTP...</span>";
       }
       if (otpError) otpError.style.display = "none";
+
+      let slotKey = currentCancelAppt.slotKey;
+      if (!slotKey && currentCancelAppt.date && currentCancelAppt.time) {
+        slotKey = `${currentCancelAppt.date}#${currentCancelAppt.time}`;
+      }
 
       // Gọi API xác thực OTP và hủy lịch trên DynamoDB
       await window.CareSyncAPI.appointmentApi.confirmCancel({
         doctorId: currentCancelAppt.doctorId,
-        slotKey:
-          currentCancelAppt.slotKey ||
-          `${currentCancelAppt.date}#${currentCancelAppt.time}`,
+        slotKey: slotKey,
         otp: otpVal,
       });
 
-      // Cập nhật localStorage
-      if (typeof window.updateAppointmentInStorage === "function") {
-        window.updateAppointmentInStorage(currentCancelAppt.id, {
-          status: "cancelled",
-        });
+      // Cập nhật trạng thái trong mảng bộ nhớ (KHÔNG dùng LocalStorage)
+      const targetId = currentCancelAppt.id;
+      const targetItem = currentFetchedAppointments.find(
+        (a) => a.id === targetId,
+      );
+      if (targetItem) {
+        targetItem.status = "cancelled";
       }
 
-      const cancelledId = currentCancelAppt.id;
       closeCancelOtpModal();
 
       safeShowToast(
         "Hủy lịch thành công!",
-        `Lịch hẹn #${cancelledId} đã được hủy trên hệ thống. Email xác nhận đã được gửi về hộp thư.`,
+        `Lịch hẹn #${targetId} đã được hủy trên hệ thống AWS DynamoDB.`,
         "success",
       );
 
-      // Tải lại danh sách
-      const currentPhone = searchInput ? searchInput.value.trim() : "";
-      if (currentPhone) {
-        executeAppointmentLookup(currentPhone);
-      } else {
-        resetToAllAppointments();
-      }
+      // Cập nhật lại giao diện và số lượng
+      applyCurrentFilter();
     } catch (err) {
       console.error("Lỗi xác nhận OTP hủy lịch:", err);
       if (otpError) {
@@ -654,22 +749,6 @@
   }
 
   /**
-   * Xử lý hủy lịch - Mở modal xác thực 2 bước
-   */
-  function handleCancel(appt) {
-    openCancelOtpModal(appt);
-  }
-
-  /**
-   * Khôi phục hiển thị tất cả lịch hẹn
-   */
-  function resetToAllAppointments() {
-    if (typeof window.renderMyAppointments === "function") {
-      window.renderMyAppointments();
-    }
-  }
-
-  /**
    * Cập nhật số lượng trên các tab
    */
   function updateCounts(all, upcoming, cancelled) {
@@ -688,8 +767,6 @@
   function safeShowToast(title, message, type = "info") {
     if (typeof window.showToast === "function") {
       window.showToast(title, message, type);
-    } else if (typeof showToast === "function") {
-      showToast(title, message, type);
     } else {
       console.log(`[Toast ${type}]: ${title} - ${message}`);
     }
@@ -704,9 +781,10 @@
 
   // Xuất ra window
   window.openCancelOtpModal = openCancelOtpModal;
+  window.renderPromptState = renderPromptState;
   window.CareSyncLookup = {
     lookupByPhone: executeAppointmentLookup,
-    reset: resetToAllAppointments,
+    applyCurrentFilter: applyCurrentFilter,
     openCancelOtpModal: openCancelOtpModal,
   };
 })();
