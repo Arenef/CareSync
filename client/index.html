@@ -1,1008 +1,1691 @@
 <!doctype html>
 <html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
+    />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <script>
+      try {
+        localStorage.removeItem("caresync_appointments");
+        localStorage.removeItem("caresync_appointments_v2");
+      } catch (e) {}
+    </script>
+    <title>
+      CareSync – Đặt Lịch Khám Bệnh Trực Tuyến Nhanh Chóng & Tiện Lợi
+    </title>
+    <meta
+      name="description"
+      content="Hệ thống đặt lịch khám bệnh trực tuyến CareSync. Chủ động lựa chọn bác sĩ, chuyên khoa, thời gian và xác nhận lịch hẹn y tế chuyên nghiệp."
+    />
+    <link rel="icon" type="image/svg+xml" href="assets/icons/logo.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css?v=2" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  <script>
-    try {
-      localStorage.removeItem("caresync_appointments");
-      localStorage.removeItem("caresync_appointments_v2");
-    } catch (e) {}
-  </script>
-  <title>
-    CareSync – Đặt Lịch Khám Bệnh Trực Tuyến Nhanh Chóng & Tiện Lợi
-  </title>
-  <meta name="description"
-    content="Hệ thống đặt lịch khám bệnh trực tuyến CareSync. Chủ động lựa chọn bác sĩ, chuyên khoa, thời gian và xác nhận lịch hẹn y tế chuyên nghiệp." />
-  <link rel="icon" type="image/svg+xml" href="assets/icons/logo.svg" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-    rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=2" />
-</head>
+  <body>
+    <!-- Header -->
+    <header class="site-header" id="siteHeader">
+      <div class="container header-inner">
+        <!-- Brand Logo -->
+        <a
+          href="#"
+          class="brand-logo"
+          id="brandLogo"
+          aria-label="CareSync Trang chủ"
+        >
+          <svg
+            class="brand-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path
+              d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"
+            />
+            <path d="M12 5v6" />
+            <path d="M9 8h6" />
+          </svg>
+          <span class="brand-name">Care<span>Sync</span></span>
+        </a>
+        <!-- Navbar -->
+        <nav class="primary-nav" id="primaryNav" aria-label="Menu chính">
+          <ul class="nav-list">
+            <li class="nav-item">
+              <a href="#hero" class="nav-link active">Trang chủ</a>
+            </li>
+            <li class="nav-item">
+              <a href="#doctorsDirectorySection" class="nav-link">Bác sĩ</a>
+            </li>
+            <li class="nav-item">
+              <a href="#bookingSection" class="nav-link" aria-current="page"
+                >Đặt lịch khám</a
+              >
+            </li>
+            <li class="nav-item">
+              <a href="#myAppointmentsSection" class="nav-link"
+                >Lịch hẹn của tôi</a
+              >
+            </li>
+          </ul>
+        </nav>
+        <!-- Header Actions -->
+        <div class="header-actions">
+          <!-- Nút kích hoạt Đăng nhập Bác sĩ -->
+          <button
+            type="button"
+            class="btn btn-outline btn-sm doctor-login-trigger"
+            id="doctorLoginTriggerBtn"
+            title="Dành cho Bác sĩ công tác tại phòng khám"
+          >
+            Bác sĩ đăng nhập
+          </button>
 
-<body>
-  <!-- Header -->
-  <header class="site-header" id="siteHeader">
-    <div class="container header-inner">
-      <!-- Brand Logo -->
-      <a href="#" class="brand-logo" id="brandLogo" aria-label="CareSync Trang chủ">
-        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path
-            d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-          <path d="M12 5v6" />
-          <path d="M9 8h6" />
-        </svg>
-        <span class="brand-name">Care<span>Sync</span></span>
-      </a>
-      <!-- Navbar -->
-      <nav class="primary-nav" id="primaryNav" aria-label="Menu chính">
-        <ul class="nav-list">
-          <li class="nav-item">
-            <a href="#hero" class="nav-link active">Trang chủ</a>
-          </li>
-          <li class="nav-item">
-            <a href="#doctorsDirectorySection" class="nav-link">Bác sĩ</a>
-          </li>
-          <li class="nav-item">
-            <a href="#bookingSection" class="nav-link" aria-current="page">Đặt lịch khám</a>
-          </li>
-          <li class="nav-item">
-            <a href="#myAppointmentsSection" class="nav-link">Lịch hẹn của tôi</a>
-          </li>
-        </ul>
-      </nav>
-      <!-- Header Actions -->
-      <div class="header-actions">
-        <!-- Nút kích hoạt Đăng nhập Bác sĩ -->
-        <button type="button" class="btn btn-outline btn-sm doctor-login-trigger" id="doctorLoginTriggerBtn"
-          title="Dành cho Bác sĩ công tác tại phòng khám">
-          Bác sĩ đăng nhập
-        </button>
-
-        <!-- Profile Bác Sĩ khi đã đăng nhập thành công -->
-        <div class="doctor-profile-header" id="doctorProfileHeader" style="display: none">
-          <img src="assets/images/doctor-1.jpg" alt="Avatar Bác sĩ" class="doctor-header-avatar"
-            id="doctorHeaderAvatar" />
-          <div class="doctor-header-info">
-            <span class="doctor-header-name" id="doctorHeaderName">BS. Nguyễn Văn Bình</span>
-            <span class="doctor-header-badge">Bác sĩ khám</span>
+          <!-- Profile Bác Sĩ khi đã đăng nhập thành công -->
+          <div
+            class="doctor-profile-header"
+            id="doctorProfileHeader"
+            style="display: none"
+          >
+            <img
+              src="assets/images/doctor-1.jpg"
+              alt="Avatar Bác sĩ"
+              class="doctor-header-avatar"
+              id="doctorHeaderAvatar"
+            />
+            <div class="doctor-header-info">
+              <span class="doctor-header-name" id="doctorHeaderName"
+                >BS. Nguyễn Văn Bình</span
+              >
+              <span class="doctor-header-badge">Bác sĩ khám</span>
+            </div>
+            <button
+              type="button"
+              class="btn-doctor-logout"
+              id="doctorLogoutBtn"
+              title="Đăng xuất khỏi Cổng Bác sĩ"
+            >
+              Đăng xuất
+            </button>
           </div>
-          <button type="button" class="btn-doctor-logout" id="doctorLogoutBtn" title="Đăng xuất khỏi Cổng Bác sĩ">
-            Đăng xuất
+
+          <!-- Mobile Hamburger Button -->
+          <button
+            type="button"
+            class="hamburger-btn"
+            id="hamburgerBtn"
+            aria-label="Mở menu điều hướng"
+            aria-expanded="false"
+            aria-controls="primaryNav"
+          >
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
           </button>
         </div>
+      </div>
+    </header>
 
-        <!-- Mobile Hamburger Button -->
-        <button type="button" class="hamburger-btn" id="hamburgerBtn" aria-label="Mở menu điều hướng"
-          aria-expanded="false" aria-controls="primaryNav">
-          <span class="hamburger-line"></span>
-          <span class="hamburger-line"></span>
-          <span class="hamburger-line"></span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <main class="main-content">
-    <!--  Hero - Section Giới Thiệu -->
-    <section class="hero-section" id="hero">
-      <div class="container hero-grid">
-        <div class="hero-content">
-          <span class="hero-badge">Hệ thống Y tế Trực tuyến Thông minh</span>
-          <h1 class="hero-title">
-            Chăm sóc sức khỏe, bắt đầu từ một lịch hẹn
-          </h1>
-          <p class="hero-description">
-            Chủ động lựa chọn bác sĩ, thời gian khám và đặt lịch trực tuyến
-            một cách thuận tiện cùng CareSync.
-          </p>
-          <div class="hero-actions">
-            <button type="button" class="btn btn-primary btn-lg" id="heroBookingCta">
-              <span>Đặt lịch ngay</span>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="m9 18 6-6-6-6" />
-              </svg>
-            </button>
-            <a href="#doctorsDirectorySection" class="btn btn-secondary btn-lg">Xem đội ngũ bác sĩ</a>
-          </div>
-          <div class="hero-stats">
-            <div class="stat-item">
-              <span class="stat-number">24/7</span>
-              <span class="stat-label">Đặt hẹn mọi lúc</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-number">50+</span>
-              <span class="stat-label">Bác sĩ chuyên khoa</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-number">0đ</span>
-              <span class="stat-label">Phí đặt lịch trực tuyến</span>
-            </div>
-          </div>
-        </div>
-        <div class="hero-media">
-          <img src="assets/images/hero-medical.jpg" alt="Bác sĩ thăm khám và tư vấn trực tuyến chuyên nghiệp"
-            class="hero-image" loading="eager" />
-        </div>
-      </div>
-    </section>
-    <!-- Workflow - Quy Trình Đặt Lịch -->
-    <section class="workflow-section" id="workflow">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-tag">Quy trình đơn giản</span>
-          <h2 class="section-title">
-            Đặt lịch khám nhanh chóng chỉ với 3 bước
-          </h2>
-          <p class="section-subtitle">
-            Chủ động thời gian, tiết kiệm thời gian chờ đợi tại bệnh viện
-          </p>
-        </div>
-        <div class="steps-grid">
-          <div class="step-card">
-            <div class="step-number">1</div>
-            <h3 class="step-title">Chọn bác sĩ phù hợp</h3>
-            <p class="step-description">
-              Tìm kiếm bác sĩ theo chuyên khoa, học vị và kinh nghiệm chuyên
-              môn.
+    <main class="main-content">
+      <!--  Hero - Section Giới Thiệu -->
+      <section class="hero-section" id="hero">
+        <div class="container hero-grid">
+          <div class="hero-content">
+            <span class="hero-badge">Hệ thống Y tế Trực tuyến Thông minh</span>
+            <h1 class="hero-title">
+              Chăm sóc sức khỏe, bắt đầu từ một lịch hẹn
+            </h1>
+            <p class="hero-description">
+              Chủ động lựa chọn bác sĩ, thời gian khám và đặt lịch trực tuyến
+              một cách thuận tiện cùng CareSync.
             </p>
-          </div>
-          <div class="step-card">
-            <div class="step-number">2</div>
-            <h3 class="step-title">Lựa chọn ngày & giờ</h3>
-            <p class="step-description">
-              Chọn ngày khám thuận tiện và khung giờ phù hợp với lịch trình
-              của bạn.
-            </p>
-          </div>
-          <div class="step-card">
-            <div class="step-number">3</div>
-            <h3 class="step-title">Điền thông tin & xác nhận</h3>
-            <p class="step-description">
-              Cung cấp thông tin liên hệ và nhận phiếu hẹn khám trực tuyến
-              ngay lập tức.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-    <!-- Doctors Directory - Danh Sách Bác Sĩ Theo Chuyên Khoa -->
-    <section class="doctors-directory-section" id="doctorsDirectorySection">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-tag">Đội ngũ y tế</span>
-          <h2 class="section-title">Danh sách Bác sĩ theo Chuyên khoa</h2>
-          <p class="section-subtitle">
-            Đội ngũ bác sĩ đầu ngành, tận tâm và giàu kinh nghiệm, sẵn sàng
-            đồng hành cùng sức khỏe của bạn
-          </p>
-        </div>
-        <!-- Toolbar tìm kiếm bác sĩ & Lọc theo chuyên khoa -->
-        <div class="directory-toolbar">
-          <div class="directory-search-wrapper">
-            <div class="input-icon-wrapper">
-              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.3-4.3" />
-              </svg>
-              <input type="search" id="directorySearchInput" class="form-input input-with-icon"
-                placeholder="Tìm bác sĩ theo họ tên, chuyên môn hoặc học vị..."
-                aria-label="Tìm kiếm bác sĩ theo chuyên khoa" />
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              onclick="resetDirectoryFilter()"
+              style="margin-top: 10px"
+            >
+              Xem tất cả bác sĩ
+            </button>
+            <div class="hero-actions">
+              <button
+                type="button"
+                class="btn btn-primary btn-lg"
+                id="heroBookingCta"
+              >
+                <span>Đặt lịch ngay</span>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </button>
+              <a
+                href="#doctorsDirectorySection"
+                class="btn btn-secondary btn-lg"
+                >Xem đội ngũ bác sĩ</a
+              >
+            </div>
+            <div class="hero-stats">
+              <div class="stat-item">
+                <span class="stat-number">24/7</span>
+                <span class="stat-label">Đặt hẹn mọi lúc</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">50+</span>
+                <span class="stat-label">Bác sĩ chuyên khoa</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">0đ</span>
+                <span class="stat-label">Phí đặt lịch trực tuyến</span>
+              </div>
             </div>
           </div>
-          <div class="directory-tabs" id="directorySpecialtyTabs" role="tablist" aria-label="Lọc theo chuyên khoa">
-            <button type="button" class="tab-btn is-active" data-specialty="all">
-              Tất cả chuyên khoa
-            </button>
-            <button type="button" class="tab-btn" data-specialty="Chuyên khoa Tim mạch">
-              Tim mạch
-            </button>
-            <button type="button" class="tab-btn" data-specialty="Chuyên khoa Nội tổng quát">
-              Nội khoa
-            </button>
-            <button type="button" class="tab-btn" data-specialty="Chuyên khoa Nhi">
-              Nhi khoa
-            </button>
-            <button type="button" class="tab-btn" data-specialty="Chuyên khoa Da liễu">
-              Da liễu
-            </button>
+          <div class="hero-media">
+            <img
+              src="assets/images/hero-medical.jpg"
+              alt="Bác sĩ thăm khám và tư vấn trực tuyến chuyên nghiệp"
+              class="hero-image"
+              loading="eager"
+            />
           </div>
         </div>
-        <!-- Lưới thẻ bác sĩ chuyên khoa -->
-        <div class="doctors-directory-grid" id="doctorsDirectoryGrid">
-          <!-- Render động từ js/doctors.js -->
+      </section>
+      <!-- Workflow - Quy Trình Đặt Lịch -->
+      <section class="workflow-section" id="workflow">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-tag">Quy trình đơn giản</span>
+            <h2 class="section-title">
+              Đặt lịch khám nhanh chóng chỉ với 3 bước
+            </h2>
+            <p class="section-subtitle">
+              Chủ động thời gian, tiết kiệm thời gian chờ đợi tại bệnh viện
+            </p>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              onclick="resetDirectoryFilter()"
+              style="margin-top: 10px"
+            >
+              Xem tất cả bác sĩ
+            </button>
+          </div>
+          <div class="steps-grid">
+            <div class="step-card">
+              <div class="step-number">1</div>
+              <h3 class="step-title">Chọn bác sĩ phù hợp</h3>
+              <p class="step-description">
+                Tìm kiếm bác sĩ theo chuyên khoa, học vị và kinh nghiệm chuyên
+                môn.
+              </p>
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                onclick="resetDirectoryFilter()"
+                style="margin-top: 10px"
+              >
+                Xem tất cả bác sĩ
+              </button>
+            </div>
+            <div class="step-card">
+              <div class="step-number">2</div>
+              <h3 class="step-title">Lựa chọn ngày & giờ</h3>
+              <p class="step-description">
+                Chọn ngày khám thuận tiện và khung giờ phù hợp với lịch trình
+                của bạn.
+              </p>
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                onclick="resetDirectoryFilter()"
+                style="margin-top: 10px"
+              >
+                Xem tất cả bác sĩ
+              </button>
+            </div>
+            <div class="step-card">
+              <div class="step-number">3</div>
+              <h3 class="step-title">Điền thông tin & xác nhận</h3>
+              <p class="step-description">
+                Cung cấp thông tin liên hệ và nhận phiếu hẹn khám trực tuyến
+                ngay lập tức.
+              </p>
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                onclick="resetDirectoryFilter()"
+                style="margin-top: 10px"
+              >
+                Xem tất cả bác sĩ
+              </button>
+            </div>
+          </div>
         </div>
-        <!-- Trạng thái trống khi tìm kiếm không thấy -->
-        <div class="empty-directory-state" id="emptyDirectoryState">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-            stroke-linecap="round" stroke-linejoin="round" style="
+      </section>
+      <!-- Doctors Directory - Danh Sách Bác Sĩ Theo Chuyên Khoa -->
+      <section class="doctors-directory-section" id="doctorsDirectorySection">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-tag">Đội ngũ y tế</span>
+            <h2 class="section-title">Danh sách Bác sĩ theo Chuyên khoa</h2>
+            <p class="section-subtitle">
+              Đội ngũ bác sĩ đầu ngành, tận tâm và giàu kinh nghiệm, sẵn sàng
+              đồng hành cùng sức khỏe của bạn
+            </p>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              onclick="resetDirectoryFilter()"
+              style="margin-top: 10px"
+            >
+              Xem tất cả bác sĩ
+            </button>
+          </div>
+          <!-- Toolbar tìm kiếm bác sĩ & Lọc theo chuyên khoa -->
+          <div class="directory-toolbar">
+            <div class="directory-search-wrapper">
+              <div class="input-icon-wrapper">
+                <svg
+                  class="input-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.3-4.3" />
+                </svg>
+                <input
+                  type="search"
+                  id="directorySearchInput"
+                  class="form-input input-with-icon"
+                  placeholder="Tìm bác sĩ theo họ tên, chuyên môn hoặc học vị..."
+                  aria-label="Tìm kiếm bác sĩ theo chuyên khoa"
+                />
+              </div>
+            </div>
+            <div
+              class="directory-tabs"
+              id="directorySpecialtyTabs"
+              role="tablist"
+              aria-label="Lọc theo chuyên khoa"
+            >
+              <button
+                type="button"
+                class="tab-btn is-active"
+                data-specialty="all"
+              >
+                Tất cả chuyên khoa
+              </button>
+              <button type="button" class="tab-btn" data-specialty="Tim mạch">
+                Tim mạch
+              </button>
+              <button
+                type="button"
+                class="tab-btn"
+                data-specialty="Nội tổng quát"
+              >
+                Nội khoa
+              </button>
+              <button type="button" class="tab-btn" data-specialty="Nhi khoa">
+                Nhi khoa
+              </button>
+              <button
+                type="button"
+                class="tab-btn"
+                data-specialty="Da liễu & Thẩm mỹ da"
+              >
+                Da liễu
+              </button>
+            </div>
+          </div>
+          <!-- Lưới thẻ bác sĩ chuyên khoa -->
+          <div class="doctors-directory-grid" id="doctorsDirectoryGrid">
+            <!-- Render động từ js/doctors.js -->
+          </div>
+          <!-- Trạng thái trống khi tìm kiếm không thấy -->
+          <div class="empty-directory-state" id="emptyDirectoryState">
+            <svg
+              width="40"
+              height="40"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="
                 color: var(--color-text-muted);
                 margin-bottom: var(--spacing-xs);
-              " aria-hidden="true">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
-          <h4 style="
+              "
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <h4
+              style="
                 font-size: var(--font-size-base);
                 font-weight: var(--font-weight-semibold);
                 color: var(--color-text);
                 margin-bottom: 4px;
-              ">
-            Không tìm thấy bác sĩ phù hợp
-          </h4>
-          <p style="
+              "
+            >
+              Không tìm thấy bác sĩ phù hợp
+            </h4>
+            <p
+              style="
                 font-size: var(--font-size-sm);
                 color: var(--color-text-secondary);
-              ">
-            Vui lòng thử lại với từ khóa khác hoặc chuyển sang chuyên khoa
-            khác.
-          </p>
-        </div>
-      </div>
-    </section>
-    <!-- Booking - Form Đặt Lịch Khám Chính -->
-    <section class="booking-section" id="bookingSection">
-      <div class="container">
-        <div class="booking-header">
-          <span class="booking-tag">Đăng ký khám bệnh</span>
-          <h2 class="booking-title">Biểu mẫu đặt lịch khám</h2>
-          <p class="booking-subtitle">
-            Vui lòng hoàn thành các bước bên dưới để hoàn tất lịch hẹn của
-            bạn.
-          </p>
-        </div>
-        <!-- Cột chính (Bác sĩ + Ngày giờ) và Cột phụ (Thông tin bệnh nhân + Tóm tắt) -->
-        <div class="booking-layout">
-          <!-- Cột chính: Lựa chọn bác sĩ và lịch trình -->
-          <div class="booking-main-column">
-            <!-- 1. Chọn Bác Sĩ -->
-            <div class="booking-sub-section" id="doctorSelectionSection">
-              <h3 class="sub-section-title">
-                <span class="sub-section-number">1</span>
-                <span>Chọn bác sĩ chuyên khoa</span>
-              </h3>
-              <!-- Tìm kiếm -->
-              <div class="doctor-search-bar">
-                <div class="input-icon-wrapper">
-                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="m21 21-4.3-4.3" />
-                  </svg>
-                  <input type="search" id="doctorSearchInput" class="form-input input-with-icon"
-                    placeholder="Tìm theo tên bác sĩ, chuyên khoa (Tim mạch, Nhi, Da liễu...)"
-                    aria-label="Tìm kiếm bác sĩ" />
-                </div>
-              </div>
-              <!-- Danh sách bác sĩ -->
-              <div class="doctor-list-grid" id="doctorListGrid">
-                <!-- Sẽ được render động bởi js/doctors.js -->
-              </div>
-              <!-- Trạng thái không tìm thấy bác sĩ -->
-              <div class="empty-doctor-state" id="emptyDoctorState">
-                <p>Không tìm thấy bác sĩ phù hợp với từ khóa tìm kiếm.</p>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="
-                      document.getElementById('doctorSearchInput').value = '';
-                      renderDoctors(DOCTORS_DATA);
-                    ">
-                  Xem tất cả bác sĩ
-                </button>
-              </div>
-            </div>
-            <!-- Chọn Ngày & Giờ Khám -->
-            <div class="booking-sub-section" id="scheduleSelectionSection">
-              <h3 class="sub-section-title">
-                <span class="sub-section-number">2</span>
-                <span>Lựa chọn thời gian khám</span>
-              </h3>
-              <div class="schedule-controls">
-                <!-- Chọn Ngày Khám -->
-                <div class="form-group date-picker-group">
-                  <label for="appointmentDate" class="form-label">
-                    <span>Ngày khám</span>
-                    <span class="required-mark" aria-hidden="true">*</span>
-                  </label>
-                  <input type="date" id="appointmentDate" class="form-input" required aria-required="true" />
-                  <span class="form-error-msg" id="dateErrorMsg">Vui lòng chọn ngày khám hợp lệ</span>
-                </div>
-                <!-- Chọn Giờ Khám -->
-                <div class="time-slots-wrapper">
-                  <span class="time-slots-label">Khung giờ khám dự kiến:</span>
-                  <div class="time-slots-grid" id="timeSlotsGrid" role="radiogroup" aria-label="Chọn khung giờ khám">
-                    <button type="button" class="time-slot-btn" data-time="08:00">
-                      08:00
-                    </button>
-                    <button type="button" class="time-slot-btn" data-time="08:30">
-                      08:30
-                    </button>
-                    <button type="button" class="time-slot-btn" data-time="09:00">
-                      09:00
-                    </button>
-                    <button type="button" class="time-slot-btn is-unavailable" data-time="09:30" disabled
-                      title="Khung giờ đã đầy">
-                      09:30
-                    </button>
-                    <button type="button" class="time-slot-btn" data-time="10:00">
-                      10:00
-                    </button>
-                    <button type="button" class="time-slot-btn" data-time="14:00">
-                      14:00
-                    </button>
-                    <button type="button" class="time-slot-btn" data-time="14:30">
-                      14:30
-                    </button>
-                    <button type="button" class="time-slot-btn" data-time="15:00">
-                      15:00
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- Cột phụ: Thông tin bệnh nhân & Tóm tắt xác nhận -->
-          <div class="booking-side-column">
-            <!-- 3. Thông tin bệnh nhân -->
-            <div class="patient-form-card" id="patientFormSection">
-              <h3 class="sub-section-title" style="margin-bottom: var(--spacing-md)">
-                <span class="sub-section-number">3</span>
-                <span>Thông tin bệnh nhân</span>
-              </h3>
-              <form id="bookingForm" novalidate autocomplete="off">
-                <div class="form-group">
-                  <label for="patientName" class="form-label">
-                    <span>Họ và tên</span>
-                    <span class="required-mark" aria-hidden="true">*</span>
-                  </label>
-                  <input type="text" id="patientName" class="form-input" placeholder="Ví dụ: Nguyễn Văn An" required
-                    aria-required="true" autocomplete="off" />
-                  <span class="form-error-msg">Vui lòng nhập họ tên bệnh nhân</span>
-                </div>
-                <div class="form-group">
-                  <label for="patientPhone" class="form-label">
-                    <span>Số điện thoại</span>
-                    <span class="required-mark" aria-hidden="true">*</span>
-                  </label>
-                  <input type="tel" id="patientPhone" class="form-input" placeholder="Ví dụ: 0912345678" required
-                    aria-required="true" autocomplete="off" />
-                  <span class="form-error-msg">Vui lòng nhập số điện thoại hợp lệ (10 chữ số)</span>
-                </div>
-                <div class="form-group">
-                  <label for="patientEmail" class="form-label">
-                    <span>Email liên hệ</span>
-                    <span class="required-mark" aria-hidden="true">*</span>
-                  </label>
-                  <input type="email" id="patientEmail" class="form-input" placeholder="Ví dụ: nguyenvanan@gmail.com"
-                    required aria-required="true" autocomplete="off" />
-                  <span class="form-error-msg">Vui lòng nhập địa chỉ email hợp lệ</span>
-                </div>
-                <div class="form-group">
-                  <label for="patientReason" class="form-label">
-                    <span>Triệu chứng hoặc lý do khám</span>
-                  </label>
-                  <textarea id="patientReason" class="form-textarea"
-                    placeholder="Mô tả ngắn triệu chứng bạn gặp phải (tùy chọn)..."></textarea>
-                </div>
-                <!-- Tóm Tắt Lịch Khám -->
-                <div class="summary-card">
-                  <div class="summary-title">
-                    <span>Tóm tắt lịch khám</span>
-                    <span class="summary-badge">Xem trước</span>
-                  </div>
-
-                  <div class="summary-list">
-                    <div class="summary-row">
-                      <span class="summary-label">Bác sĩ phụ trách:</span>
-                      <span class="summary-value" id="summaryDoctor">Chưa chọn</span>
-                    </div>
-                    <div class="summary-row">
-                      <span class="summary-label">Chuyên khoa:</span>
-                      <span class="summary-value" id="summarySpecialty">--</span>
-                    </div>
-                    <div class="summary-row">
-                      <span class="summary-label">Ngày khám:</span>
-                      <span class="summary-value" id="summaryDate">Chưa chọn</span>
-                    </div>
-                    <div class="summary-row">
-                      <span class="summary-label">Khung giờ:</span>
-                      <span class="summary-value" id="summaryTime">Chưa chọn</span>
-                    </div>
-                    <div class="summary-row">
-                      <span class="summary-label">Bệnh nhân:</span>
-                      <span class="summary-value" id="summaryPatient">Chưa nhập</span>
-                    </div>
-                  </div>
-
-                  <div class="summary-notice">
-                    Vui lòng chọn bác sĩ, ngày giờ khám và điền đầy đủ thông tin để xác nhận lịch hẹn.
-                  </div>
-                  <!-- Button -->
-                  <div class="form-actions">
-                    <button type="submit" class="btn btn-primary btn-block btn-lg" id="submitBookingBtn">
-                      <span>Xác nhận đặt lịch</span>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    </button>
-                    <button type="button" class="btn btn-secondary btn-block" id="resetBookingBtn">
-                      Đặt lại biểu mẫu
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <!-- My Appointments - Danh Sách & Tra Cứu Lịch Hẹn Của Tôi -->
-    <section class="my-appointments-section" id="myAppointmentsSection">
-      <div class="container">
-        <div class="appointments-header">
-          <div class="appointments-header-text">
-            <span class="appointments-tag">Quản lý lịch khám</span>
-            <h2 class="appointments-title">Lịch hẹn của tôi</h2>
-            <p class="appointments-subtitle">
-              Tra cứu, theo dõi trạng thái và quản lý các phiếu hẹn khám đã
-              đăng ký trực tuyến
+              "
+            >
+              Vui lòng thử lại với từ khóa khác hoặc chuyển sang chuyên khoa
+              khác.
             </p>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              onclick="resetDirectoryFilter()"
+              style="margin-top: 10px"
+            >
+              Xem tất cả bác sĩ
+            </button>
           </div>
-          <a href="#bookingSection" class="btn btn-outline btn-sm">
-            <span>+ Đặt thêm lịch khám</span>
-          </a>
         </div>
-        <!-- Form Tra Cứu Số Điện Thoại & Bộ Lọc -->
-        <form id="appointmentLookupForm" class="appointment-lookup-form" novalidate>
-          <div class="appointments-toolbar">
-            <div class="appointments-search-wrapper">
-              <div class="input-icon-wrapper lookup-field-wrap">
-                <span class="material-symbols-rounded input-icon" style="font-size: 20px">call</span>
-                <input type="tel" id="appointmentSearchInput" class="form-input input-with-icon"
-                  placeholder="Nhập số điện thoại tra cứu lịch hẹn (ví dụ: 0912345678)..."
-                  aria-label="Tra cứu lịch hẹn theo số điện thoại" maxlength="11" autocomplete="tel" />
-                <button type="button" class="lookup-clear-btn" id="appointmentSearchClearBtn" style="display: none"
-                  aria-label="Xóa nội dung">
-                  &times;
+      </section>
+      <!-- Booking - Form Đặt Lịch Khám Chính -->
+      <section class="booking-section" id="bookingSection">
+        <div class="container">
+          <div class="booking-header">
+            <span class="booking-tag">Đăng ký khám bệnh</span>
+            <h2 class="booking-title">Biểu mẫu đặt lịch khám</h2>
+            <p class="booking-subtitle">
+              Vui lòng hoàn thành các bước bên dưới để hoàn tất lịch hẹn của
+              bạn.
+            </p>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              onclick="resetDirectoryFilter()"
+              style="margin-top: 10px"
+            >
+              Xem tất cả bác sĩ
+            </button>
+          </div>
+          <!-- Cột chính (Bác sĩ + Ngày giờ) và Cột phụ (Thông tin bệnh nhân + Tóm tắt) -->
+          <div class="booking-layout">
+            <!-- Cột chính: Lựa chọn bác sĩ và lịch trình -->
+            <div class="booking-main-column">
+              <!-- 1. Chọn Bác Sĩ -->
+              <div class="booking-sub-section" id="doctorSelectionSection">
+                <h3 class="sub-section-title">
+                  <span class="sub-section-number">1</span>
+                  <span>Chọn bác sĩ chuyên khoa</span>
+                </h3>
+                <!-- Tìm kiếm -->
+                <div class="doctor-search-bar">
+                  <div class="input-icon-wrapper">
+                    <svg
+                      class="input-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.3-4.3" />
+                    </svg>
+                    <input
+                      type="search"
+                      id="doctorSearchInput"
+                      class="form-input input-with-icon"
+                      placeholder="Tìm theo tên bác sĩ, chuyên khoa (Tim mạch, Nhi, Da liễu...)"
+                      aria-label="Tìm kiếm bác sĩ"
+                    />
+                  </div>
+                </div>
+                <!-- Lọc nhanh theo chuyên khoa khi đặt lịch -->
+                <div
+                  class="directory-tabs booking-specialty-tabs"
+                  id="bookingSpecialtyTabs"
+                  role="tablist"
+                  aria-label="Lọc theo chuyên khoa đặt lịch"
+                  style="
+                    margin-top: var(--spacing-sm);
+                    margin-bottom: var(--spacing-md);
+                    display: flex;
+                  "
+                ></div>
+                <!-- Danh sách bác sĩ -->
+                <div class="doctor-list-grid" id="doctorListGrid">
+                  <!-- Sẽ được render động bởi js/doctors.js -->
+                </div>
+                <!-- Trạng thái không tìm thấy bác sĩ -->
+                <div class="empty-doctor-state" id="emptyDoctorState">
+                  <p>Không tìm thấy bác sĩ phù hợp với từ khóa tìm kiếm.</p>
+                  <button
+                    type="button"
+                    class="btn btn-secondary btn-sm"
+                    onclick="
+                      document.getElementById('doctorSearchInput').value = '';
+                      resetBookingFilter();
+                    "
+                  >
+                    Xem tất cả bác sĩ
+                  </button>
+                </div>
+              </div>
+              <!-- Chọn Ngày & Giờ Khám -->
+              <div class="booking-sub-section" id="scheduleSelectionSection">
+                <h3 class="sub-section-title">
+                  <span class="sub-section-number">2</span>
+                  <span>Lựa chọn thời gian khám</span>
+                </h3>
+                <div class="schedule-controls">
+                  <!-- Chọn Ngày Khám -->
+                  <div class="form-group date-picker-group">
+                    <label for="appointmentDate" class="form-label">
+                      <span>Ngày khám</span>
+                      <span class="required-mark" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      id="appointmentDate"
+                      class="form-input"
+                      required
+                      aria-required="true"
+                    />
+                    <span class="form-error-msg" id="dateErrorMsg"
+                      >Vui lòng chọn ngày khám hợp lệ</span
+                    >
+                  </div>
+                  <!-- Chọn Giờ Khám -->
+                  <div class="time-slots-wrapper">
+                    <span class="time-slots-label"
+                      >Khung giờ khám dự kiến:</span
+                    >
+                    <div
+                      class="time-slots-grid"
+                      id="timeSlotsGrid"
+                      role="radiogroup"
+                      aria-label="Chọn khung giờ khám"
+                    >
+                      <button
+                        type="button"
+                        class="time-slot-btn"
+                        data-time="08:00"
+                      >
+                        08:00
+                      </button>
+                      <button
+                        type="button"
+                        class="time-slot-btn"
+                        data-time="08:30"
+                      >
+                        08:30
+                      </button>
+                      <button
+                        type="button"
+                        class="time-slot-btn"
+                        data-time="09:00"
+                      >
+                        09:00
+                      </button>
+                      <button
+                        type="button"
+                        class="time-slot-btn is-unavailable"
+                        data-time="09:30"
+                        disabled
+                        title="Khung giờ đã đầy"
+                      >
+                        09:30
+                      </button>
+                      <button
+                        type="button"
+                        class="time-slot-btn"
+                        data-time="10:00"
+                      >
+                        10:00
+                      </button>
+                      <button
+                        type="button"
+                        class="time-slot-btn"
+                        data-time="14:00"
+                      >
+                        14:00
+                      </button>
+                      <button
+                        type="button"
+                        class="time-slot-btn"
+                        data-time="14:30"
+                      >
+                        14:30
+                      </button>
+                      <button
+                        type="button"
+                        class="time-slot-btn"
+                        data-time="15:00"
+                      >
+                        15:00
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Cột phụ: Thông tin bệnh nhân & Tóm tắt xác nhận -->
+            <div class="booking-side-column">
+              <!-- 3. Thông tin bệnh nhân -->
+              <div class="patient-form-card" id="patientFormSection">
+                <h3
+                  class="sub-section-title"
+                  style="margin-bottom: var(--spacing-md)"
+                >
+                  <span class="sub-section-number">3</span>
+                  <span>Thông tin bệnh nhân</span>
+                </h3>
+                <form id="bookingForm" novalidate autocomplete="off">
+                  <div class="form-group">
+                    <label for="patientName" class="form-label">
+                      <span>Họ và tên</span>
+                      <span class="required-mark" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="patientName"
+                      class="form-input"
+                      placeholder="Ví dụ: Nguyễn Văn An"
+                      required
+                      aria-required="true"
+                      autocomplete="off"
+                    />
+                    <span class="form-error-msg"
+                      >Vui lòng nhập họ tên bệnh nhân</span
+                    >
+                  </div>
+                  <div class="form-group">
+                    <label for="patientPhone" class="form-label">
+                      <span>Số điện thoại</span>
+                      <span class="required-mark" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      id="patientPhone"
+                      class="form-input"
+                      placeholder="Ví dụ: 0912345678"
+                      required
+                      aria-required="true"
+                      autocomplete="off"
+                    />
+                    <span class="form-error-msg"
+                      >Vui lòng nhập số điện thoại hợp lệ (10 chữ số)</span
+                    >
+                  </div>
+                  <div class="form-group">
+                    <label for="patientEmail" class="form-label">
+                      <span>Email liên hệ</span>
+                      <span class="required-mark" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      id="patientEmail"
+                      class="form-input"
+                      placeholder="Ví dụ: nguyenvanan@gmail.com"
+                      required
+                      aria-required="true"
+                      autocomplete="off"
+                    />
+                    <span class="form-error-msg"
+                      >Vui lòng nhập địa chỉ email hợp lệ</span
+                    >
+                  </div>
+                  <div class="form-group">
+                    <label for="patientReason" class="form-label">
+                      <span>Triệu chứng hoặc lý do khám</span>
+                    </label>
+                    <textarea
+                      id="patientReason"
+                      class="form-textarea"
+                      placeholder="Mô tả ngắn triệu chứng bạn gặp phải (tùy chọn)..."
+                    ></textarea>
+                  </div>
+                  <!-- Tóm Tắt Lịch Khám -->
+                  <div class="summary-card">
+                    <div class="summary-title">
+                      <span>Tóm tắt lịch khám</span>
+                      <span class="summary-badge">Xem trước</span>
+                    </div>
+
+                    <div class="summary-list">
+                      <div class="summary-row">
+                        <span class="summary-label">Bác sĩ phụ trách:</span>
+                        <span class="summary-value" id="summaryDoctor"
+                          >Chưa chọn</span
+                        >
+                      </div>
+                      <div class="summary-row">
+                        <span class="summary-label">Chuyên khoa:</span>
+                        <span class="summary-value" id="summarySpecialty"
+                          >--</span
+                        >
+                      </div>
+                      <div class="summary-row">
+                        <span class="summary-label">Ngày khám:</span>
+                        <span class="summary-value" id="summaryDate"
+                          >Chưa chọn</span
+                        >
+                      </div>
+                      <div class="summary-row">
+                        <span class="summary-label">Khung giờ:</span>
+                        <span class="summary-value" id="summaryTime"
+                          >Chưa chọn</span
+                        >
+                      </div>
+                      <div class="summary-row">
+                        <span class="summary-label">Bệnh nhân:</span>
+                        <span class="summary-value" id="summaryPatient"
+                          >Chưa nhập</span
+                        >
+                      </div>
+                    </div>
+
+                    <div class="summary-notice">
+                      Vui lòng chọn bác sĩ, ngày giờ khám và điền đầy đủ thông
+                      tin để xác nhận lịch hẹn.
+                    </div>
+                    <!-- Button -->
+                    <div class="form-actions">
+                      <button
+                        type="submit"
+                        class="btn btn-primary btn-block btn-lg"
+                        id="submitBookingBtn"
+                      >
+                        <span>Xác nhận đặt lịch</span>
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          aria-hidden="true"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-secondary btn-block"
+                        id="resetBookingBtn"
+                      >
+                        Đặt lại biểu mẫu
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- My Appointments - Danh Sách & Tra Cứu Lịch Hẹn Của Tôi -->
+      <section class="my-appointments-section" id="myAppointmentsSection">
+        <div class="container">
+          <div class="appointments-header">
+            <div class="appointments-header-text">
+              <span class="appointments-tag">Quản lý lịch khám</span>
+              <h2 class="appointments-title">Lịch hẹn của tôi</h2>
+              <p class="appointments-subtitle">
+                Tra cứu, theo dõi trạng thái và quản lý các phiếu hẹn khám đã
+                đăng ký trực tuyến
+              </p>
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                onclick="resetDirectoryFilter()"
+                style="margin-top: 10px"
+              >
+                Xem tất cả bác sĩ
+              </button>
+            </div>
+            <a href="#bookingSection" class="btn btn-outline btn-sm">
+              <span>+ Đặt thêm lịch khám</span>
+            </a>
+          </div>
+          <!-- Form Tra Cứu Số Điện Thoại & Bộ Lọc -->
+          <form
+            id="appointmentLookupForm"
+            class="appointment-lookup-form"
+            novalidate
+          >
+            <div class="appointments-toolbar">
+              <div class="appointments-search-wrapper">
+                <div class="input-icon-wrapper lookup-field-wrap">
+                  <span
+                    class="material-symbols-rounded input-icon"
+                    style="font-size: 20px"
+                    >call</span
+                  >
+                  <input
+                    type="tel"
+                    id="appointmentSearchInput"
+                    class="form-input input-with-icon"
+                    placeholder="Nhập số điện thoại tra cứu lịch hẹn (ví dụ: 0912345678)..."
+                    aria-label="Tra cứu lịch hẹn theo số điện thoại"
+                    maxlength="11"
+                    autocomplete="tel"
+                  />
+                  <button
+                    type="button"
+                    class="lookup-clear-btn"
+                    id="appointmentSearchClearBtn"
+                    style="display: none"
+                    aria-label="Xóa nội dung"
+                  >
+                    &times;
+                  </button>
+                </div>
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  id="sectionLookupSubmitBtn"
+                >
+                  <span
+                    class="material-symbols-rounded"
+                    style="font-size: 18px; margin-right: 4px"
+                    >search</span
+                  >
+                  <span>Tra cứu</span>
                 </button>
               </div>
-              <button type="submit" class="btn btn-primary" id="sectionLookupSubmitBtn">
-                <span class="material-symbols-rounded" style="font-size: 18px; margin-right: 4px">search</span>
-                <span>Tra cứu</span>
-              </button>
+              <div
+                class="appointments-tabs"
+                role="tablist"
+                aria-label="Bộ lọc trạng thái"
+              >
+                <button
+                  type="button"
+                  class="tab-btn is-active"
+                  data-filter="all"
+                >
+                  Tất cả (<span id="countAll">0</span>)
+                </button>
+                <button type="button" class="tab-btn" data-filter="upcoming">
+                  Sắp tới (<span id="countUpcoming">0</span>)
+                </button>
+                <button type="button" class="tab-btn" data-filter="cancelled">
+                  Đã hủy (<span id="countCancelled">0</span>)
+                </button>
+              </div>
             </div>
-            <div class="appointments-tabs" role="tablist" aria-label="Bộ lọc trạng thái">
-              <button type="button" class="tab-btn is-active" data-filter="all">
-                Tất cả (<span id="countAll">0</span>)
-              </button>
-              <button type="button" class="tab-btn" data-filter="upcoming">
-                Sắp tới (<span id="countUpcoming">0</span>)
-              </button>
-              <button type="button" class="tab-btn" data-filter="cancelled">
-                Đã hủy (<span id="countCancelled">0</span>)
-              </button>
-            </div>
+            <span
+              class="form-error-msg lookup-error-msg"
+              id="sectionLookupError"
+            >
+              Số điện thoại không hợp lệ (Cần 10 chữ số, ví dụ: 0912345678)
+            </span>
+          </form>
+          <!-- Danh sách thẻ lịch hẹn -->
+          <div class="appointments-list-grid" id="myAppointmentsList">
+            <!-- Render động từ js/lookup.js qua AWS DynamoDB -->
           </div>
-          <span class="form-error-msg lookup-error-msg" id="sectionLookupError">
-            Số điện thoại không hợp lệ (Cần 10 chữ số, ví dụ: 0912345678)
-          </span>
-        </form>
-        <!-- Danh sách thẻ lịch hẹn -->
-        <div class="appointments-list-grid" id="myAppointmentsList">
-          <!-- Render động từ js/lookup.js qua AWS DynamoDB -->
-        </div>
-        <!-- Trạng thái trống -->
-        <div class="empty-appointments-state" id="emptyAppointmentsNotice">
-          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-            stroke-linecap="round" stroke-linejoin="round" style="
+          <!-- Trạng thái trống -->
+          <div class="empty-appointments-state" id="emptyAppointmentsNotice">
+            <svg
+              width="44"
+              height="44"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="
                 color: var(--color-text-muted);
                 margin-bottom: var(--spacing-sm);
-              " aria-hidden="true">
-            <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-            <line x1="16" x2="16" y1="2" y2="6" />
-            <line x1="8" x2="8" y1="2" y2="6" />
-            <line x1="3" x2="21" y1="10" y2="10" />
-          </svg>
-          <h4 style="
+              "
+              aria-hidden="true"
+            >
+              <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+              <line x1="16" x2="16" y1="2" y2="6" />
+              <line x1="8" x2="8" y1="2" y2="6" />
+              <line x1="3" x2="21" y1="10" y2="10" />
+            </svg>
+            <h4
+              style="
                 font-size: var(--font-size-base);
                 font-weight: var(--font-weight-semibold);
                 color: var(--color-text);
                 margin-bottom: 4px;
-              ">
-            Chưa có lịch hẹn nào
-          </h4>
-          <p style="
+              "
+            >
+              Chưa có lịch hẹn nào
+            </h4>
+            <p
+              style="
                 font-size: var(--font-size-sm);
                 color: var(--color-text-secondary);
                 margin-bottom: var(--spacing-md);
-              ">
-            Bạn chưa có lịch hẹn nào phù hợp hoặc chưa đăng ký lịch khám.
-          </p>
-          <a href="#bookingSection" class="btn btn-primary btn-sm">Đặt lịch khám ngay</a>
-        </div>
-      </div>
-    </section>
-  </main>
-  <!-- Footer -->
-  <footer class="site-footer" id="siteFooter">
-    <div class="container">
-      <div class="footer-grid">
-        <!-- Brand Col -->
-        <div class="footer-brand">
-          <a href="#" class="brand-logo" aria-label="CareSync Footer">
-            <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path
-                d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-              <path d="M12 5v6" />
-              <path d="M9 8h6" />
-            </svg>
-            <span class="brand-name">Care<span>Sync</span></span>
-          </a>
-          <p class="footer-description">
-            Nền tảng đặt lịch khám bệnh trực tuyến tiện lợi, an toàn và chuyên
-            nghiệp, giúp kết nối người bệnh và đội ngũ y bác sĩ uy tín.
-          </p>
-        </div>
-        <div class="footer-column">
-          <h4 class="footer-column-title">Dịch vụ</h4>
-          <ul class="footer-links">
-            <li>
-              <a href="#bookingSection" class="footer-link">Đặt lịch khám</a>
-            </li>
-            <li>
-              <a href="#workflow" class="footer-link">Quy trình khám</a>
-            </li>
-            <li>
-              <a href="#myAppointmentsSection" class="footer-link">Tra cứu lịch hẹn</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>
-          &copy; 2026 CareSync. Đồ án xây dựng giao diện ứng dụng y tế. Bản
-          quyền thuộc về tác giả.
-        </p>
-        <p>Hệ thống Đặt lịch Khám bệnh Trực tuyến Serverless trên AWS.</p>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Modals -->
-
-  <!-- Đăng nhập -->
-  <div class="modal-overlay" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle"
-    aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <h3 class="modal-title" id="loginModalTitle">Đăng nhập tài khoản</h3>
-        <button type="button" class="modal-close-btn" data-action="close-modal" aria-label="Đóng cửa sổ">
-          &times;
-        </button>
-      </div>
-      <form id="demoLoginForm">
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="loginEmail" class="form-label">Email hoặc Số điện thoại</label>
-            <input type="text" id="loginEmail" class="form-input" placeholder="nguyenvanan@gmail.com" required />
+              "
+            >
+              Bạn chưa có lịch hẹn nào phù hợp hoặc chưa đăng ký lịch khám.
+            </p>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              onclick="resetDirectoryFilter()"
+              style="margin-top: 10px"
+            >
+              Xem tất cả bác sĩ
+            </button>
+            <a href="#bookingSection" class="btn btn-primary btn-sm"
+              >Đặt lịch khám ngay</a
+            >
           </div>
-          <div class="form-group">
-            <label for="loginPassword" class="form-label">Mật khẩu</label>
-            <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required />
+        </div>
+      </section>
+    </main>
+    <!-- Footer -->
+    <footer class="site-footer" id="siteFooter">
+      <div class="container">
+        <div class="footer-grid">
+          <!-- Brand Col -->
+          <div class="footer-brand">
+            <a href="#" class="brand-logo" aria-label="CareSync Footer">
+              <svg
+                class="brand-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path
+                  d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"
+                />
+                <path d="M12 5v6" />
+                <path d="M9 8h6" />
+              </svg>
+              <span class="brand-name">Care<span>Sync</span></span>
+            </a>
+            <p class="footer-description">
+              Nền tảng đặt lịch khám bệnh trực tuyến tiện lợi, an toàn và chuyên
+              nghiệp, giúp kết nối người bệnh và đội ngũ y bác sĩ uy tín.
+            </p>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              onclick="resetDirectoryFilter()"
+              style="margin-top: 10px"
+            >
+              Xem tất cả bác sĩ
+            </button>
           </div>
-          <p style="
+          <div class="footer-column">
+            <h4 class="footer-column-title">Dịch vụ</h4>
+            <ul class="footer-links">
+              <li>
+                <a href="#bookingSection" class="footer-link">Đặt lịch khám</a>
+              </li>
+              <li>
+                <a href="#workflow" class="footer-link">Quy trình khám</a>
+              </li>
+              <li>
+                <a href="#myAppointmentsSection" class="footer-link"
+                  >Tra cứu lịch hẹn</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>
+            &copy; 2026 CareSync. Đồ án xây dựng giao diện ứng dụng y tế. Bản
+            quyền thuộc về tác giả.
+          </p>
+          <p>Hệ thống Đặt lịch Khám bệnh Trực tuyến Serverless trên AWS.</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Modals -->
+
+    <!-- Đăng nhập -->
+    <div
+      class="modal-overlay"
+      id="loginModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="loginModalTitle"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 class="modal-title" id="loginModalTitle">Đăng nhập tài khoản</h3>
+          <button
+            type="button"
+            class="modal-close-btn"
+            data-action="close-modal"
+            aria-label="Đóng cửa sổ"
+          >
+            &times;
+          </button>
+        </div>
+        <form id="demoLoginForm">
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="loginEmail" class="form-label"
+                >Email hoặc Số điện thoại</label
+              >
+              <input
+                type="text"
+                id="loginEmail"
+                class="form-input"
+                placeholder="nguyenvanan@gmail.com"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="loginPassword" class="form-label">Mật khẩu</label>
+              <input
+                type="password"
+                id="loginPassword"
+                class="form-input"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            <p
+              style="
                 font-size: var(--font-size-xs);
                 color: var(--color-text-muted);
-              ">
-            Lưu ý: Đây là màn hình đăng nhập thử nghiệm phía giao diện, chưa
-            xác thực API.
-          </p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-action="close-modal">
-            Hủy
-          </button>
-          <button type="submit" class="btn btn-primary">
-            Đăng nhập (Demo)
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal Chi Tiết & Phóng To Bác Sĩ (Từ CSDL DynamoDB) -->
-  <div class="modal-overlay" id="doctorDetailModal" role="dialog" aria-modal="true" aria-labelledby="doctorModalName"
-    aria-hidden="true">
-    <div class="modal-dialog doctor-detail-dialog">
-      <div class="modal-header">
-        <div class="modal-header-title-wrap">
-          <span class="material-symbols-rounded modal-header-icon">medical_services</span>
-          <h3 class="modal-title">Hồ sơ Bác sĩ Chuyên khoa</h3>
-        </div>
-        <button type="button" class="modal-close-btn" data-action="close-modal" aria-label="Đóng cửa sổ">
-          &times;
-        </button>
-      </div>
-      <div class="modal-body doctor-modal-body">
-        <!-- Hero Header: Hình ảnh phóng to + Tên + Học vị -->
-        <div class="doctor-modal-hero">
-          <div class="doctor-modal-avatar-wrapper">
-            <img id="doctorModalAvatar" src="" alt="Bác sĩ" class="doctor-modal-avatar" />
-          </div>
-          <div class="doctor-modal-header-info">
-            <div class="doctor-modal-tags">
-              <span id="doctorModalSpecialty" class="badge badge-primary">Chuyên khoa</span>
-              <span id="doctorModalStatus" class="badge badge-success">Đang hoạt động</span>
-            </div>
-            <h3 id="doctorModalName" class="doctor-modal-name">Tên Bác Sĩ</h3>
-            <p id="doctorModalDegree" class="doctor-modal-degree">
-              Học vị • Chức vụ
+              "
+            >
+              Lưu ý: Đây là màn hình đăng nhập thử nghiệm phía giao diện, chưa
+              xác thực API.
             </p>
-            <div class="doctor-modal-id-pill">
-              <span class="pill-label">Mã BS:</span>
-              <span id="doctorModalId" class="pill-value">DOC01</span>
-            </div>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              onclick="resetDirectoryFilter()"
+              style="margin-top: 10px"
+            >
+              Xem tất cả bác sĩ
+            </button>
           </div>
-        </div>
-
-        <!-- Lưới thông tin chi tiết từ Database -->
-        <div class="doctor-modal-details-grid">
-          <div class="doctor-detail-cell">
-            <span class="material-symbols-rounded cell-icon">meeting_room</span>
-            <div class="cell-content">
-              <span class="cell-label">Phòng khám</span>
-              <strong id="doctorModalRoom" class="cell-value">Phòng khám Đa khoa</strong>
-            </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-action="close-modal"
+            >
+              Hủy
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Đăng nhập (Demo)
+            </button>
           </div>
-          <div class="doctor-detail-cell">
-            <span class="material-symbols-rounded cell-icon">work_history</span>
-            <div class="cell-content">
-              <span class="cell-label">Kinh nghiệm</span>
-              <strong id="doctorModalExp" class="cell-value">10+ năm kinh nghiệm</strong>
-            </div>
-          </div>
-          <div class="doctor-detail-cell">
-            <span class="material-symbols-rounded cell-icon">phone_in_talk</span>
-            <div class="cell-content">
-              <span class="cell-label">Hotline tư vấn</span>
-              <a id="doctorModalPhone" href="#" class="cell-link cell-value">1900 1234</a>
-            </div>
-          </div>
-          <div class="doctor-detail-cell">
-            <span class="material-symbols-rounded cell-icon">mail</span>
-            <div class="cell-content">
-              <span class="cell-label">Hòm thư điện tử</span>
-              <a id="doctorModalEmail" href="#" class="cell-link cell-value">bacsi@caresync.vn</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Khung giờ làm việc / tiếp nhận khám -->
-        <div class="doctor-modal-section">
-          <div class="section-sub-title">
-            <span class="material-symbols-rounded">schedule</span>
-            <span>Khung giờ khám tiếp nhận</span>
-          </div>
-          <div class="doctor-modal-slots-wrap" id="doctorModalSlots">
-            <!-- Render các chip giờ khám từ DB -->
-          </div>
-        </div>
-
-        <!-- Giới thiệu chuyên môn / Bio -->
-        <div class="doctor-modal-section">
-          <div class="section-sub-title">
-            <span class="material-symbols-rounded">description</span>
-            <span>Giới thiệu chuyên môn & Quá trình công tác</span>
-          </div>
-          <p id="doctorModalBio" class="doctor-modal-bio-text">
-            Thông tin chi tiết về quá trình học tập, đào tạo và kinh nghiệm
-            chuyên môn của bác sĩ.
-          </p>
-        </div>
-      </div>
-      <div class="modal-footer doctor-modal-footer">
-        <button type="button" class="btn btn-secondary" data-action="close-modal">
-          Đóng
-        </button>
-        <button type="button" class="btn btn-primary" id="doctorModalBookBtn">
-          <span class="material-symbols-rounded"
-            style="font-size: 18px; vertical-align: middle; margin-right: 4px">event_available</span>
-          <span>Chọn bác sĩ này & Đặt lịch</span>
-        </button>
+        </form>
       </div>
     </div>
-  </div>
 
-  <!-- Modal Xác Thực Hủy Lịch Khám Qua Email (Mã OTP) -->
-  <div class="modal-overlay" id="cancelOtpModal" role="dialog" aria-modal="true" aria-labelledby="cancelOtpModalTitle"
-    aria-hidden="true">
-    <div class="modal-dialog cancel-otp-dialog" style="max-width: 460px">
-      <div class="modal-header">
-        <div class="modal-header-title-wrap">
-          <span class="material-symbols-rounded modal-header-icon" style="color: var(--color-danger)">cancel</span>
-          <h3 class="modal-title" id="cancelOtpModalTitle">
-            Hủy Lịch Hẹn Khám Bệnh
-          </h3>
+    <!-- Modal Chi Tiết & Phóng To Bác Sĩ (Từ CSDL DynamoDB) -->
+    <div
+      class="modal-overlay"
+      id="doctorDetailModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="doctorModalName"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog doctor-detail-dialog">
+        <div class="modal-header">
+          <div class="modal-header-title-wrap">
+            <span class="material-symbols-rounded modal-header-icon"
+              >medical_services</span
+            >
+            <h3 class="modal-title">Hồ sơ Bác sĩ Chuyên khoa</h3>
+          </div>
+          <button
+            type="button"
+            class="modal-close-btn"
+            data-action="close-modal"
+            aria-label="Đóng cửa sổ"
+          >
+            &times;
+          </button>
         </div>
-        <button type="button" class="modal-close-btn" data-action="close-modal" aria-label="Đóng cửa sổ">
-          &times;
-        </button>
-      </div>
-      <div class="modal-body">
-        <!-- BƯỚC 1: Xác nhận thông tin và gửi OTP qua Email -->
-        <div id="cancelStepRequest" class="cancel-step-pane">
-          <div class="cancel-summary-box">
-            <div class="cancel-summary-row">
-              <span class="cancel-summary-label">Mã phiếu khám:</span>
-              <strong id="cancelTargetCode" class="cancel-summary-val" style="
-                    font-family: var(--font-mono);
-                    color: var(--color-primary);
-                  ">APT-...</strong>
+        <div class="modal-body doctor-modal-body">
+          <!-- Hero Header: Hình ảnh phóng to + Tên + Học vị -->
+          <div class="doctor-modal-hero">
+            <div class="doctor-modal-avatar-wrapper">
+              <img
+                id="doctorModalAvatar"
+                src=""
+                alt="Bác sĩ"
+                class="doctor-modal-avatar"
+              />
             </div>
-            <div class="cancel-summary-row">
-              <span class="cancel-summary-label">Bác sĩ khám:</span>
-              <span id="cancelTargetDoctor" class="cancel-summary-val">--</span>
-            </div>
-            <div class="cancel-summary-row">
-              <span class="cancel-summary-label">Thời gian khám:</span>
-              <span id="cancelTargetTime" class="cancel-summary-val highlight">--</span>
-            </div>
-            <div class="cancel-summary-row">
-              <span class="cancel-summary-label">Người đặt:</span>
-              <span id="cancelTargetPatient" class="cancel-summary-val">--</span>
+            <div class="doctor-modal-header-info">
+              <div class="doctor-modal-tags">
+                <span id="doctorModalSpecialty" class="badge badge-primary"
+                  >Chuyên khoa</span
+                >
+                <span id="doctorModalStatus" class="badge badge-success"
+                  >Đang hoạt động</span
+                >
+              </div>
+              <h3 id="doctorModalName" class="doctor-modal-name">Tên Bác Sĩ</h3>
+              <p id="doctorModalDegree" class="doctor-modal-degree">
+                Học vị • Chức vụ
+              </p>
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                onclick="resetDirectoryFilter()"
+                style="margin-top: 10px"
+              >
+                Xem tất cả bác sĩ
+              </button>
+              <div class="doctor-modal-id-pill">
+                <span class="pill-label">Mã BS:</span>
+                <span id="doctorModalId" class="pill-value">DOC01</span>
+              </div>
             </div>
           </div>
 
-          <div class="cancel-security-notice">
-            <span class="material-symbols-rounded cancel-notice-icon">verified_user</span>
-            <p>
-              Để bảo vệ thông tin và tránh việc người khác hủy trộm lịch khám
-              của bạn, hệ thống sẽ gửi <strong>mã OTP 6 chữ số</strong> về hộp
-              thư email của bạn qua dịch vụ <strong>Amazon SNS</strong>.
+          <!-- Lưới thông tin chi tiết từ Database -->
+          <div class="doctor-modal-details-grid">
+            <div class="doctor-detail-cell">
+              <span class="material-symbols-rounded cell-icon"
+                >meeting_room</span
+              >
+              <div class="cell-content">
+                <span class="cell-label">Phòng khám</span>
+                <strong id="doctorModalRoom" class="cell-value"
+                  >Phòng khám Đa khoa</strong
+                >
+              </div>
+            </div>
+            <div class="doctor-detail-cell">
+              <span class="material-symbols-rounded cell-icon"
+                >work_history</span
+              >
+              <div class="cell-content">
+                <span class="cell-label">Kinh nghiệm</span>
+                <strong id="doctorModalExp" class="cell-value"
+                  >10+ năm kinh nghiệm</strong
+                >
+              </div>
+            </div>
+            <div class="doctor-detail-cell">
+              <span class="material-symbols-rounded cell-icon"
+                >phone_in_talk</span
+              >
+              <div class="cell-content">
+                <span class="cell-label">Hotline tư vấn</span>
+                <a id="doctorModalPhone" href="#" class="cell-link cell-value"
+                  >1900 1234</a
+                >
+              </div>
+            </div>
+            <div class="doctor-detail-cell">
+              <span class="material-symbols-rounded cell-icon">mail</span>
+              <div class="cell-content">
+                <span class="cell-label">Hòm thư điện tử</span>
+                <a id="doctorModalEmail" href="#" class="cell-link cell-value"
+                  >bacsi@caresync.vn</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Khung giờ làm việc / tiếp nhận khám -->
+          <div class="doctor-modal-section">
+            <div class="section-sub-title">
+              <span class="material-symbols-rounded">schedule</span>
+              <span>Khung giờ khám tiếp nhận</span>
+            </div>
+            <div class="doctor-modal-slots-wrap" id="doctorModalSlots">
+              <!-- Render các chip giờ khám từ DB -->
+            </div>
+          </div>
+
+          <!-- Giới thiệu chuyên môn / Bio -->
+          <div class="doctor-modal-section">
+            <div class="section-sub-title">
+              <span class="material-symbols-rounded">description</span>
+              <span>Giới thiệu chuyên môn & Quá trình công tác</span>
+            </div>
+            <p id="doctorModalBio" class="doctor-modal-bio-text">
+              Thông tin chi tiết về quá trình học tập, đào tạo và kinh nghiệm
+              chuyên môn của bác sĩ.
             </p>
-          </div>
-        </div>
-
-        <!-- BƯỚC 2: Nhập mã OTP đã nhận qua Email -->
-        <div id="cancelStepVerify" class="cancel-step-pane" style="display: none">
-          <div class="cancel-otp-header-icon">
-            <span class="material-symbols-rounded">mark_email_read</span>
-          </div>
-          <p class="cancel-otp-intro">
-            Mã xác nhận 6 chữ số đã được gửi tới email:<br />
-            <strong id="cancelMaskedEmail" class="cancel-masked-email">...</strong>
-          </p>
-
-          <div class="form-group cancel-otp-group">
-            <label for="cancelOtpInput" class="form-label" style="text-align: center; font-weight: 600">
-              Nhập mã xác nhận (OTP)
-            </label>
-            <input type="text" id="cancelOtpInput" class="form-input cancel-otp-input" placeholder="000000"
-              maxlength="6" autocomplete="one-time-code" inputmode="numeric" />
-            <p id="cancelOtpError" class="cancel-otp-error-msg" style="display: none"></p>
-          </div>
-
-          <div class="cancel-resend-wrap">
-            <span id="cancelResendTimerText" style="
-                  display: none;
-                  font-size: var(--font-size-xs);
-                  color: var(--color-text-muted);
-                ">
-              Gửi lại mã sau: <span id="cancelTimerCountdown">60</span>s
-            </span>
-            <button type="button" id="cancelResendOtpBtn" class="cancel-resend-btn">
-              Chưa nhận được mã? Gửi lại OTP
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              onclick="resetDirectoryFilter()"
+              style="margin-top: 10px"
+            >
+              Xem tất cả bác sĩ
             </button>
           </div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-action="close-modal" id="cancelModalCloseBtn">
-          Đóng
-        </button>
-        <!-- Nút kích hoạt Bước 1 -->
-        <button type="button" class="btn btn-danger" id="cancelRequestOtpBtn">
-          <span class="material-symbols-rounded"
-            style="font-size: 18px; vertical-align: middle; margin-right: 4px">send</span>
-          <span>Gửi mã OTP qua Email</span>
-        </button>
-        <!-- Nút kích hoạt Bước 2 -->
-        <button type="button" class="btn btn-danger" id="cancelConfirmOtpBtn" style="display: none">
-          <span class="material-symbols-rounded"
-            style="font-size: 18px; vertical-align: middle; margin-right: 4px">check_circle</span>
-          <span>Xác nhận hủy lịch</span>
-        </button>
+        <div class="modal-footer doctor-modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-action="close-modal"
+          >
+            Đóng
+          </button>
+          <button type="button" class="btn btn-primary" id="doctorModalBookBtn">
+            <span
+              class="material-symbols-rounded"
+              style="font-size: 18px; vertical-align: middle; margin-right: 4px"
+              >event_available</span
+            >
+            <span>Chọn bác sĩ này & Đặt lịch</span>
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Phiếu xác nhận đặt lịch -->
-  <div class="modal-overlay" id="confirmationModal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle"
-    aria-hidden="true">
-    <div class="modal-dialog" style="max-width: 520px">
-      <div class="modal-header">
-        <h3 class="modal-title" id="confirmModalTitle">
-          Phiếu Hẹn Khám Bệnh (Demo)
-        </h3>
-        <button type="button" class="modal-close-btn" data-action="close-modal" aria-label="Đóng cửa sổ">
-          &times;
-        </button>
+    <!-- Modal Xác Thực Hủy Lịch Khám Qua Email (Mã OTP) -->
+    <div
+      class="modal-overlay"
+      id="cancelOtpModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cancelOtpModalTitle"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog cancel-otp-dialog" style="max-width: 460px">
+        <div class="modal-header">
+          <div class="modal-header-title-wrap">
+            <span
+              class="material-symbols-rounded modal-header-icon"
+              style="color: var(--color-danger)"
+              >cancel</span
+            >
+            <h3 class="modal-title" id="cancelOtpModalTitle">
+              Hủy Lịch Hẹn Khám Bệnh
+            </h3>
+          </div>
+          <button
+            type="button"
+            class="modal-close-btn"
+            data-action="close-modal"
+            aria-label="Đóng cửa sổ"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- BƯỚC 1: Xác nhận thông tin và gửi OTP qua Email -->
+          <div id="cancelStepRequest" class="cancel-step-pane">
+            <div class="cancel-summary-box">
+              <div class="cancel-summary-row">
+                <span class="cancel-summary-label">Mã phiếu khám:</span>
+                <strong
+                  id="cancelTargetCode"
+                  class="cancel-summary-val"
+                  style="
+                    font-family: var(--font-mono);
+                    color: var(--color-primary);
+                  "
+                  >APT-...</strong
+                >
+              </div>
+              <div class="cancel-summary-row">
+                <span class="cancel-summary-label">Bác sĩ khám:</span>
+                <span id="cancelTargetDoctor" class="cancel-summary-val"
+                  >--</span
+                >
+              </div>
+              <div class="cancel-summary-row">
+                <span class="cancel-summary-label">Thời gian khám:</span>
+                <span id="cancelTargetTime" class="cancel-summary-val highlight"
+                  >--</span
+                >
+              </div>
+              <div class="cancel-summary-row">
+                <span class="cancel-summary-label">Người đặt:</span>
+                <span id="cancelTargetPatient" class="cancel-summary-val"
+                  >--</span
+                >
+              </div>
+            </div>
+
+            <div class="cancel-security-notice">
+              <span class="material-symbols-rounded cancel-notice-icon"
+                >verified_user</span
+              >
+              <p>
+                Để bảo vệ thông tin và tránh việc người khác hủy trộm lịch khám
+                của bạn, hệ thống sẽ gửi <strong>mã OTP 6 chữ số</strong> về hộp
+                thư email của bạn qua dịch vụ <strong>Amazon SNS</strong>.
+              </p>
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                onclick="resetDirectoryFilter()"
+                style="margin-top: 10px"
+              >
+                Xem tất cả bác sĩ
+              </button>
+            </div>
+          </div>
+
+          <!-- BƯỚC 2: Nhập mã OTP đã nhận qua Email -->
+          <div
+            id="cancelStepVerify"
+            class="cancel-step-pane"
+            style="display: none"
+          >
+            <div class="cancel-otp-header-icon">
+              <span class="material-symbols-rounded">mark_email_read</span>
+            </div>
+            <p class="cancel-otp-intro">
+              Mã xác nhận 6 chữ số đã được gửi tới email:<br />
+              <strong id="cancelMaskedEmail" class="cancel-masked-email"
+                >...</strong
+              >
+            </p>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              onclick="resetDirectoryFilter()"
+              style="margin-top: 10px"
+            >
+              Xem tất cả bác sĩ
+            </button>
+
+            <div class="form-group cancel-otp-group">
+              <label
+                for="cancelOtpInput"
+                class="form-label"
+                style="text-align: center; font-weight: 600"
+              >
+                Nhập mã xác nhận (OTP)
+              </label>
+              <input
+                type="text"
+                id="cancelOtpInput"
+                class="form-input cancel-otp-input"
+                placeholder="000000"
+                maxlength="6"
+                autocomplete="one-time-code"
+                inputmode="numeric"
+              />
+              <p
+                id="cancelOtpError"
+                class="cancel-otp-error-msg"
+                style="display: none"
+              ></p>
+            </div>
+
+            <div class="cancel-resend-wrap">
+              <span
+                id="cancelResendTimerText"
+                style="
+                  display: none;
+                  font-size: var(--font-size-xs);
+                  color: var(--color-text-muted);
+                "
+              >
+                Gửi lại mã sau: <span id="cancelTimerCountdown">60</span>s
+              </span>
+              <button
+                type="button"
+                id="cancelResendOtpBtn"
+                class="cancel-resend-btn"
+              >
+                Chưa nhận được mã? Gửi lại OTP
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-action="close-modal"
+            id="cancelModalCloseBtn"
+          >
+            Đóng
+          </button>
+          <!-- Nút kích hoạt Bước 1 -->
+          <button type="button" class="btn btn-danger" id="cancelRequestOtpBtn">
+            <span
+              class="material-symbols-rounded"
+              style="font-size: 18px; vertical-align: middle; margin-right: 4px"
+              >send</span
+            >
+            <span>Gửi mã OTP qua Email</span>
+          </button>
+          <!-- Nút kích hoạt Bước 2 -->
+          <button
+            type="button"
+            class="btn btn-danger"
+            id="cancelConfirmOtpBtn"
+            style="display: none"
+          >
+            <span
+              class="material-symbols-rounded"
+              style="font-size: 18px; vertical-align: middle; margin-right: 4px"
+              >check_circle</span
+            >
+            <span>Xác nhận hủy lịch</span>
+          </button>
+        </div>
       </div>
-      <div class="modal-body">
-        <div class="ticket-preview">
-          <div class="ticket-header">
-            <div>
-              <span style="
+    </div>
+
+    <!-- Phiếu xác nhận đặt lịch -->
+    <div
+      class="modal-overlay"
+      id="confirmationModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirmModalTitle"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" style="max-width: 520px">
+        <div class="modal-header">
+          <h3 class="modal-title" id="confirmModalTitle">
+            Phiếu Hẹn Khám Bệnh (Demo)
+          </h3>
+          <button
+            type="button"
+            class="modal-close-btn"
+            data-action="close-modal"
+            aria-label="Đóng cửa sổ"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="ticket-preview">
+            <div class="ticket-header">
+              <div>
+                <span
+                  style="
                     font-size: var(--font-size-xs);
                     color: var(--color-text-muted);
                     display: block;
-                  ">Mã lịch hẹn:</span>
-              <span class="ticket-code" id="ticketCode">--</span>
+                  "
+                  >Mã lịch hẹn:</span
+                >
+                <span class="ticket-code" id="ticketCode">--</span>
+              </div>
+              <span class="badge badge-success">Đặt thành công</span>
             </div>
-            <span class="badge badge-success">Đặt thành công</span>
-          </div>
-          <div class="ticket-details">
-            <div class="ticket-item">
-              <span class="ticket-label">Bác sĩ khám:</span>
-              <span class="ticket-val" id="ticketDoctor">--</span>
+            <div class="ticket-details">
+              <div class="ticket-item">
+                <span class="ticket-label">Bác sĩ khám:</span>
+                <span class="ticket-val" id="ticketDoctor">--</span>
+              </div>
+              <div class="ticket-item">
+                <span class="ticket-label">Chuyên khoa:</span>
+                <span class="ticket-val" id="ticketSpecialty">--</span>
+              </div>
+              <div class="ticket-item">
+                <span class="ticket-label">Địa điểm:</span>
+                <span class="ticket-val" id="ticketRoom">--</span>
+              </div>
+              <div class="ticket-item">
+                <span class="ticket-label">Thời gian khám:</span>
+                <span class="ticket-val"
+                  ><span id="ticketTime">--</span>, ngày
+                  <span id="ticketDate">--</span></span
+                >
+              </div>
+              <div class="ticket-item">
+                <span class="ticket-label">Bệnh nhân:</span>
+                <span class="ticket-val" id="ticketPatient">--</span>
+              </div>
+              <div class="ticket-item">
+                <span class="ticket-label">Số điện thoại:</span>
+                <span class="ticket-val" id="ticketPhone">--</span>
+              </div>
             </div>
-            <div class="ticket-item">
-              <span class="ticket-label">Chuyên khoa:</span>
-              <span class="ticket-val" id="ticketSpecialty">--</span>
-            </div>
-            <div class="ticket-item">
-              <span class="ticket-label">Địa điểm:</span>
-              <span class="ticket-val" id="ticketRoom">--</span>
-            </div>
-            <div class="ticket-item">
-              <span class="ticket-label">Thời gian khám:</span>
-              <span class="ticket-val"><span id="ticketTime">--</span>, ngày
-                <span id="ticketDate">--</span></span>
-            </div>
-            <div class="ticket-item">
-              <span class="ticket-label">Bệnh nhân:</span>
-              <span class="ticket-val" id="ticketPatient">--</span>
-            </div>
-            <div class="ticket-item">
-              <span class="ticket-label">Số điện thoại:</span>
-              <span class="ticket-val" id="ticketPhone">--</span>
-            </div>
-          </div>
-          <div style="
+            <div
+              style="
                 font-size: var(--font-size-xs);
                 padding-top: var(--spacing-xs);
                 border-top: 1px dashed var(--color-border);
-              ">
-            <span class="ticket-label">Lý do khám: </span>
-            <span id="ticketReason" style="color: var(--color-text)">--</span>
+              "
+            >
+              <span class="ticket-label">Lý do khám: </span>
+              <span id="ticketReason" style="color: var(--color-text)">--</span>
+            </div>
           </div>
-        </div>
-        <p style="
+          <p
+            style="
               margin-top: var(--spacing-md);
               font-size: var(--font-size-xs);
               color: var(--color-text-secondary);
               line-height: 1.5;
-            ">
-          * Quý khách vui lòng đến trước giờ hẹn 15 phút tại quầy tiếp đón để được nhân viên hướng dẫn vào phòng khám.
-        </p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-action="close-modal">
-          Đã hiểu & Đóng
-        </button>
+            "
+          >
+            * Quý khách vui lòng đến trước giờ hẹn 15 phút tại quầy tiếp đón để
+            được nhân viên hướng dẫn vào phòng khám.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-action="close-modal"
+          >
+            Đã hiểu & Đóng
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- =================================================================== -->
-  <!-- Modal Đăng Nhập Dành Cho Bác Sĩ (Xác thực qua OTP Email) -->
-  <!-- =================================================================== -->
-  <div class="modal-overlay doctor-login-modal" id="doctorLoginModal" role="dialog" aria-modal="true"
-    aria-labelledby="doctorLoginModalTitle">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <h3 class="modal-title" id="doctorLoginModalTitle">
-          Cổng Đăng Nhập Bác Sĩ
-        </h3>
-        <button type="button" class="modal-close-btn" data-action="close-doctor-login" aria-label="Đóng popup">
-          &times;
-        </button>
-      </div>
+    <!-- =================================================================== -->
+    <!-- Modal Đăng Nhập Dành Cho Bác Sĩ (Xác thực qua OTP Email) -->
+    <!-- =================================================================== -->
+    <div
+      class="modal-overlay doctor-login-modal"
+      id="doctorLoginModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="doctorLoginModalTitle"
+    >
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 class="modal-title" id="doctorLoginModalTitle">
+            Cổng Đăng Nhập Bác Sĩ
+          </h3>
+          <button
+            type="button"
+            class="modal-close-btn"
+            data-action="close-doctor-login"
+            aria-label="Đóng popup"
+          >
+            &times;
+          </button>
+        </div>
 
-      <div class="modal-body">
-        <!-- Bước 1: Nhập email bác sĩ -->
-        <form id="doctorEmailStepForm">
-          <p style="
+        <div class="modal-body">
+          <!-- Bước 1: Nhập email bác sĩ -->
+          <form id="doctorEmailStepForm">
+            <p
+              style="
                 font-size: var(--font-size-sm);
                 color: var(--color-text-secondary);
                 margin-bottom: var(--spacing-sm);
-              ">
-            Vui lòng nhập địa chỉ email công tác của bác sĩ để nhận mã xác
-            thực OTP.
-          </p>
+              "
+            >
+              Vui lòng nhập địa chỉ email công tác của bác sĩ để nhận mã xác
+              thực OTP.
+            </p>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              onclick="resetDirectoryFilter()"
+              style="margin-top: 10px"
+            >
+              Xem tất cả bác sĩ
+            </button>
 
-
-          <div class="form-group" style="margin-bottom: var(--spacing-md)">
-            <label for="doctorLoginEmailInput" class="form-label">
-              Email Bác sĩ <span style="color: var(--color-danger)">*</span>
-            </label>
-            <input type="email" id="doctorLoginEmailInput" class="form-input" placeholder="ví dụ: bacsi@caresync.vn"
-              required autocomplete="email" />
-            <span class="form-error-msg" id="doctorEmailError" style="
+            <div class="form-group" style="margin-bottom: var(--spacing-md)">
+              <label for="doctorLoginEmailInput" class="form-label">
+                Email Bác sĩ <span style="color: var(--color-danger)">*</span>
+              </label>
+              <input
+                type="email"
+                id="doctorLoginEmailInput"
+                class="form-input"
+                placeholder="ví dụ: bacsi@caresync.vn"
+                required
+                autocomplete="email"
+              />
+              <span
+                class="form-error-msg"
+                id="doctorEmailError"
+                style="
                   display: none;
                   color: var(--color-danger);
                   font-size: 12px;
                   margin-top: 4px;
-                "></span>
-          </div>
+                "
+              ></span>
+            </div>
 
-          <button type="submit" class="btn btn-primary" id="btnSendDoctorOtp" style="width: 100%">
-            Gửi mã xác thực OTP
-          </button>
-        </form>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              id="btnSendDoctorOtp"
+              style="width: 100%"
+            >
+              Gửi mã xác thực OTP
+            </button>
+          </form>
 
-        <!-- Bước 2: Nhập mã OTP -->
-        <form id="doctorOtpStepForm" style="display: none">
-          <p style="
+          <!-- Bước 2: Nhập mã OTP -->
+          <form id="doctorOtpStepForm" style="display: none">
+            <p
+              style="
                 font-size: var(--font-size-sm);
                 color: var(--color-text-secondary);
                 margin-bottom: var(--spacing-md);
-              ">
-            Mã xác thực 6 số đã được gửi tới:
-            <strong id="otpTargetEmailText" style="color: var(--color-text)"></strong>
-          </p>
+              "
+            >
+              Mã xác thực 6 số đã được gửi tới:
+              <strong
+                id="otpTargetEmailText"
+                style="color: var(--color-text)"
+              ></strong>
+            </p>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              onclick="resetDirectoryFilter()"
+              style="margin-top: 10px"
+            >
+              Xem tất cả bác sĩ
+            </button>
 
-          <div class="form-group" style="margin-bottom: var(--spacing-md)">
-            <label for="doctorLoginOtpInput" class="form-label">
-              Mã OTP (6 chữ số)
-              <span style="color: var(--color-danger)">*</span>
-            </label>
-            <input type="text" id="doctorLoginOtpInput" class="form-input" placeholder="Nhập 6 số OTP (ví dụ: 123456)"
-              maxlength="6" required style="text-align: center; font-size: 18px; font-weight: 600" />
-            <span class="form-error-msg" id="doctorOtpError" style="
+            <div class="form-group" style="margin-bottom: var(--spacing-md)">
+              <label for="doctorLoginOtpInput" class="form-label">
+                Mã OTP (6 chữ số)
+                <span style="color: var(--color-danger)">*</span>
+              </label>
+              <input
+                type="text"
+                id="doctorLoginOtpInput"
+                class="form-input"
+                placeholder="Nhập 6 số OTP (ví dụ: 123456)"
+                maxlength="6"
+                required
+                style="text-align: center; font-size: 18px; font-weight: 600"
+              />
+              <span
+                class="form-error-msg"
+                id="doctorOtpError"
+                style="
                   display: none;
                   color: var(--color-danger);
                   font-size: 12px;
                   margin-top: 4px;
-                "></span>
-          </div>
+                "
+              ></span>
+            </div>
 
-          <div style="display: flex; flex-direction: column; gap: 8px">
-            <button type="submit" class="btn btn-primary" id="btnVerifyDoctorOtp" style="width: 100%">
-              Xác nhận & Đăng nhập
-            </button>
-            <button type="button" class="btn btn-secondary" id="btnBackToEmailStep" style="width: 100%">
-              Quay lại đổi email khác
-            </button>
-          </div>
-        </form>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <button
+                type="submit"
+                class="btn btn-primary"
+                id="btnVerifyDoctorOtp"
+                style="width: 100%"
+              >
+                Xác nhận & Đăng nhập
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                id="btnBackToEmailStep"
+                style="width: 100%"
+              >
+                Quay lại đổi email khác
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Container chứa Toast Notifications -->
-  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+    <!-- Container chứa Toast Notifications -->
+    <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
-  <!-- JavaScript Files (v2 Cache Busting) -->
-  <script src="js/api.js?v=2" defer></script>
-  <script src="js/doctors.js?v=2" defer></script>
-  <script src="js/booking.js?v=2" defer></script>
-  <script src="js/lookup.js?v=2" defer></script>
-  <script src="js/doctor-auth.js?v=2" defer></script>
-  <script src="js/navigation.js?v=2" defer></script>
-  <script src="js/app.js?v=2" defer></script>
-</body>
-
+    <!-- JavaScript Files (v2 Cache Busting) -->
+    <script src="js/api.js?v=2" defer></script>
+    <script src="js/doctors.js?v=2" defer></script>
+    <script src="js/booking.js?v=2" defer></script>
+    <script src="js/lookup.js?v=2" defer></script>
+    <script src="js/doctor-auth.js?v=2" defer></script>
+    <script src="js/navigation.js?v=2" defer></script>
+    <script src="js/app.js?v=2" defer></script>
+  </body>
 </html>
