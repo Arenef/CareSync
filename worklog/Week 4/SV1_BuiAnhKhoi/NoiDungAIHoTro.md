@@ -114,16 +114,6 @@ Sau khi tiếp nhận các phân tích gợi ý từ AI, sinh viên đã tự m�
 4. **Dọn dẹp cây thư mục backend AWS Lambda:**
    - Kiểm tra nội dung tệp `server/lambda/index.mjs`, xác nhận đây là tệp rỗng không liên kết vào kiến trúc triển khai của nhóm và chủ động xóa khỏi repository.
 
-5. **Tự thực hiện kiểm thử cú pháp và kiểm thử vận hành:**
-   - Sử dụng lệnh `node -c` trên môi trường terminal để kiểm tra cú pháp toàn bộ các tệp JavaScript:
-     ```powershell
-     node -c client/js/*.js
-     node -c server/lambda/*.js
-     node -c server/lambda/service/*.js
-     ```
-   - Tất cả các tệp đều trả về mã lỗi 0 (không có bất kỳ lỗi cú pháp nào).
-   - Kiểm thử E2E trên trình duyệt xác nhận các luồng nghiệp vụ (đặt khám, tra cứu/hủy phiếu khám, bác sĩ đăng nhập/tìm kiếm) đều vận hành trơn tru 100%.
-
 ---
 
 [Quay lại đầu trang](#top)
