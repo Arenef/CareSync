@@ -335,3 +335,581 @@
   cursor: not-allowed;
   text-decoration: none;
 }
+
+/* ============================================================================
+   7. GIAO DIỆN CALENDAR VIEW (LỊCH HẸN CỦA TÔI)
+   ============================================================================ */
+#myAppointmentsList.is-calendar-mode {
+  display: block !important;
+  width: 100%;
+}
+
+.appointment-calendar-view {
+  width: 100%;
+  animation: calFadeIn 0.3s ease;
+}
+
+@keyframes calFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header thanh công cụ Lịch */
+.cal-view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 12px 18px;
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.cal-nav-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cal-month-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  margin: 0 4px;
+  min-width: 160px;
+  text-align: center;
+  user-select: none;
+}
+
+.cal-nav-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.cal-nav-btn:hover {
+  background-color: var(--color-bg-muted);
+  border-color: var(--color-border-strong);
+  color: var(--color-primary);
+}
+
+.cal-today-btn {
+  height: 36px;
+  padding: 0 12px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.cal-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cal-stats-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-muted);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+}
+
+.cal-stats-badge strong {
+  color: var(--color-primary);
+}
+
+.cal-view-switcher {
+  display: inline-flex;
+  align-items: center;
+  background: var(--color-bg-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 3px;
+  gap: 3px;
+}
+
+.cal-switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: calc(var(--radius-md) - 2px);
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.cal-switch-btn .material-symbols-rounded {
+  font-size: 16px;
+}
+
+.cal-switch-btn:hover {
+  color: var(--color-text);
+}
+
+.cal-switch-btn.is-active {
+  background: #ffffff;
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Layout 2 cột: Khung Lịch và Chi Tiết */
+.cal-main-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: var(--spacing-lg);
+  align-items: start;
+}
+
+/* Khung Tháng (Lịch Tháng) */
+.cal-month-box {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+}
+
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+  padding-bottom: 10px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+  letter-spacing: 0.5px;
+}
+
+.cal-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+/* Từng ô ngày trên lịch */
+.cal-day-cell {
+  min-height: 84px;
+  padding: 6px 8px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-secondary);
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  user-select: none;
+}
+
+.cal-day-cell:hover {
+  background-color: var(--color-primary-subtle);
+  border-color: var(--color-primary-light);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.1);
+}
+
+.cal-day-cell.is-other-month {
+  opacity: 0.35;
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.cal-day-cell.is-today {
+  background-color: #f0f7ff;
+  border-color: #bfdbfe;
+}
+
+.cal-day-cell.is-today .cal-day-number {
+  background: var(--color-primary);
+  color: #ffffff;
+  font-weight: var(--font-weight-bold);
+}
+
+.cal-day-cell.has-appt {
+  background-color: #f8fbff;
+  border-color: #93c5fd;
+}
+
+.cal-day-cell.is-selected {
+  border-color: var(--color-primary) !important;
+  background-color: #eff6ff !important;
+  box-shadow:
+    0 0 0 2px rgba(37, 99, 235, 0.25),
+    0 4px 10px rgba(37, 99, 235, 0.12) !important;
+  z-index: 2;
+}
+
+.cal-day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.cal-day-number {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+}
+
+.cal-today-badge {
+  font-size: 10px;
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+  background: var(--color-primary-light);
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+}
+
+.cal-cell-dots {
+  display: none;
+  gap: 3px;
+  align-items: center;
+}
+
+.cal-cell-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.cal-cell-dot.dot-upcoming {
+  background-color: #16a34a;
+}
+
+.cal-cell-dot.dot-cancelled {
+  background-color: #94a3b8;
+}
+
+.cal-cell-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.cal-cell-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  line-height: 1.2;
+  padding: 2px 4px;
+  border-radius: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.cal-cell-badge.badge-upcoming {
+  background-color: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.cal-cell-badge.badge-cancelled {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  text-decoration: line-through;
+}
+
+.cal-cell-badge .badge-time {
+  font-weight: 700;
+}
+
+.cal-cell-badge .badge-doc {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cal-cell-more {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-primary);
+  padding: 1px 4px;
+}
+
+/* Legend Chú thích */
+.cal-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--color-border);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.cal-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cal-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.cal-legend-dot.dot-upcoming {
+  background-color: #16a34a;
+}
+
+.cal-legend-dot.dot-cancelled {
+  background-color: #94a3b8;
+}
+
+.cal-legend-box.box-selected {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 2px solid var(--color-primary);
+  background-color: #eff6ff;
+}
+
+/* Khung Chi tiết Ca khám (Cột phải) */
+.cal-details-panel {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  min-height: 440px;
+  display: flex;
+  flex-direction: column;
+}
+
+.cal-details-header {
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.cal-details-header-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cal-details-date-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cal-details-date-title h4 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  margin: 0;
+}
+
+.cal-details-count {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-muted);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+}
+
+.cal-details-count.has-data {
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #bfdbfe;
+}
+
+.cal-details-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Thẻ appointment-card bên trong Calendar Details Panel */
+.cal-details-panel .appointment-card {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border-left: 4px solid var(--color-primary);
+  background: #ffffff;
+}
+
+.cal-details-panel .appointment-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Empty date state */
+.cal-empty-date {
+  text-align: center;
+  padding: 36px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  margin: auto 0;
+}
+
+.cal-empty-date .empty-icon {
+  font-size: 42px;
+  color: var(--color-text-muted);
+  margin-bottom: 10px;
+  opacity: 0.7;
+}
+
+.cal-empty-date h5 {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+
+.cal-empty-date p {
+  font-size: var(--font-size-xs);
+  max-width: 280px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.cal-month-shortcuts {
+  width: 100%;
+  margin-top: 10px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--color-border);
+}
+
+.cal-month-shortcuts h6 {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.cal-shortcuts-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-start;
+}
+
+.cal-shortcut-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.cal-shortcut-chip:hover {
+  background: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+/* Responsive Lịch Calendar */
+@media (max-width: 992px) {
+  .cal-main-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cal-details-panel {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .cal-view-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cal-nav-group {
+    justify-content: center;
+  }
+
+  .cal-header-right {
+    justify-content: space-between;
+  }
+
+  .cal-day-cell {
+    min-height: 52px;
+    padding: 3px;
+  }
+
+  .cal-day-number {
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+
+  .cal-cell-badges {
+    display: none;
+  }
+
+  .cal-cell-dots {
+    display: flex;
+  }
+
+  .cal-today-badge {
+    display: none;
+  }
+}

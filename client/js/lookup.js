@@ -16,6 +16,10 @@
   // Dữ liệu bộ nhớ tạm sau khi tra cứu từ DynamoDB (KHÔNG dùng LocalStorage)
   let currentFetchedAppointments = [];
   let currentFilterTab = "all";
+  let currentFilteredAppointments = [];
+  let currentViewMode = "calendar"; // "calendar" | "list"
+  let currentCalendarDate = new Date(); // Tháng đang xem
+  let selectedCalendarDate = null; // Ngày được chọn dạng YYYY-MM-DD
 
   /**
    * Khởi tạo module tra cứu
@@ -86,6 +90,10 @@
         clearError();
         searchInput.focus();
         currentFetchedAppointments = [];
+        currentFilteredAppointments = [];
+        currentViewMode = "calendar";
+        currentCalendarDate = new Date();
+        selectedCalendarDate = null;
         renderPromptState();
       });
     }
@@ -169,6 +177,7 @@
     if (emptyNotice) emptyNotice.classList.remove("show");
 
     if (appointmentsContainer) {
+      appointmentsContainer.classList.remove("is-calendar-mode");
       appointmentsContainer.innerHTML = `
         <div class="appointments-prompt-state" style="grid-column: 1 / -1; text-align: center; padding: 48px var(--spacing-md); background: var(--color-bg-muted); border: 1px dashed var(--color-border); border-radius: var(--radius-lg);">
           <span class="material-symbols-rounded" style="font-size: 48px; color: var(--color-primary); margin-bottom: 12px; display: inline-block;">lock_person</span>
@@ -179,6 +188,32 @@
         </div>
       `;
     }
+  }
+
+  // Sử dụng tiện ích từ module CareSyncCalendar đã được tách
+  const parseApptDate = (d) =>
+    window.CareSyncCalendar ? window.CareSyncCalendar.parseApptDate(d) : null;
+  const formatDateKey = (d) =>
+    window.CareSyncCalendar ? window.CareSyncCalendar.formatDateKey(d) : "";
+  const formatVietnameseDate = (d) =>
+    window.CareSyncCalendar
+      ? window.CareSyncCalendar.formatVietnameseDate(d)
+      : "--";
+
+  /**
+   * Xác định tháng ban đầu để mở lịch dựa trên danh sách ca khám tìm được
+   */
+  function setupInitialCalendarDate(appointments) {
+    if (window.CareSyncCalendar) {
+      const init =
+        window.CareSyncCalendar.setupInitialCalendarDate(appointments);
+      currentCalendarDate = init.monthDate;
+      selectedCalendarDate = init.selectedDateKey;
+      return;
+    }
+    const now = new Date();
+    currentCalendarDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    selectedCalendarDate = formatDateKey(now);
   }
 
   /**
@@ -194,6 +229,7 @@
     }
 
     if (appointmentsContainer) {
+      appointmentsContainer.classList.remove("is-calendar-mode");
       appointmentsContainer.innerHTML = `
         <div class="appointments-loading-state" style="grid-column: 1 / -1; text-align: center; padding: 48px var(--spacing-md);">
           <div class="lookup-spinner" style="margin: 0 auto var(--spacing-sm);"></div>
@@ -224,12 +260,17 @@
 
       // Reset về Tab "Tất cả"
       currentFilterTab = "all";
-      const tabButtons = document.querySelectorAll(".appointments-tabs .tab-btn");
+      const tabButtons = document.querySelectorAll(
+        ".appointments-tabs .tab-btn",
+      );
       tabButtons.forEach((b) => {
         b.classList.toggle("is-active", (b.dataset.filter || "all") === "all");
       });
 
       if (currentFetchedAppointments.length > 0) {
+        // Tự động chuyển giao diện sang dạng Calendar khi tìm thấy lịch hẹn
+        setupInitialCalendarDate(currentFetchedAppointments);
+        currentViewMode = "calendar";
         applyCurrentFilter();
         safeShowToast(
           "Tra cứu thành công",
@@ -239,6 +280,7 @@
       } else {
         // Không tìm thấy bất kỳ lịch hẹn nào
         if (appointmentsContainer) {
+          appointmentsContainer.classList.remove("is-calendar-mode");
           appointmentsContainer.innerHTML = "";
         }
         if (emptyNotice) {
@@ -263,6 +305,7 @@
     } catch (error) {
       console.error("[Execute Lookup Error]:", error);
       if (appointmentsContainer) {
+        appointmentsContainer.classList.remove("is-calendar-mode");
         appointmentsContainer.innerHTML = "";
       }
       if (emptyNotice) {
@@ -287,7 +330,10 @@
   function applyCurrentFilter() {
     if (!appointmentsContainer) return;
 
-    if (!currentFetchedAppointments || currentFetchedAppointments.length === 0) {
+    if (
+      !currentFetchedAppointments ||
+      currentFetchedAppointments.length === 0
+    ) {
       renderPromptState();
       return;
     }
@@ -317,9 +363,11 @@
       );
     }
 
+    currentFilteredAppointments = filtered;
     appointmentsContainer.innerHTML = "";
 
     if (filtered.length === 0) {
+      appointmentsContainer.classList.remove("is-calendar-mode");
       if (emptyNotice) {
         emptyNotice.classList.add("show");
         const emptyTitle = emptyNotice.querySelector("h4");
@@ -341,9 +389,63 @@
       emptyNotice.classList.remove("show");
     }
 
-    filtered.forEach((appt) => {
-      const card = createAppointmentCard(appt);
-      appointmentsContainer.appendChild(card);
+    // Hiển thị ở chế độ Calendar (mặc định) hoặc List
+    if (currentViewMode === "calendar") {
+      appointmentsContainer.classList.add("is-calendar-mode");
+      renderCalendarView(filtered);
+    } else {
+      appointmentsContainer.classList.remove("is-calendar-mode");
+      renderListView(filtered);
+    }
+  }
+
+  /**
+   * Render giao diện dạng Calendar khi tìm thấy lịch hẹn
+   */
+  function renderCalendarView(filtered) {
+    if (!appointmentsContainer || !window.CareSyncCalendar) return;
+
+    window.CareSyncCalendar.renderCalendarView({
+      container: appointmentsContainer,
+      appointments: filtered,
+      currentDate: currentCalendarDate,
+      selectedDate: selectedCalendarDate,
+      role: "patient",
+      renderCard: (appt) => createAppointmentCard(appt),
+      emptyMessage: "Không có ca khám vào ngày này",
+      emptySubtext:
+        "Vui lòng chọn ngày có đánh dấu màu xanh trên lịch để xem phiếu hẹn khám đã đăng ký.",
+      statsLabel: "ca khám",
+      onMonthChange: (newDate) => {
+        currentCalendarDate = newDate;
+        selectedCalendarDate = null;
+        applyCurrentFilter();
+      },
+      onDateSelect: (dateKey) => {
+        selectedCalendarDate = dateKey;
+      },
+      onSwitchMode: (mode) => {
+        currentViewMode = mode;
+        applyCurrentFilter();
+      },
+    });
+  }
+
+  /**
+   * Render dạng danh sách truyền thống (List View)
+   */
+  function renderListView(filtered) {
+    if (!appointmentsContainer || !window.CareSyncCalendar) return;
+
+    window.CareSyncCalendar.renderListView({
+      container: appointmentsContainer,
+      appointments: filtered,
+      title: "Danh sách lịch khám",
+      renderCard: (appt) => createAppointmentCard(appt),
+      onSwitchMode: (mode) => {
+        currentViewMode = mode;
+        applyCurrentFilter();
+      },
     });
   }
 
@@ -369,7 +471,9 @@
     const docName =
       appt.doctorName || (doctor && doctor.name) || "Bác sĩ phụ trách";
     const docSpec =
-      appt.doctorSpecialty || (doctor && doctor.specialty) || "Chuyên khoa đa khoa";
+      appt.doctorSpecialty ||
+      (doctor && doctor.specialty) ||
+      "Chuyên khoa đa khoa";
     const docRoom =
       appt.doctorRoom || (doctor && doctor.room) || "Phòng khám 101";
     const docAvatar =
@@ -377,8 +481,9 @@
       (doctor && doctor.avatar) ||
       "assets/images/doctor-1.jpg";
 
-    const dateVal = appt.date || appt.appointmentDate || "--";
-    const timeVal = appt.time || appt.slotTime || "--";
+    const dateVal =
+      appt.date || appt.appointmentDate || appt.AppointmentDate || "--";
+    const timeVal = appt.time || appt.slotTime || appt.SlotTime || "--";
 
     card.innerHTML = `
       <div class="appointment-card-header">

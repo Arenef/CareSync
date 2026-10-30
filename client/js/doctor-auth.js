@@ -72,7 +72,6 @@
       });
     }
 
-
     // Nút đăng xuất
     if (logoutBtn) {
       logoutBtn.addEventListener("click", handleDoctorLogout);
@@ -375,7 +374,8 @@
     if (addMoreBtn) addMoreBtn.style.display = show ? "" : "none";
 
     const apptsTag = document.querySelector(".appointments-tag");
-    if (apptsTag) apptsTag.textContent = show ? "Quản lý lịch khám" : "CỔNG BÁC SĨ";
+    if (apptsTag)
+      apptsTag.textContent = show ? "Quản lý lịch khám" : "CỔNG BÁC SĨ";
   }
 
   function applyDoctorSession(doctor) {
@@ -404,6 +404,7 @@
       apptsSubtitle.textContent = `Danh sách toàn bộ bệnh nhân đã đặt lịch khám trực tiếp với ${doctor.Name} (${doctor.Specialty || "Phòng khám"}).`;
     }
     if (lookupForm) lookupForm.style.display = "none";
+    if (apptsGrid) apptsGrid.classList.remove("is-calendar-mode");
 
     // Cuộn mượt lên đầu trang hiển thị ngay lịch khám
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -427,11 +428,16 @@
 
     // Render lại danh sách trống hoặc dữ liệu ban đầu
     if (apptsGrid) {
-      apptsGrid.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: var(--color-text-secondary);">
-          <p style="font-size: var(--font-size-md);">Vui lòng nhập số điện thoại ở trên để tra cứu phiếu hẹn khám của bạn.</p>
-        </div>
-      `;
+      apptsGrid.classList.remove("is-calendar-mode");
+      if (typeof window.renderPromptState === "function") {
+        window.renderPromptState();
+      } else {
+        apptsGrid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: var(--color-text-secondary);">
+            <p style="font-size: var(--font-size-md);">Vui lòng nhập số điện thoại ở trên để tra cứu phiếu hẹn khám của bạn.</p>
+          </div>
+        `;
+      }
     }
 
     // Cuộn về đầu trang
@@ -443,8 +449,11 @@
   // 5. TẢI VÀ RENDER DANH SÁCH BỆNH NHÂN CỦA BÁC SĨ (VỚI TÌM KIẾM & BỘ LỌC)
   // ==========================================================================
   let currentDoctorAppointments = [];
-  let currentFilter = "ALL"; // ALL, TODAY, TOMORROW, CONFIRMED, CANCELLED
+  let currentFilter = "ALL"; // ALL, TODAY, TOMORROW
   let currentSearchQuery = "";
+  let doctorViewMode = "calendar"; // "calendar" | "list"
+  let doctorCalendarDate = new Date(); // Tháng đang xem
+  let doctorSelectedCalendarDate = null; // Ngày được chọn YYYY-MM-DD
 
   function getSampleAppointments(doctorId) {
     return [
@@ -520,7 +529,7 @@
             await window.CareSyncAPI.doctorAuthApi.getAppointments(doctorId);
           if (Array.isArray(apiRes)) {
             list = apiRes;
-            isApiSuccess = true; // Kết nối thành công tới database AWS -> Chỉ hiển thị dữ liệu từ DynamoDB
+            isApiSuccess = true;
           }
         } catch (_) {
           isApiSuccess = false;
@@ -534,12 +543,26 @@
       currentDoctorAppointments = list;
       currentFilter = "ALL";
       currentSearchQuery = "";
+      if (window.CareSyncCalendar) {
+        const init = window.CareSyncCalendar.setupInitialCalendarDate(list);
+        doctorCalendarDate = init.monthDate;
+        doctorSelectedCalendarDate = init.selectedDateKey;
+      }
+      doctorViewMode = "calendar";
       renderDoctorAppointmentsView(doctor);
     } catch (err) {
       console.warn("Nạp dữ liệu mẫu cho bác sĩ:", err);
       currentDoctorAppointments = getSampleAppointments(doctorId);
       currentFilter = "ALL";
       currentSearchQuery = "";
+      if (window.CareSyncCalendar) {
+        const init = window.CareSyncCalendar.setupInitialCalendarDate(
+          currentDoctorAppointments,
+        );
+        doctorCalendarDate = init.monthDate;
+        doctorSelectedCalendarDate = init.selectedDateKey;
+      }
+      doctorViewMode = "calendar";
       renderDoctorAppointmentsView(doctor);
     }
   }
@@ -547,155 +570,183 @@
   function renderDoctorAppointmentsView(doctor) {
     if (!apptsGrid) return;
 
-    // Tính toán số lượng theo bộ lọc
+    const todayDate = new Date();
+    const tomorrowDate = new Date();
+    tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+
+    // Tính toán số lượng theo bộ lọc ngày chuẩn xác (hỗ trợ cả YYYY-MM-DD lẫn chuỗi hôm nay)
     const totalCount = currentDoctorAppointments.length;
     const todayCount = currentDoctorAppointments.filter((a) => {
-      const d = (a.appointmentDate || a.AppointmentDate || "").toLowerCase();
-      return d.includes("hôm nay") || d.includes("today");
+      const rawDateStr =
+        a.appointmentDate ||
+        a.AppointmentDate ||
+        a.date ||
+        a.slotKey ||
+        a.SlotKey ||
+        "";
+      if (!window.CareSyncCalendar) return false;
+      const parsedD = window.CareSyncCalendar.parseApptDate(rawDateStr);
+      return (
+        (parsedD && window.CareSyncCalendar.isSameDay(parsedD, todayDate)) ||
+        rawDateStr.toLowerCase().includes("hôm nay") ||
+        rawDateStr.toLowerCase().includes("today")
+      );
     }).length;
+
     const tomorrowCount = currentDoctorAppointments.filter((a) => {
-      const d = (a.appointmentDate || a.AppointmentDate || "").toLowerCase();
-      return d.includes("ngày mai") || d.includes("tomorrow");
+      const rawDateStr =
+        a.appointmentDate ||
+        a.AppointmentDate ||
+        a.date ||
+        a.slotKey ||
+        a.SlotKey ||
+        "";
+      if (!window.CareSyncCalendar) return false;
+      const parsedD = window.CareSyncCalendar.parseApptDate(rawDateStr);
+      return (
+        (parsedD && window.CareSyncCalendar.isSameDay(parsedD, tomorrowDate)) ||
+        rawDateStr.toLowerCase().includes("ngày mai") ||
+        rawDateStr.toLowerCase().includes("tomorrow")
+      );
     }).length;
 
-    // Header controls: Thanh tìm kiếm & Các nút lọc (không dùng icon màu)
-    const controlsHtml = `
-      <div style="grid-column: 1 / -1; margin-bottom: 20px; display: flex; flex-direction: column; gap: 14px;">
-        <!-- Thanh tìm kiếm & Làm mới -->
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-          <div style="flex: 1; min-width: 260px; position: relative;">
-            <input
-              type="text"
-              id="doctorSearchInput"
-              class="form-control"
-              placeholder="Tìm theo tên bệnh nhân, số điện thoại, mã hẹn..."
-              value="${currentSearchQuery}"
-              style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--color-border); font-size: 14px; background: var(--color-surface); color: var(--color-text); outline: none;"
-            />
-            ${
-              currentSearchQuery
-                ? `<button type="button" id="btnClearSearch" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 14px; color: var(--color-text-secondary); cursor: pointer;">Xóa</button>`
-                : ""
-            }
-          </div>
-          <button type="button" class="btn btn-secondary" id="btnRefreshDoctorAppts" style="padding: 9px 16px; font-size: 13px; font-weight: 500; border-radius: 8px;">
-            Làm mới
-          </button>
-        </div>
-
-        <!-- Bộ lọc (Tabs/Chips) -->
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-          <span style="font-size: 13px; font-weight: 600; color: var(--color-text-secondary); margin-right: 4px;">Lọc ca khám:</span>
-          
-          <button type="button" class="doctor-filter-chip ${currentFilter === "ALL" ? "is-active" : ""}" data-filter="ALL" style="${getFilterChipStyle(currentFilter === "ALL")}">
-            Tất cả <span style="${getBadgeStyle(currentFilter === "ALL")}">${totalCount}</span>
-          </button>
-
-          <button type="button" class="doctor-filter-chip ${currentFilter === "TODAY" ? "is-active" : ""}" data-filter="TODAY" style="${getFilterChipStyle(currentFilter === "TODAY")}">
-            Hôm nay <span style="${getBadgeStyle(currentFilter === "TODAY")}">${todayCount}</span>
-          </button>
-
-          <button type="button" class="doctor-filter-chip ${currentFilter === "TOMORROW" ? "is-active" : ""}" data-filter="TOMORROW" style="${getFilterChipStyle(currentFilter === "TOMORROW")}">
-            Ngày mai <span style="${getBadgeStyle(currentFilter === "TOMORROW")}">${tomorrowCount}</span>
-          </button>
-        </div>
-      </div>
-    `;
-
-    // Lọc danh sách theo currentFilter & currentSearchQuery
-    const filteredList = getFilteredAppointments();
-
-    let cardsHtml = "";
-    if (filteredList.length === 0) {
-      cardsHtml = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 48px 20px; background: var(--color-bg-muted); border-radius: var(--radius-md); border: 1px dashed var(--color-border);">
-          <h4 style="margin: 0 0 6px; font-size: 15px; color: var(--color-text);">Không tìm thấy ca hẹn khám nào!</h4>
-          <p style="color: var(--color-text-secondary); max-width: 460px; margin: 0 auto; font-size: 13px;">
-            ${
-              currentSearchQuery || currentFilter !== "ALL"
-                ? "Không có ca khám nào khớp với từ khóa hoặc bộ lọc đã chọn. Vui lòng thử tìm từ khóa khác hoặc bấm 'Tất cả'."
-                : "Hiện tại chưa có bệnh nhân nào đặt lịch với Bác sĩ."
-            }
-          </p>
+    // 1. Tạo thanh điều khiển phía trên (Thanh tìm kiếm & Bộ lọc Tất cả / Hôm nay / Ngày mai)
+    const topBar = document.createElement("div");
+    topBar.style.cssText =
+      "grid-column: 1 / -1; margin-bottom: 20px; display: flex; flex-direction: column; gap: 14px;";
+    topBar.innerHTML = `
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 260px; position: relative;">
+          <input
+            type="text"
+            id="doctorSearchInput"
+            class="form-control"
+            placeholder="Tìm theo tên bệnh nhân, số điện thoại, mã hẹn..."
+            value="${currentSearchQuery}"
+            style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--color-border); font-size: 14px; background: var(--color-surface); color: var(--color-text); outline: none;"
+          />
           ${
-            currentSearchQuery || currentFilter !== "ALL"
-              ? `<button type="button" id="btnResetFilters" class="btn btn-outline btn-sm" style="margin-top: 12px; font-size: 12px;">Xóa bộ lọc</button>`
+            currentSearchQuery
+              ? `<button type="button" id="btnClearSearch" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 14px; color: var(--color-text-secondary); cursor: pointer;">Xóa</button>`
               : ""
           }
         </div>
+        <button type="button" class="btn btn-secondary" id="btnRefreshDoctorAppts" style="padding: 9px 16px; font-size: 13px; font-weight: 500; border-radius: 8px;">
+          Làm mới
+        </button>
+      </div>
+
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+        <span style="font-size: 13px; font-weight: 600; color: var(--color-text-secondary); margin-right: 4px;">Lọc ca khám:</span>
+        
+        <button type="button" class="doctor-filter-chip ${currentFilter === "ALL" ? "is-active" : ""}" data-filter="ALL" style="${getFilterChipStyle(currentFilter === "ALL")}">
+          Tất cả <span style="${getBadgeStyle(currentFilter === "ALL")}">${totalCount}</span>
+        </button>
+
+        <button type="button" class="doctor-filter-chip ${currentFilter === "TODAY" ? "is-active" : ""}" data-filter="TODAY" style="${getFilterChipStyle(currentFilter === "TODAY")}">
+          Hôm nay <span style="${getBadgeStyle(currentFilter === "TODAY")}">${todayCount}</span>
+        </button>
+
+        <button type="button" class="doctor-filter-chip ${currentFilter === "TOMORROW" ? "is-active" : ""}" data-filter="TOMORROW" style="${getFilterChipStyle(currentFilter === "TOMORROW")}">
+          Ngày mai <span style="${getBadgeStyle(currentFilter === "TOMORROW")}">${tomorrowCount}</span>
+        </button>
+      </div>
+    `;
+
+    // 2. Lọc danh sách theo currentFilter & currentSearchQuery
+    const filteredList = getFilteredAppointments();
+
+    apptsGrid.innerHTML = "";
+    apptsGrid.appendChild(topBar);
+
+    // Gắn sự kiện Search & Filters
+    setupTopControlsEvents(doctor);
+
+    if (filteredList.length === 0) {
+      apptsGrid.classList.remove("is-calendar-mode");
+      const emptyDiv = document.createElement("div");
+      emptyDiv.style.cssText =
+        "grid-column: 1 / -1; text-align: center; padding: 48px 20px; background: var(--color-bg-muted); border-radius: var(--radius-md); border: 1px dashed var(--color-border);";
+      emptyDiv.innerHTML = `
+        <h4 style="margin: 0 0 6px; font-size: 15px; color: var(--color-text);">Không tìm thấy ca hẹn khám nào!</h4>
+        <p style="color: var(--color-text-secondary); max-width: 460px; margin: 0 auto; font-size: 13px;">
+          ${
+            currentSearchQuery || currentFilter !== "ALL"
+              ? "Không có ca khám nào khớp với từ khóa hoặc bộ lọc đã chọn. Vui lòng thử tìm từ khóa khác hoặc bấm 'Tất cả'."
+              : "Hiện tại chưa có bệnh nhân nào đặt lịch với Bác sĩ."
+          }
+        </p>
+        ${
+          currentSearchQuery || currentFilter !== "ALL"
+            ? `<button type="button" id="btnResetFilters" class="btn btn-outline btn-sm" style="margin-top: 12px; font-size: 12px;">Xóa bộ lọc</button>`
+            : ""
+        }
       `;
-    } else {
-      cardsHtml = filteredList
-        .map((item, index) => {
-          const apptId = item.id || item.AppointmentId || `APT-${index + 1}`;
-          const patientName =
-            item.patientName || item.PatientName || "Bệnh nhân";
-          const patientPhone = item.patientPhone || item.PatientPhone || "--";
-          const patientEmail = item.patientEmail || item.PatientEmail || "--";
-          const apptDate =
-            item.appointmentDate ||
-            item.AppointmentDate ||
-            item.date ||
-            "Hôm nay";
-          const slotTime = item.slotTime || item.SlotTime || item.time || "--";
-          const reason = item.reason || item.Reason || item.patientReason || "";
+      apptsGrid.appendChild(emptyDiv);
 
-          return `
-            <div class="appointment-card" data-id="${apptId}">
-              <div class="appointment-card-header">
-                <span class="appointment-code-badge">${apptId}</span>
-              </div>
-
-              <div class="appointment-doctor-row" style="margin-bottom: 12px;">
-                <div class="appointment-doc-meta">
-                  <h4 class="appointment-doc-name" style="font-size: 16px;">${patientName}</h4>
-                  <span class="appointment-doc-spec">Bệnh nhân &bull; SĐT: ${patientPhone}</span>
-                </div>
-              </div>
-
-              <div class="appointment-info-grid">
-                <div class="appointment-info-col">
-                  <span class="appointment-info-label">Thời gian khám:</span>
-                  <span class="appointment-info-value highlight-time">${slotTime}, ${apptDate}</span>
-                </div>
-                <div class="appointment-info-col">
-                  <span class="appointment-info-label">Bệnh nhân:</span>
-                  <span class="appointment-info-value">${patientName}</span>
-                </div>
-                <div class="appointment-info-col">
-                  <span class="appointment-info-label">Số điện thoại:</span>
-                  <span class="appointment-info-value">${patientPhone}</span>
-                </div>
-                <div class="appointment-info-col">
-                  <span class="appointment-info-label">Email:</span>
-                  <span class="appointment-info-value">${patientEmail}</span>
-                </div>
-              </div>
-
-              ${
-                reason
-                  ? `
-                <div class="appointment-reason-note">
-                  <strong>Lý do khám:</strong> ${reason}
-                </div>
-              `
-                  : ""
-              }
-            </div>
-          `;
-        })
-        .join("");
+      const resetFiltersBtn = emptyDiv.querySelector("#btnResetFilters");
+      if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener("click", () => {
+          currentFilter = "ALL";
+          currentSearchQuery = "";
+          renderDoctorAppointmentsView(doctor);
+        });
+      }
+      return;
     }
 
-    apptsGrid.innerHTML = controlsHtml + cardsHtml;
+    // 3. Khung chứa Calendar hoặc List (Tái sử dụng module window.CareSyncCalendar)
+    const calWrapper = document.createElement("div");
+    calWrapper.style.cssText = "grid-column: 1 / -1; width: 100%;";
+    apptsGrid.appendChild(calWrapper);
 
-    // Gắn sự kiện Search
+    if (doctorViewMode === "calendar" && window.CareSyncCalendar) {
+      apptsGrid.classList.add("is-calendar-mode");
+      window.CareSyncCalendar.renderCalendarView({
+        container: calWrapper,
+        appointments: filteredList,
+        currentDate: doctorCalendarDate,
+        selectedDate: doctorSelectedCalendarDate,
+        role: "doctor",
+        renderCard: (appt) => createDoctorAppointmentCard(appt, doctor),
+        emptyMessage: "Bác sĩ không có ca khám vào ngày này",
+        emptySubtext:
+          "Chọn các ngày có chấm xanh trên lịch để xem danh sách ca khám của bệnh nhân.",
+        statsLabel: "ca khám",
+        onMonthChange: (newDate) => {
+          doctorCalendarDate = newDate;
+          doctorSelectedCalendarDate = null;
+          renderDoctorAppointmentsView(doctor);
+        },
+        onDateSelect: (dateKey) => {
+          doctorSelectedCalendarDate = dateKey;
+        },
+        onSwitchMode: (mode) => {
+          doctorViewMode = mode;
+          renderDoctorAppointmentsView(doctor);
+        },
+      });
+    } else if (window.CareSyncCalendar) {
+      apptsGrid.classList.remove("is-calendar-mode");
+      window.CareSyncCalendar.renderListView({
+        container: calWrapper,
+        appointments: filteredList,
+        title: `Danh sách ca khám của ${doctor.Name || "Bác sĩ"}`,
+        renderCard: (appt) => createDoctorAppointmentCard(appt, doctor),
+        onSwitchMode: (mode) => {
+          doctorViewMode = mode;
+          renderDoctorAppointmentsView(doctor);
+        },
+      });
+    }
+  }
+
+  function setupTopControlsEvents(doctor) {
     const searchInput = document.getElementById("doctorSearchInput");
     if (searchInput) {
       searchInput.addEventListener("input", (e) => {
         currentSearchQuery = e.target.value.trim().toLowerCase();
         renderDoctorAppointmentsView(doctor);
-        // Giữ focus lại vào input sau khi render lại
         const newSearchInput = document.getElementById("doctorSearchInput");
         if (newSearchInput) {
           newSearchInput.focus();
@@ -715,50 +766,53 @@
       });
     }
 
-    // Gắn sự kiện Filter Chips
     const filterChips = document.querySelectorAll(".doctor-filter-chip");
     filterChips.forEach((chip) => {
       chip.addEventListener("click", () => {
-        const filterVal = chip.getAttribute("data-filter");
-        currentFilter = filterVal;
+        currentFilter = chip.getAttribute("data-filter");
         renderDoctorAppointmentsView(doctor);
       });
     });
 
-    // Nút làm mới
     const refreshBtn = document.getElementById("btnRefreshDoctorAppts");
     if (refreshBtn) {
-      refreshBtn.addEventListener("click", () =>
-        loadDoctorAppointments(doctor),
-      );
-    }
-
-    // Nút xóa bộ lọc khi rỗng
-    const resetFiltersBtn = document.getElementById("btnResetFilters");
-    if (resetFiltersBtn) {
-      resetFiltersBtn.addEventListener("click", () => {
-        currentFilter = "ALL";
-        currentSearchQuery = "";
-        renderDoctorAppointmentsView(doctor);
+      refreshBtn.addEventListener("click", () => {
+        loadDoctorAppointments(doctor);
       });
     }
   }
 
   function getFilteredAppointments() {
+    const todayDate = new Date();
+    const tomorrowDate = new Date();
+    tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+
     return currentDoctorAppointments.filter((item) => {
-      // 1. Lọc theo thời gian (Hôm nay / Ngày mai)
-      const apptDate = (
+      const rawDateStr =
         item.appointmentDate ||
         item.AppointmentDate ||
-        ""
-      ).toLowerCase();
+        item.date ||
+        item.slotKey ||
+        item.SlotKey ||
+        "";
+      const parsedD = window.CareSyncCalendar
+        ? window.CareSyncCalendar.parseApptDate(rawDateStr)
+        : null;
 
+      // 1. Lọc theo thời gian (Hôm nay / Ngày mai)
       if (currentFilter === "TODAY") {
-        if (!apptDate.includes("hôm nay") && !apptDate.includes("today"))
-          return false;
+        const isMatch =
+          (parsedD && window.CareSyncCalendar.isSameDay(parsedD, todayDate)) ||
+          rawDateStr.toLowerCase().includes("hôm nay") ||
+          rawDateStr.toLowerCase().includes("today");
+        if (!isMatch) return false;
       } else if (currentFilter === "TOMORROW") {
-        if (!apptDate.includes("ngày mai") && !apptDate.includes("tomorrow"))
-          return false;
+        const isMatch =
+          (parsedD &&
+            window.CareSyncCalendar.isSameDay(parsedD, tomorrowDate)) ||
+          rawDateStr.toLowerCase().includes("ngày mai") ||
+          rawDateStr.toLowerCase().includes("tomorrow");
+        if (!isMatch) return false;
       }
 
       // 2. Lọc theo từ khóa tìm kiếm
@@ -774,7 +828,12 @@
           item.PatientPhone ||
           ""
         ).toLowerCase();
-        const reason = (item.reason || item.Reason || "").toLowerCase();
+        const reason = (
+          item.reason ||
+          item.Reason ||
+          item.patientReason ||
+          ""
+        ).toLowerCase();
 
         const match =
           id.includes(currentSearchQuery) ||
@@ -787,6 +846,105 @@
 
       return true;
     });
+  }
+
+  function createDoctorAppointmentCard(appt, doctor) {
+    const card = document.createElement("div");
+    card.className = "appointment-card";
+    const apptId = appt.id || appt.AppointmentId || "APT-0";
+    const patientName = appt.patientName || appt.PatientName || "Bệnh nhân";
+    const patientPhone = appt.patientPhone || appt.PatientPhone || "--";
+    const patientEmail = appt.patientEmail || appt.PatientEmail || "--";
+    const apptDate =
+      appt.appointmentDate || appt.AppointmentDate || appt.date || "Hôm nay";
+    const slotTime = appt.slotTime || appt.SlotTime || appt.time || "--";
+    const reason = appt.reason || appt.Reason || appt.patientReason || "";
+    const isCancelled =
+      (appt.status || appt.Status || "").toLowerCase() === "cancelled" ||
+      (appt.status || appt.Status || "").toLowerCase() === "da_huy";
+
+    card.innerHTML = `
+      <div class="appointment-card-header">
+        <span class="appointment-code-badge">${apptId}</span>
+        ${
+          isCancelled
+            ? '<span class="badge badge-neutral">Đã hủy</span>'
+            : '<span class="badge badge-success">Đã xác nhận</span>'
+        }
+      </div>
+
+      <div class="appointment-doctor-row" style="margin-bottom: 12px;">
+        <div class="appointment-doc-meta">
+          <h4 class="appointment-doc-name" style="font-size: 16px;">${patientName}</h4>
+          <span class="appointment-doc-spec">Bệnh nhân &bull; SĐT: ${patientPhone}</span>
+        </div>
+      </div>
+
+      <div class="appointment-info-grid">
+        <div class="appointment-info-col">
+          <span class="appointment-info-label">Thời gian khám:</span>
+          <span class="appointment-info-value highlight-time">${slotTime}, ${apptDate}</span>
+        </div>
+        <div class="appointment-info-col">
+          <span class="appointment-info-label">Bệnh nhân:</span>
+          <span class="appointment-info-value">${patientName}</span>
+        </div>
+        <div class="appointment-info-col">
+          <span class="appointment-info-label">Số điện thoại:</span>
+          <span class="appointment-info-value">${patientPhone}</span>
+        </div>
+        <div class="appointment-info-col">
+          <span class="appointment-info-label">Email:</span>
+          <span class="appointment-info-value">${patientEmail}</span>
+        </div>
+      </div>
+
+      ${
+        reason
+          ? `
+        <div class="appointment-reason-note">
+          <strong>Lý do khám:</strong> ${reason}
+        </div>
+      `
+          : ""
+      }
+
+      <div class="appointment-card-actions">
+        <button type="button" class="btn btn-outline btn-sm action-view-ticket" data-id="${apptId}">
+          <span class="material-symbols-rounded" style="font-size: 16px; margin-right: 4px;">receipt_long</span>
+          <span>Xem phiếu khám</span>
+        </button>
+      </div>
+    `;
+
+    const viewBtn = card.querySelector(".action-view-ticket");
+    if (viewBtn) {
+      viewBtn.addEventListener("click", () => {
+        if (typeof window.openAppointmentTicketModal === "function") {
+          window.openAppointmentTicketModal({
+            id: apptId,
+            patientName: patientName,
+            patientPhone: patientPhone,
+            patientEmail: patientEmail,
+            patientReason: reason,
+            date: apptDate,
+            time: slotTime,
+            doctorName: doctor?.Name || appt.doctorName || "Bác sĩ phụ trách",
+            doctorSpecialty:
+              doctor?.Specialty ||
+              appt.doctorSpecialty ||
+              "Chuyên khoa đa khoa",
+            doctorRoom: doctor?.Room || appt.doctorRoom || "Phòng khám 101",
+            doctorAvatar:
+              doctor?.Avatar ||
+              appt.doctorAvatar ||
+              "assets/images/doctor-1.jpg",
+          });
+        }
+      });
+    }
+
+    return card;
   }
 
   function getFilterChipStyle(isActive) {
