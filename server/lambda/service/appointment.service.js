@@ -90,6 +90,41 @@ const createAppointment = async (data) => {
   try {
     const asyncTasks = [];
 
+    // Chuẩn bị thông tin hiển thị bác sĩ và phòng khám
+    const doctorDisplay = newAppointmentItem.DoctorName
+      ? `${newAppointmentItem.DoctorName}${newAppointmentItem.DoctorSpecialty ? ` (${newAppointmentItem.DoctorSpecialty})` : ""}`
+      : doctorId;
+    const roomDisplay = newAppointmentItem.DoctorRoom || "Phòng khám 101";
+
+    // 1. Soạn nội dung email xác nhận đặt lịch khám tức thì
+    const confirmationEmailBody = [
+      "🏥 TRUNG TÂM Y TẾ TRỰC TUYẾN CARESYNC",
+      "XÁC NHẬN ĐẶT LỊCH KHÁM BỆNH THÀNH CÔNG",
+      "",
+      `Kính gửi Quý bệnh nhân: ${patientName},`,
+      "",
+      "Hệ thống CareSync xin trân trọng thông báo lịch hẹn khám bệnh của Quý khách đã được xác nhận thành công:",
+      "",
+      `  • Mã phiếu hẹn : #${appointmentId}`,
+      `  • Bác sĩ khám  : ${doctorDisplay}`,
+      `  • Ngày khám    : ${appointmentDate}`,
+      `  • Khung giờ     : ${slotTime}`,
+      `  • Địa điểm     : ${roomDisplay} - CareSync Clinic`,
+      `  • SĐT đăng ký  : ${patientPhone}`,
+      `  • Email         : ${patientEmail}`,
+      "",
+      "📌 Lưu ý dành cho bệnh nhân:",
+      "- Quý khách vui lòng có mặt tại phòng khám trước giờ hẹn 10 - 15 phút.",
+      "- Xuất trình mã phiếu hẹn trên tại Quầy tiếp đón để được làm thủ tục nhanh nhất.",
+      `- Quý khách có thể tra cứu lịch hẹn tại CareSync bằng SĐT: ${patientPhone}.`,
+      "",
+      "Kính chúc Quý khách nhiều sức khỏe!",
+      "",
+      "Trân trọng,",
+      "Đội ngũ Y tế CareSync",
+      "Hotline hỗ trợ: 1900 1234",
+    ].join("\n");
+
     // Gọi lệnh PublishCommand gửi email xác nhận ngay sau khi ghi DynamoDB
     if (snsTopicArn) {
       const publishTask = snsClient
@@ -97,21 +132,7 @@ const createAppointment = async (data) => {
           new PublishCommand({
             TopicArn: snsTopicArn,
             Subject: `[CareSync] Xác nhận đặt lịch khám #${appointmentId}`,
-            Message: [
-              `Xin chào ${patientName},`,
-              ``,
-              `Lịch hẹn khám bệnh của bạn đã được xác nhận thành công trên CareSync:`,
-              `- Mã lịch hẹn: ${appointmentId}`,
-              `- Mã bác sĩ: ${doctorId}`,
-              `- Ngày khám: ${appointmentDate}`,
-              `- Khung giờ: ${slotTime}`,
-              `- Số điện thoại: ${patientPhone}`,
-              `- Email: ${patientEmail}`,
-              ``,
-              `Vui lòng đến trước giờ hẹn 15 phút.`,
-              `Trân trọng,`,
-              `Đội ngũ CareSync.`,
-            ].join("\n"),
+            Message: confirmationEmailBody,
           }),
         )
         .catch((err) => {
@@ -120,6 +141,34 @@ const createAppointment = async (data) => {
 
       asyncTasks.push(publishTask);
     }
+
+    // 2. Soạn nội dung email nhắc lịch hẹn khám bệnh (EventBridge Scheduler)
+    const reminderEmailBody = [
+      "🏥 TRUNG TÂM Y TẾ TRỰC TUYẾN CARESYNC",
+      "THÔNG BÁO NHẮC LỊCH HẸN KHÁM BỆNH",
+      "",
+      `Kính gửi Quý bệnh nhân: ${patientName},`,
+      "",
+      "CareSync xin trân trọng thông báo nhắc nhở về lịch hẹn khám bệnh sắp diễn ra của Quý khách:",
+      "",
+      `  • Mã phiếu hẹn : #${appointmentId}`,
+      `  • Bác sĩ khám  : ${doctorDisplay}`,
+      `  • Ngày khám    : ${appointmentDate}`,
+      `  • Khung giờ     : ${slotTime}`,
+      `  • Địa điểm     : ${roomDisplay} - CareSync Clinic`,
+      "",
+      "⚠️ Lưu ý quan trọng:",
+      "- Quý khách vui lòng có mặt đúng giờ hoặc trước 10 - 15 phút tại phòng khám.",
+      "- Vui lòng mang theo CCCD/CMND hoặc thẻ BHYT (nếu có).",
+      `- Tra cứu chi tiết phiếu khám trực tuyến bằng SĐT: ${patientPhone}.`,
+      "- Nếu có việc đột xuất cần dời lịch, vui lòng liên hệ hotline sớm nhất.",
+      "",
+      "Kính chúc Quý khách có buổi khám bệnh thuận lợi và sức khỏe dồi dào!",
+      "",
+      "Trân trọng,",
+      "Đội ngũ Y tế & Chăm sóc khách hàng CareSync",
+      "Hotline hỗ trợ: 1900 1234",
+    ].join("\n");
 
     // Gọi lệnh CreateScheduleCommand với biểu thức at() để hẹn giờ nhắc lịch sau vài phút
     if (schedulerRoleArn && schedulerTargetArn) {
@@ -146,10 +195,7 @@ const createAppointment = async (data) => {
             Target: {
               Arn: schedulerTargetArn,
               RoleArn: schedulerRoleArn,
-              Input: JSON.stringify({
-                Subject: `[CareSync] Nhắc lịch hẹn khám bệnh #${appointmentId}`,
-                Message: `Xin chào ${patientName},\nĐây là thông báo nhắc lịch khám bệnh từ CareSync vào lúc ${slotTime} ngày ${appointmentDate}.\nVui lòng có mặt đúng giờ!`,
-              }),
+              Input: reminderEmailBody,
             },
           }),
         )
