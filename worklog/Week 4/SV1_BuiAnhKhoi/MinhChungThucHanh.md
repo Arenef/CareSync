@@ -143,7 +143,7 @@ _Hình 2.2: Giao diện kiểm tra tính hợp lệ của dữ liệu (Validatio
 ![Popup Vé khám hiển thị ngay sau khi đặt lịch thành công trên AWS](../img/E2E_04_Booking_Success_Ticket.png)
 _Hình 2.3: Cửa sổ Vé khám (Ticket Modal) hiển thị chi tiết mã phiếu hẹn sau khi lưu thành công vào DynamoDB._
 
-![Dữ liệu hồ sơ bệnh nhân được mã hóa số điện thoại bằng AWS KMS trong bảng Patients](../img/E2E_05_DynamoDB_KMS_Patient.png)
+![Dữ liệu hồ sơ bệnh nhân được mã hóa số điện thoại bằng AWS KMS trong bảng Patients](../img/E2E_05_DynamoDB_KMS_Patient.jpg)
 _Hình 2.4: Minh chứng bản ghi trên bảng DynamoDB Patients với trường PhoneEncrypted được mã hóa bằng AWS KMS._
 
 ![Email xác nhận đặt lịch và email nhắc lịch hẹn tự động sau 2 phút qua Amazon SNS](../img/E2E_06_SNS_Confirm_Reminder_Email.png)
