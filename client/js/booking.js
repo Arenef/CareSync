@@ -21,17 +21,8 @@ function initBooking() {
     dateInput.addEventListener("change", handleDateChange);
   }
 
-  // Chọn giờ
-  timeSlotButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      if (btn.disabled || btn.classList.contains("is-unavailable")) return;
-
-      timeSlotButtons.forEach((b) => b.classList.remove("is-selected"));
-      btn.classList.add("is-selected");
-      selectedTimeSlot = btn.dataset.time || btn.textContent.trim();
-      updateSummary();
-    });
-  });
+  // Khởi tạo các khung giờ khám
+  renderBookingTimeSlots();
 
   // Realtime input listeners for summary & error clearing
   const patientNameInput = document.getElementById("patientName");
@@ -70,6 +61,7 @@ function initBooking() {
 // Cập nhật thông tin bác sĩ
 function updateSelectedDoctor(doc) {
   currentDoctor = doc;
+  renderBookingTimeSlots();
   updateSummary();
 }
 
@@ -95,8 +87,98 @@ function handleDateChange(e) {
   } else {
     clearFieldError(dateInput);
   }
+  renderBookingTimeSlots();
   updateSummary();
 }
+
+/**
+ * Render động và cập nhật trạng thái các khung giờ khám
+ * - Theo khung giờ làm việc riêng của bác sĩ (workingSlots)
+ * - Khóa các khung giờ đã trôi qua nếu ngày khám là ngày hôm nay
+ */
+function renderBookingTimeSlots() {
+  const container = document.getElementById("timeSlotsGrid");
+  if (!container) return;
+
+  const dateInput = document.getElementById("appointmentDate");
+  const selectedDateStr = dateInput ? dateInput.value : "";
+
+  // 1. Xác định danh sách khung giờ theo bác sĩ đang chọn
+  let slots = [
+    "08:00",
+    "08:30",
+    "09:00",
+    "09:30",
+    "10:00",
+    "14:00",
+    "14:30",
+    "15:00",
+  ];
+  if (
+    currentDoctor &&
+    Array.isArray(currentDoctor.workingSlots) &&
+    currentDoctor.workingSlots.length > 0
+  ) {
+    slots = currentDoctor.workingSlots;
+  }
+
+  // 2. Kiểm tra nếu ngày khám được chọn là hôm nay
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  const todayStr = `${yyyy}-${mm}-${dd}`;
+  const isToday = selectedDateStr === todayStr;
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+  container.innerHTML = "";
+
+  slots.forEach((time) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "time-slot-btn";
+    btn.dataset.time = time;
+    btn.textContent = time;
+
+    // Phân tích giờ/phút của ca khám
+    const [h, m] = time.split(":").map(Number);
+    const slotMinutes = h * 60 + (m || 0);
+
+    // Khóa các khung giờ đã trôi qua nếu là ngày hôm nay
+    const isPast = isToday && slotMinutes < currentMinutes;
+
+    if (isPast) {
+      btn.classList.add("is-unavailable");
+      btn.disabled = true;
+      btn.title = "Đã qua khung giờ khám";
+      btn.setAttribute("aria-disabled", "true");
+      // Nếu khung giờ này đang được chọn thì tự động hủy chọn
+      if (selectedTimeSlot === time) {
+        selectedTimeSlot = null;
+      }
+    } else {
+      btn.title = "Khung giờ khả dụng";
+      if (selectedTimeSlot === time) {
+        btn.classList.add("is-selected");
+      }
+    }
+
+    btn.addEventListener("click", () => {
+      if (btn.disabled || btn.classList.contains("is-unavailable")) return;
+
+      const allBtns = container.querySelectorAll(".time-slot-btn");
+      allBtns.forEach((b) => b.classList.remove("is-selected"));
+      btn.classList.add("is-selected");
+      selectedTimeSlot = time;
+      updateSummary();
+    });
+
+    container.appendChild(btn);
+  });
+
+  updateSummary();
+}
+
 
 // Cập nhật tóm tắt
 function updateSummary() {
@@ -393,10 +475,7 @@ function handleBookingReset() {
 
   // Reset giờ khám
   selectedTimeSlot = null;
-  const slotButtons = document.querySelectorAll(".time-slot-btn");
-  slotButtons.forEach((btn) => {
-    btn.classList.remove("is-selected");
-  });
+  renderBookingTimeSlots();
 
   // Reset chọn bác sĩ
   if (typeof resetDoctorSelection === "function") {
