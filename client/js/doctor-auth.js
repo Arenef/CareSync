@@ -232,10 +232,7 @@
       currentTargetEmail = email;
       showStep(2);
 
-      const toastMsg = res.debugOtp
-        ? `Đã gửi mã OTP về ${email}! (Mã thử nghiệm: ${res.debugOtp})`
-        : `Mã xác thực đã được gửi về email ${email}! Vui lòng kiểm tra hộp thư.`;
-      showToastNotification(toastMsg, "success");
+      showToastNotification("Gửi mã OTP thành công!", "success");
     } catch (err) {
       console.error("Lỗi gửi OTP Bác sĩ:", err);
       showError(
