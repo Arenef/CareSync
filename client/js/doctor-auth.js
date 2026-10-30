@@ -576,8 +576,16 @@
     }
   }
 
+  function getFilterChipStyle(isActive) {
+    return `padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid ${isActive ? "var(--color-primary)" : "var(--color-border)"}; background: ${isActive ? "var(--color-primary)" : "var(--color-surface)"}; color: ${isActive ? "#fff" : "var(--color-text)"}; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px;`;
+  }
+
+  function getBadgeStyle(isActive) {
+    return `padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; background: ${isActive ? "rgba(255,255,255,0.25)" : "var(--color-bg-muted)"}; color: ${isActive ? "#fff" : "var(--color-text-secondary)"};`;
+  }
+
   function renderDoctorAppointmentsView(doctor) {
-    const apptsGrid = document.getElementById("doctorAppointmentsGrid");
+    const apptsGrid = document.getElementById("myAppointmentsList");
     if (!apptsGrid) return;
 
     const todayDate = new Date();
@@ -623,6 +631,7 @@
     // 1. Kiểm tra hoặc tạo thanh điều khiển phía trên (topBar) - KHÔNG xóa ô input để giữ focus và IME gõ tiếng Việt
     let topBar = apptsGrid.querySelector(".doctor-top-controls");
     if (!topBar) {
+      apptsGrid.innerHTML = ""; // Dọn sạch dòng loading 'Đang đồng bộ danh sách ca khám...'
       topBar = document.createElement("div");
       topBar.className = "doctor-top-controls";
       topBar.style.cssText =
