@@ -585,7 +585,7 @@
   }
 
   function renderDoctorAppointmentsView(doctor) {
-    const apptsGrid = document.getElementById("doctorAppointmentsGrid");
+    const apptsGrid = document.getElementById("myAppointmentsList");
     if (!apptsGrid) return;
 
     const todayDate = new Date();
