@@ -192,15 +192,20 @@
         <!-- Toolbar tìm kiếm bác sĩ & Lọc theo chuyên khoa -->
         <div class="directory-toolbar">
           <div class="directory-search-wrapper">
-            <div class="input-icon-wrapper">
-              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.3-4.3" />
-              </svg>
-              <input type="search" id="directorySearchInput" class="form-input input-with-icon"
-                placeholder="Tìm bác sĩ theo họ tên, chuyên môn hoặc học vị..."
-                aria-label="Tìm kiếm bác sĩ theo chuyên khoa" />
+            <div class="directory-search-group" style="display: flex; gap: 8px; width: 100%;">
+              <div class="input-icon-wrapper" style="flex: 1;">
+                <svg class="input-icon" id="directorySearchIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="cursor: pointer;" title="Bấm để tìm kiếm">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.3-4.3" />
+                </svg>
+                <input type="search" id="directorySearchInput" class="form-input input-with-icon"
+                  placeholder="Tìm bác sĩ theo họ tên, chuyên môn hoặc học vị..."
+                  aria-label="Tìm kiếm bác sĩ theo chuyên khoa" />
+              </div>
+              <button type="button" id="btnDirectorySearch" class="btn btn-primary" style="white-space: nowrap; padding: 0 16px;">
+                Tìm kiếm
+              </button>
             </div>
           </div>
           <div class="directory-tabs" id="directorySpecialtyTabs" role="tablist" aria-label="Lọc theo chuyên khoa">
@@ -1005,12 +1010,12 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- JavaScript Files (v3 Cache Busting) -->
-  <script src="js/api.js?v=2" defer></script>
-  <script src="js/doctors.js?v=2" defer></script>
+  <script src="js/api.js?v=3" defer></script>
+  <script src="js/doctors.js?v=3" defer></script>
   <script src="js/booking.js?v=2" defer></script>
   <script src="js/calendar.js?v=1" defer></script>
   <script src="js/lookup.js?v=4" defer></script>
-  <script src="js/doctor-auth.js?v=3" defer></script>
+  <script src="js/doctor-auth.js?v=4" defer></script>
   <script src="js/navigation.js?v=2" defer></script>
   <script src="js/app.js?v=2" defer></script>
 </body>

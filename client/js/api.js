@@ -75,13 +75,13 @@ function mapDoctorFromDynamoDB(doc) {
   if (!doc) return null;
   return {
     id: doc.DoctorId || doc.id,
-    name: doc.FullName || doc.name,
-    specialty: doc.Specialty || doc.specialty,
+    name: doc.FullName || doc.Name || doc.name || "Bác sĩ",
+    specialty: doc.Specialty || doc.specialty || doc.DoctorSpecialty || "",
     phone: doc.Phone || doc.phone || "1900 1234",
     email: doc.Email || doc.email || "",
     avatar:
-      doc.AvatarUrl || doc.avatar || "assets/images/doctor-placeholder.jpg",
-    room: doc.Room || doc.room || "Phòng khám Đa khoa",
+      doc.AvatarUrl || doc.avatar || doc.Avatar || "assets/images/doctor-placeholder.jpg",
+    room: doc.Room || doc.room || doc.DoctorRoom || "Phòng khám Đa khoa",
     degree: doc.Degree || doc.degree || "Bác sĩ Chuyên khoa",
     position: doc.Position || doc.position || "Bác sĩ điều trị",
     workingSlots: doc.WorkingSlots ||

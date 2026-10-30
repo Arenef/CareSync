@@ -86,6 +86,9 @@ function normalizeString(str) {
     .replace(/Đ/g, "d")
     .trim();
 }
+if (typeof window !== "undefined") {
+  window.normalizeString = normalizeString;
+}
 
 /**
  * Chuẩn hóa chuỗi chuyên khoa để so sánh linh hoạt (bỏ tiền tố/hậu tố 'khoa', 'chuyên khoa')
@@ -118,6 +121,33 @@ function matchesSpecialty(docSpecialty, filterSpecialty) {
 
   return false;
 }
+
+/**
+ * Kiểm tra bác sĩ có khớp với từ khóa tìm kiếm hay không
+ * Live search theo từng ký tự nhập vào (không dấu, chữ thường)
+ * Tìm kiếm theo: Tên bác sĩ, Số điện thoại, Chuyên khoa, Học vị, Mã bác sĩ
+ */
+function doctorMatchesQuery(doc, query) {
+  if (!query) return true;
+  const q = normalizeString(query);
+  if (!q) return true;
+
+  // Gom các trường thông tin của bác sĩ (tên, số điện thoại, chuyên khoa, học vị, mã bác sĩ)
+  // thành chuỗi chuẩn hóa không dấu để so khớp chuỗi ký tự nhập vào
+  const searchableText = [
+    doc.name,
+    doc.phone,
+    doc.specialty,
+    doc.degree,
+    doc.id,
+    doc.DoctorId,
+  ]
+    .map(normalizeString)
+    .join(" ");
+
+  return searchableText.includes(q);
+}
+
 
 // Khởi tạo danh sách bác sĩ và bộ lọc tìm kiếm
 async function initDoctors(onSelectCallback) {
@@ -224,23 +254,9 @@ function filterBookingDoctors() {
     );
   }
 
-  // Lọc theo từ khóa tìm kiếm (họ tên, chuyên khoa, phòng, học vị...)
+  // Lọc theo từ khóa tìm kiếm (họ tên, chuyên khoa, học vị, mã BS...)
   if (bookingSearchQuery) {
-    const q = normalizeString(bookingSearchQuery);
-    filtered = filtered.filter((doc) => {
-      const name = normalizeString(doc.name);
-      const spec = normalizeString(doc.specialty);
-      const degree = normalizeString(doc.degree);
-      const pos = normalizeString(doc.position);
-      const room = normalizeString(doc.room);
-      return (
-        name.includes(q) ||
-        spec.includes(q) ||
-        degree.includes(q) ||
-        pos.includes(q) ||
-        room.includes(q)
-      );
-    });
+    filtered = filtered.filter((doc) => doctorMatchesQuery(doc, bookingSearchQuery));
   }
 
   renderDoctors(filtered);
@@ -357,16 +373,62 @@ function renderDirectoryTabs() {
 function initDoctorDirectory() {
   const directoryGrid = document.getElementById("doctorsDirectoryGrid");
   const searchInput = document.getElementById("directorySearchInput");
+  const searchBtn = document.getElementById("btnDirectorySearch");
+  const searchIcon = document.getElementById("directorySearchIcon");
 
   if (!directoryGrid) return;
 
   // Render động các tab chuyên khoa từ danh sách bác sĩ
   renderDirectoryTabs();
 
+  const handleDirectorySearch = (val) => {
+    directorySearchQuery = (val || "").trim();
+    // Khi người dùng gõ tìm kiếm từ khóa, nếu đang ở tab chuyên khoa hẹp thì tự động chuyển về tất cả để tìm bao quát
+    if (directorySearchQuery && directorySpecialtyFilter !== "all") {
+      directorySpecialtyFilter = "all";
+      const tabs = document.querySelectorAll("#directorySpecialtyTabs .tab-btn");
+      tabs.forEach((t) => {
+        if (t.dataset.specialty === "all") t.classList.add("is-active");
+        else t.classList.remove("is-active");
+      });
+    }
+    renderDoctorDirectory();
+  };
+
   if (searchInput) {
+    // Tìm kiếm tức thì khi gõ
     searchInput.addEventListener("input", (e) => {
-      directorySearchQuery = e.target.value.trim();
-      renderDoctorDirectory();
+      handleDirectorySearch(e.target.value);
+    });
+
+    // Khi người dùng bấm nút Clear (dấu X) trong input type="search"
+    searchInput.addEventListener("search", (e) => {
+      handleDirectorySearch(e.target.value);
+    });
+
+    // Khi người dùng nhấn Enter
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleDirectorySearch(searchInput.value);
+      }
+    });
+  }
+
+  // Sự kiện khi bấm nút "Tìm kiếm"
+  if (searchBtn) {
+    searchBtn.addEventListener("click", () => {
+      if (searchInput) handleDirectorySearch(searchInput.value);
+    });
+  }
+
+  // Sự kiện khi click biểu tượng kính lúp
+  if (searchIcon) {
+    searchIcon.addEventListener("click", () => {
+      if (searchInput) {
+        searchInput.focus();
+        handleDirectorySearch(searchInput.value);
+      }
     });
   }
 
@@ -388,25 +450,9 @@ function renderDoctorDirectory() {
     );
   }
 
-  // Filter tìm kiếm theo tên, chuyên khoa, học vị, chức vụ, phòng, giới thiệu
+  // Filter tìm kiếm theo tên, chuyên khoa, học vị, chức vụ, mã BS (dùng doctorMatchesQuery chuẩn xác)
   if (directorySearchQuery) {
-    const q = normalizeString(directorySearchQuery);
-    filtered = filtered.filter((doc) => {
-      const name = normalizeString(doc.name);
-      const spec = normalizeString(doc.specialty);
-      const degree = normalizeString(doc.degree);
-      const pos = normalizeString(doc.position);
-      const room = normalizeString(doc.room);
-      const bio = normalizeString(doc.bio);
-      return (
-        name.includes(q) ||
-        spec.includes(q) ||
-        degree.includes(q) ||
-        pos.includes(q) ||
-        room.includes(q) ||
-        bio.includes(q)
-      );
-    });
+    filtered = filtered.filter((doc) => doctorMatchesQuery(doc, directorySearchQuery));
   }
 
   directoryGrid.innerHTML = "";
