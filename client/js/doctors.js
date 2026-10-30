@@ -188,7 +188,9 @@ function renderBookingSpecialtyTabs() {
 
   uniqueSpecialties.forEach((spec) => {
     const isActive = bookingSpecialtyFilter === spec;
-    const count = DOCTORS_DATA.filter((d) => matchesSpecialty(d.specialty, spec)).length;
+    const count = DOCTORS_DATA.filter((d) =>
+      matchesSpecialty(d.specialty, spec),
+    ).length;
     html += `
       <button type="button" class="tab-btn ${isActive ? "is-active" : ""}" data-specialty="${spec}">
         ${spec} (${count})
@@ -218,7 +220,7 @@ function filterBookingDoctors() {
   // Lọc theo chuyên khoa
   if (bookingSpecialtyFilter !== "all") {
     filtered = filtered.filter((doc) =>
-      matchesSpecialty(doc.specialty, bookingSpecialtyFilter)
+      matchesSpecialty(doc.specialty, bookingSpecialtyFilter),
     );
   }
 
@@ -267,12 +269,9 @@ function renderDoctors(doctors) {
     card.setAttribute("tabindex", "0");
     card.setAttribute("aria-pressed", isSelected ? "true" : "false");
     card.dataset.id = doc.id;
-    card.title = "Bấm để chọn bác sĩ và xem thông tin chi tiết";
+    card.title = "Bấm để chọn bác sĩ";
 
     card.innerHTML = `
-      <button type="button" class="doctor-quick-view-btn" data-action="quick-view" title="Xem ảnh phóng to & hồ sơ chi tiết bác sĩ">
-        <span class="material-symbols-rounded">zoom_in</span>
-      </button>
       <div class="doctor-avatar-wrapper">
         <img src="${doc.avatar || "assets/images/doctor-placeholder.jpg"}" alt="${doc.name}" class="doctor-avatar" loading="lazy">
         <span class="doctor-check-icon" aria-hidden="true">&#10003;</span>
@@ -286,21 +285,10 @@ function renderDoctors(doctors) {
       </div>
     `;
 
-    // Khi bấm vào ô bác sĩ: vừa chọn bác sĩ vừa mở modal xem thông tin phóng to
+    // Khi bấm vào ô bác sĩ: chỉ chọn bác sĩ khám bệnh (không mở modal)
     const handleCardClick = (e) => {
       selectDoctor(doc.id);
-      showDoctorDetailModal(doc.id);
     };
-
-    // Nút soi ảnh nhanh
-    const quickViewBtn = card.querySelector("[data-action='quick-view']");
-    if (quickViewBtn) {
-      quickViewBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        selectDoctor(doc.id);
-        showDoctorDetailModal(doc.id);
-      });
-    }
 
     card.addEventListener("click", handleCardClick);
     card.addEventListener("keydown", (e) => {
@@ -342,7 +330,9 @@ function renderDirectoryTabs() {
 
   uniqueSpecialties.forEach((spec) => {
     const isActive = directorySpecialtyFilter === spec;
-    const count = DOCTORS_DATA.filter((d) => matchesSpecialty(d.specialty, spec)).length;
+    const count = DOCTORS_DATA.filter((d) =>
+      matchesSpecialty(d.specialty, spec),
+    ).length;
     html += `
       <button type="button" class="tab-btn ${isActive ? "is-active" : ""}" data-specialty="${spec}">
         ${spec} (${count})
@@ -394,7 +384,7 @@ function renderDoctorDirectory() {
   let filtered = DOCTORS_DATA;
   if (directorySpecialtyFilter !== "all") {
     filtered = filtered.filter((doc) =>
-      matchesSpecialty(doc.specialty, directorySpecialtyFilter)
+      matchesSpecialty(doc.specialty, directorySpecialtyFilter),
     );
   }
 
@@ -596,15 +586,15 @@ function showDoctorDetailModal(doctorId) {
       doc.workingSlots && doc.workingSlots.length > 0
         ? doc.workingSlots
         : [
-          "08:00",
-          "08:30",
-          "09:00",
-          "09:30",
-          "10:00",
-          "14:00",
-          "14:30",
-          "15:00",
-        ];
+            "08:00",
+            "08:30",
+            "09:00",
+            "09:30",
+            "10:00",
+            "14:00",
+            "14:30",
+            "15:00",
+          ];
 
     slots.forEach((s) => {
       const chip = document.createElement("span");
@@ -721,6 +711,10 @@ window.resetBookingFilter = resetBookingFilter;
 window.resetDoctorSelection = resetDoctorSelection;
 window.getDoctorById = function (id) {
   if (!id) return null;
-  return DOCTORS_DATA.find((d) => d.id === id || d.doctorId === id || d.DoctorId === id) || null;
+  return (
+    DOCTORS_DATA.find(
+      (d) => d.id === id || d.doctorId === id || d.DoctorId === id,
+    ) || null
+  );
 };
 window.DOCTORS_DATA = DOCTORS_DATA;
