@@ -7,7 +7,8 @@
 > - Huỳnh Ngọc Bảo Khang – MSSV: 24110241 (SV2)
 >
 > 🌐 **Website Demo (Amazon S3 Hosting):** [http://appointment-booking-web-demo.s3-website-us-east-1.amazonaws.com](http://appointment-booking-web-demo.s3-website-us-east-1.amazonaws.com)  
-> 📦 **GitHub Repository:** [https://github.com/Arenef/CareSync](https://github.com/Arenef/CareSync) (Branch: `main`)
+> 📦 **GitHub Repository:** [https://github.com/Arenef/CareSync](https://github.com/Arenef/CareSync) (Branch: `main`)  
+> 🎥 **Video Demo CareSync:** [https://drive.google.com/drive/folders/1sK3Uae6RGCYvLRe3XZixI6ULkMxq5bKn?usp=sharing](https://drive.google.com/drive/folders/1sK3Uae6RGCYvLRe3XZixI6ULkMxq5bKn?usp=sharing)
 >
 > ⚠️ **Lưu ý quan trọng về môi trường thử nghiệm (AWS Academy Learner Lab):**  
 > Toàn bộ hạ tầng Backend (API Gateway, Lambda, DynamoDB, KMS, SNS) được triển khai trên tài khoản thực hành **AWS Academy Learner Lab**. Do cơ chế phòng lab có thời hạn phiên làm việc và cần nhấn _Start Lab_ thủ công, các kết nối API đám mây sẽ hoạt động đầy đủ khi tài khoản lab đang ở trạng thái kích hoạt (`Lab status: ready`). Khi phòng lab tắt, bạn vẫn có thể mở xem toàn bộ giao diện Frontend cục bộ.
@@ -152,12 +153,12 @@ CareSync/
    cd CareSync
    ```
 2. Mở trực tiếp file `client/index.html` bằng trình duyệt web bất kỳ (Chrome, Edge, Firefox).  
-   *Hoặc sử dụng extension **Live Server** trong VS Code / chạy lệnh Node.js:*
+   _Hoặc sử dụng extension **Live Server** trong VS Code / chạy lệnh Node.js:_
    ```bash
    npx serve client
    ```
 3. Ứng dụng đã được cấu hình sẵn endpoint API Gateway AWS trên cloud (`client/js/api.js`).  
-   *(Lưu ý: Các thao tác gọi API đám mây như nạp danh bạ từ DynamoDB, đặt lịch, tra cứu sẽ hoạt động khi tài khoản AWS Academy Learner Lab đang ở trạng thái Start Lab. Nếu phòng lab tắt, bạn vẫn có thể xem trước cấu trúc giao diện và trải nghiệm phía Client).*
+   _(Lưu ý: Các thao tác gọi API đám mây như nạp danh bạ từ DynamoDB, đặt lịch, tra cứu sẽ hoạt động khi tài khoản AWS Academy Learner Lab đang ở trạng thái Start Lab. Nếu phòng lab tắt, bạn vẫn có thể xem trước cấu trúc giao diện và trải nghiệm phía Client)._
 
 ---
 

@@ -10,6 +10,7 @@
 ## 1. Tài liệu chung của nhóm
 
 - **Link Github của nhóm:** [https://github.com/Arenef/CareSync](https://github.com/Arenef/CareSync)
+- **Video Demo CareSync:** [https://drive.google.com/drive/folders/1sK3Uae6RGCYvLRe3XZixI6ULkMxq5bKn?usp=sharing](https://drive.google.com/drive/folders/1sK3Uae6RGCYvLRe3XZixI6ULkMxq5bKn?usp=sharing)
 - **Bảng phân công nhiệm vụ & thời gian:** [BangPhanCongWeek4.md](BangPhanCongWeek4.md)
 - **Báo cáo tổng kết tuần 4 & đồ án:** [BaoCaoWeek4.md](BaoCaoWeek4.md)
 
@@ -63,19 +64,12 @@
 - **Commit Message:** `docs: bổ sung bảng phân công nhiệm vụ tuần 4`
 - **Mô tả:** Phân bổ chi tiết nhiệm vụ và thời gian thực hiện tuần 4 của SV1 và SV2.
 
-### Commit 6: Hoàn thiện tài liệu README giới thiệu dự án
+### Commit 6: Hoàn thiện báo cáo tổng kết tuần 4 và tài liệu README với sơ đồ kiến trúc thực tế AWS
 
-- **Hash commit:** `c3f04f0`
-- **Link commit:** [https://github.com/Arenef/CareSync/commit/c3f04f0](https://github.com/Arenef/CareSync/commit/c3f04f0)
-- **Commit Message:** `docs: hoàn thiện tài liệu readme giới thiệu tổng quan hệ thống và hướng dẫn sử dụng`
-- **Mô tả:** Viết tài liệu tổng quan dự án, sơ đồ kiến trúc Serverless, danh mục REST API, hướng dẫn thao tác web và lưu ý về môi trường AWS Academy Learner Lab.
-
-### Commit 7: Báo cáo thực hiện tuần 4 và tổng kết đồ án
-
-- **Hash commit:** `7a04da4`
-- **Link commit:** [https://github.com/Arenef/CareSync/commit/7a04da4](https://github.com/Arenef/CareSync/commit/7a04da4)
-- **Commit Message:** `docs: báo cáo thực hiện tuần 4 và tổng kết đồ án môn học (thiếu Chạy kiểm thử bộ API trên Postman & Kiểm tra Log - Đánh giá chi phí AWS - Lập checklist & thực hiện quy trình dọn dẹp tài nguyên)`
-- **Mô tả:** Báo cáo thực hiện tuần 4, nghiệm thu 4 luồng người dùng E2E với 16 ảnh minh chứng, tối ưu code và nêu rõ các phần SV2 đang tiếp tục hoàn thiện.
+- **Hash commit:** `6b0f586`
+- **Link commit:** [https://github.com/Arenef/CareSync/commit/6b0f586](https://github.com/Arenef/CareSync/commit/6b0f586)
+- **Commit Message:** `docs: hoàn thiện báo cáo week 4 và readme với sơ đồ thực tế AWS`
+- **Mô tả:** Cập nhật sơ đồ kiến trúc Serverless CareSync trực quan (`Serverless_CareSync_Architecture.jpg`) vào `README.md` và `BaoCaoWeek4.md`; đồng thời lược bỏ các ghi chú chưa hoàn thành sau khi đồng bộ đầy đủ kết quả kiểm thử 5 API trên Postman, CloudWatch Logs, đánh giá chi phí Free Tier và quy trình dọn dẹp tài nguyên từ SV2, hoàn tất 100% tài liệu tổng kết đồ án.
 
 ---
 

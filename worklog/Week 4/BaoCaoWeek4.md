@@ -8,6 +8,7 @@
 - **SV1:** Bùi Anh Khôi – MSSV: 24110258
 - **SV2:** Huỳnh Ngọc Bảo Khang – MSSV: 24110241  
   **GitHub Repository:** [https://github.com/Arenef/CareSync](https://github.com/Arenef/CareSync)  
+- **Video Demo CareSync:** [https://drive.google.com/drive/folders/1sK3Uae6RGCYvLRe3XZixI6ULkMxq5bKn?usp=sharing](https://drive.google.com/drive/folders/1sK3Uae6RGCYvLRe3XZixI6ULkMxq5bKn?usp=sharing)  
   **Nhánh chính (Branch):** `main`
 
 ---
