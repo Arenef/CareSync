@@ -20,43 +20,7 @@
 
 Hệ thống được thiết kế và triển khai theo mô hình **100% Serverless trên nền tảng Amazon Web Services (AWS)**. Nhờ đó, ứng dụng đạt được khả năng co giãn linh hoạt (Auto Scaling), tính sẵn sàng cao (High Availability), bảo mật dữ liệu y tế theo chuẩn đám mây và tối ưu hóa chi phí vận hành ở mức thấp nhất.
 
-```
-[ Bệnh nhân / Trình duyệt Web ]          [ Bác sĩ phụ trách phòng khám ]
-              │                                          │
-              ▼                                          ▼
-   ┌───────────────────────────────────────────────────────────┐
-   │         Amazon S3 Static Website Hosting (Frontend)       │
-   │    HTML5 / Vanilla CSS3 / JavaScript (ES6 Modularized)    │
-   └─────────────────────────────┬─────────────────────────────┘
-                                 │ REST API Calls (Fetch / CORS)
-                                 ▼
-   ┌───────────────────────────────────────────────────────────┐
-   │             Amazon API Gateway (HTTP API v2)              │
-   │            Base URL: https://2q1b3nxtkg.../               │
-   └─────────────────────────────┬─────────────────────────────┘
-                                 │ Lambda Proxy Integration
-                                 ▼
-   ┌───────────────────────────────────────────────────────────┐
-   │            AWS Lambda (AppointmentBookingFunction)         │
-   │            Node.js Runtime - Clean Layer Architecture     │
-   │   (Router -> Controller -> Services -> DB/KMS/SNS Clients)│
-   └───────┬──────────────┬──────────────┬──────────────┬──────┘
-           │              │              │              │
-           ▼              ▼              ▼              ▼
-     ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐
-     │ DynamoDB  │  │  AWS KMS  │  │Amazon SNS │  │EventBridge│
-     │  Tables   │  │(Envelope  │  │(Email Pub/│  │ Scheduler │
-     │-Appts     │  │Encryption)│  │ Sub Topic)│  │ (Reminder │
-     │-Patients  │  │PatientKey │  │           │  │  2 phút)  │
-     │-Doctors   │  │(CCCD/SĐT) │  │           │  │           │
-     └───────────┘  └───────────┘  └─────┬─────┘  └─────┬─────┘
-                                         │              │
-                                         ▼              ▼
-                                ┌─────────────────────────────┐
-                                │      Hộp thư Gmail nhận     │
-                                │   (Xác nhận vé & Nhắc hẹn)  │
-                                └─────────────────────────────┘
-```
+![Sơ đồ kiến trúc Serverless CareSync](worklog/Week%204/img/Serverless_CareSync_Architecture.jpg)
 
 ---
 
