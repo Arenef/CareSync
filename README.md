@@ -1,14 +1,15 @@
 # 🏥 CareSync - Hệ Thống Đặt Lịch Khám Bệnh Trực Tuyến Serverless
 
-> **Đồ án môn học:** Điện toán đám mây (Cloud Computing) – Trường Đại học Sư phạm Kỹ thuật TP.HCM (HCMUTE)  
-> **Thành viên nhóm:**
->
-> - Bùi Anh Khôi – MSSV: 24110258 (SV1)
-> - Huỳnh Ngọc Bảo Khang – MSSV: 24110241 (SV2)
+> **Học phần:** Điện toán đám mây (Cloud - Đợt 1 - 2026-2027) – HCMUTE  
+> **Giảng viên hướng dẫn (GVHD):** TS. Huỳnh Xuân Phụng  
+> **Nhóm sinh viên thực hiện:** Domain Apps  
+> - Bùi Anh Khôi – MSSV: 24110258 (SV1)  
+> - Huỳnh Ngọc Bảo Khang – MSSV: 24110241 (SV2)  
 >
 > 🌐 **Website Demo (Amazon S3 Hosting):** [http://appointment-booking-web-demo.s3-website-us-east-1.amazonaws.com](http://appointment-booking-web-demo.s3-website-us-east-1.amazonaws.com)  
 > 📦 **GitHub Repository:** [https://github.com/Arenef/CareSync](https://github.com/Arenef/CareSync) (Branch: `main`)  
-> 🎥 **Video Demo CareSync:** [https://drive.google.com/drive/folders/1sK3Uae6RGCYvLRe3XZixI6ULkMxq5bKn?usp=sharing](https://drive.google.com/drive/folders/1sK3Uae6RGCYvLRe3XZixI6ULkMxq5bKn?usp=sharing)
+> 🎥 **Video Demo CareSync:** [https://drive.google.com/drive/folders/1sK3Uae6RGCYvLRe3XZixI6ULkMxq5bKn?usp=sharing](https://drive.google.com/drive/folders/1sK3Uae6RGCYvLRe3XZixI6ULkMxq5bKn?usp=sharing)  
+> 📄 **Báo Cáo Tổng Kết Đồ Án:** [BaoCaoDoAn.md](BaoCaoDoAn.md)
 >
 > ⚠️ **Lưu ý quan trọng về môi trường thử nghiệm (AWS Academy Learner Lab):**  
 > Toàn bộ hạ tầng Backend (API Gateway, Lambda, DynamoDB, KMS, SNS) được triển khai trên tài khoản thực hành **AWS Academy Learner Lab**. Do cơ chế phòng lab có thời hạn phiên làm việc và cần nhấn _Start Lab_ thủ công, các kết nối API đám mây sẽ hoạt động đầy đủ khi tài khoản lab đang ở trạng thái kích hoạt (`Lab status: ready`). Khi phòng lab tắt, bạn vẫn có thể mở xem toàn bộ giao diện Frontend cục bộ.
