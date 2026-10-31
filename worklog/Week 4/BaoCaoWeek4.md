@@ -25,7 +25,7 @@
     - [2.2. Tính năng khóa khung giờ đã qua trong ngày (Past Time Slot Locking)](#22-tính-năng-khóa-khung-giờ-đã-qua-trong-ngày-past-time-slot-locking)
     - [2.3. Hoàn thiện tìm kiếm thời gian thực (Live Search) không dấu tiếng Việt](#23-hoàn-thiện-tìm-kiếm-thời-gian-thực-live-search-không-dấu-tiếng-việt)
     - [2.4. Phân tích kiến trúc Pub/Sub Amazon SNS và định hướng Amazon SES](#24-phân-tích-kiến-trúc-pubsub-amazon-sns-và-định-hướng-amazon-ses)
-  - [3. Nội Dung Kỹ Thuật Của SV2 (Huỳnh Ngọc Bảo Khang)](#3-nội-dung-kỹ-thuật-của-sv2-huỳnh-ngọc-bảo-khang)
+  - [3. Thử Nghiệm Trên Postman & Triển Khai Kỹ Thuật (SV2 - Huỳnh Ngọc Bảo Khang)](#3-thử-nghiệm-trên-postman--triển-khai-kỹ-thuật-sv2---huỳnh-ngọc-bảo-khang)
   - [4. Kết Quả Nghiệm Thu Kiểm Thử Toàn Diện (End-to-End Testing)](#4-kết-quả-nghiệm-thu-kiểm-thử-toàn-diện-end-to-end-testing)
     - [4.1. Kịch bản 1: Luồng bệnh nhân đặt khám và xuất vé điện tử](#41-kịch-bản-1-luồng-bệnh-nhân-đặt-khám-và-xuất-vé-điện-tử)
     - [4.2. Kịch bản 2: Bắt lỗi chống trùng lịch khám (409 Conflict) trên Cloud](#42-kịch-bản-2-bắt-lỗi-chống-trùng-lịch-khám-409-conflict-trên-cloud)
@@ -55,7 +55,7 @@ Tuần 4 là tuần về đích của đồ án môn học Điện toán đám m
 | STT | Thành viên                     | Nhiệm vụ đảm nhiệm chính                                                                                                                                                                                                                                                                                                                            | Sản phẩm đầu ra / Minh chứng                                                                                                                                                             |
 | :-: | :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 |  1  | **Bùi Anh Khôi (SV1)**         | • Rà soát & dọn dẹp mã nguồn Client/Server (giảm ~400 dòng thừa).<br>• Làm tính năng khóa khung giờ quá khứ trên form đặt lịch.<br>• Nâng cấp tìm kiếm Live Search không dấu chuẩn tiếng Việt.<br>• Thực hiện kiểm thử toàn diện E2E 4 luồng người dùng và chụp ảnh minh chứng.<br>• Viết báo cáo thực hành và tài liệu khai báo AI hỗ trợ của SV1. | • `client/js/booking.js`, `client/js/doctor-auth.js`<br>• 16 ảnh minh chứng tại `worklog/Week 4/img/`<br>• `SV1_BuiAnhKhoi/MinhChungThucHanh.md`<br>• `SV1_BuiAnhKhoi/NoiDungAIHoTro.md` |
-|  2  | **Huỳnh Ngọc Bảo Khang (SV2)** | • Phụ trách các hạng mục kỹ thuật cá nhân và tài liệu tổng kết tuần 4.                                                                                                                                                                                                                                                                              | • _(Đang thực hiện và cập nhật sau)_                                                                                                                                                     |
+|  2  | **Huỳnh Ngọc Bảo Khang (SV2)** | • Phát triển Module Lịch biểu đa năng `calendar.js` (740 dòng) & `lookup.css` (578 dòng).<br>• Triệt tiêu localStorage, vận hành 100% trên AWS DynamoDB.<br>• Kiểm thử độc lập 5 API trên Postman và kiểm tra CloudWatch.<br>• Phân tích chi phí Serverless AWS & lập checklist dọn dẹp tài nguyên. | • `client/js/calendar.js`, `client/css/lookup.css`<br>• 5 ảnh Postman tại `worklog/Week 4/img/`<br>• `SV2_HuynhNgocBaoKhang/MinhChungThucHanh.md`<br>• `SV2_HuynhNgocBaoKhang/NoiDungAIHoTro.md` |
 |  3  | **Cả hai thành viên**          | • Chạy thử nghiệm chéo toàn bộ hệ thống trên môi trường web thật.<br>• Hoàn thiện Báo cáo tổng kết tuần 4 và chuẩn bị nội dung thuyết trình.                                                                                                                                                                                                        | • `BaoCaoWeek4.md`<br>• `commit.md`                                                                                                                                                      |
 
 ---
@@ -199,12 +199,131 @@ Trong quá trình bảo vệ đồ án, nhóm đã chuẩn bị câu trả lời
 
 ---
 
-## 3. Nội Dung Kỹ Thuật Của SV2 (Huỳnh Ngọc Bảo Khang)
+## 3. Thử Nghiệm Trên Postman & Triển Khai Kỹ Thuật (SV2 - Huỳnh Ngọc Bảo Khang)
 
-> ⚠️ **Ghi chú về các phần chưa có (SV2 đang thực hiện và sẽ cập nhật sau):**
-> - **Chạy kiểm thử bộ API trên Postman & Kiểm tra Log**
-> - **Đánh giá chi phí AWS (Billing & Cost Optimization)**
-> - **Lập checklist & thực hiện quy trình dọn dẹp tài nguyên**
+### 3.1. Thiết kế & Hiện thực Module Lịch biểu Đa năng (Shared Calendar Module)
+
+Nhằm nâng cao trải nghiệm tra cứu cho người bệnh và quản lý ca làm việc cho bác sĩ, SV2 (Huỳnh Ngọc Bảo Khang) đã trực tiếp thiết kế và lập trình module lịch biểu độc lập tại [`client/js/calendar.js`](../../client/js/calendar.js) (hơn 740 dòng mã) cùng phong cách giao diện chuyên biệt tại [`client/css/lookup.css`](../../client/css/lookup.css) (578 dòng CSS):
+
+1. **Tính đa năng (Reusability):** Module được đóng gói thành IIFE độc lập gắn vào `window.CareSyncCalendar`, cho phép linh hoạt vận hành ở 2 chế độ:
+   - **Chế độ Bệnh nhân (`mode: 'patient'`):** Phân nhóm các phiếu khám theo từng ngày trong tháng, cho phép lọc nhanh *Sắp tới* hoặc *Đã hủy*, mở modal xem vé và gửi yêu cầu hủy lịch kèm mã OTP qua email.
+   - **Chế độ Bác sĩ (`mode: 'doctor'`):** Hiển thị tổng quan các ca khám trong tháng, hỗ trợ bộ lọc trạng thái (*Tất cả*, *Hôm nay*, *Ngày mai*), đếm số ca khám trong tháng và hiển thị chi tiết hồ sơ bệnh nhân khám trong ngày.
+2. **Kiến trúc & Thuật toán xử lý ngày tháng:**
+   - Hàm `parseApptDate()` thông minh: Tự động phân tích và chuẩn hóa chuỗi ngày dạng ISO `YYYY-MM-DD`, `DD/MM/YYYY`, cụm từ `"Hôm nay"`, `"Ngày mai"` hoặc Partition/Sort Key DynamoDB `YYYY-MM-DD#HH:mm`.
+   - Gom nhóm ca khám theo ngày bằng cấu trúc Hash Map độ phức tạp $O(N)$, tối ưu hóa việc render lưới ma trận 7x5 hoặc 7x6 ngày của tháng.
+   - Cơ chế Highlight: Tự động đánh dấu ngày hiện tại với badge `"Hôm nay"` màu xanh dương, viền nổi bật ngày đang chọn và hiển thị các badge ca khám thu nhỏ kèm giờ hẹn (ví dụ: `08:00 BS. Lê Hoàng Long`).
+
+---
+
+### 3.2. Triệt tiêu hoàn toàn LocalStorage – Vận hành 100% trên AWS DynamoDB Live
+
+Trước tuần 4, phần tra cứu lịch khám vẫn sử dụng bộ nhớ tạm `localStorage` của trình duyệt. SV2 đã tái cấu trúc toàn diện tầng dữ liệu Client:
+- **Xóa bỏ hoàn toàn việc lưu cache offline:** Chuyển đổi mã nguồn [`client/js/lookup.js`](../../client/js/lookup.js) để dữ liệu 100% được lấy trực tiếp từ bảng DynamoDB `Appointments` thông qua Global Secondary Index (GSI) `PatientPhone-index` ($O(1)$).
+- **Đồng bộ chuẩn hóa khóa `SlotKey`:** Thống nhất định dạng `YYYY-MM-DD#HH:mm` trên toàn bộ hệ thống Client và Backend Lambda, giải quyết triệt để lỗi xung đột ca khám cũ.
+
+---
+
+### 3.3. Kiểm thử Độc lập Bộ 5 API Cốt Lõi Trên Postman
+
+SV2 đã thiết lập bộ sưu tập Postman và chạy kiểm thử độc lập trực tiếp trên endpoint API Gateway thật của hệ thống (`https://2q1b3nxtkg.execute-api.us-east-1.amazonaws.com`):
+
+#### 1. API Yêu cầu Hủy lịch khám & Gửi mã OTP (`POST /appointments/request-cancel`)
+- **Mục đích:** Bệnh nhân yêu cầu hủy lịch, hệ thống kiểm tra thông tin ca khám và gửi mã OTP ngẫu nhiên 6 chữ số về email đã đăng ký qua Amazon SNS.
+- **Request Body:**
+  ```json
+  {
+    "doctorId": "DOC12",
+    "slotKey": "2026-10-31#08:00"
+  }
+  ```
+- **Kết quả thực tế (HTTP 200 OK - 473 ms):** Trả về `success: true`, thông báo gửi OTP thành công và che mờ email `th***@gmail.com` để bảo mật danh tính.
+
+  **Thử nghiệm trên Postman:**
+  ![Postman Request Cancel OTP](img/postman_cancel_appointment_send_otp.png)
+
+#### 2. API Xác nhận OTP & Tiến hành Hủy lịch khám (`POST /appointments/confirm-cancel`)
+- **Mục đích:** Đối chiếu mã OTP và thời hạn 5 phút. Khi hợp lệ, Lambda thực thi `DeleteCommand` trên DynamoDB để **giải phóng khung giờ khám** và gọi `DeleteScheduleCommand` thu hồi lịch nhắc EventBridge.
+- **Request Body:**
+  ```json
+  {
+    "doctorId": "DOC12",
+    "slotKey": "2026-10-31#08:00",
+    "otp": "269800"
+  }
+  ```
+- **Kết quả thực tế (HTTP 200 OK - 1.25 s):** Lịch hẹn `#APT-1793382954775` bị hủy thành công, khung giờ được giải phóng cho bệnh nhân khác.
+
+  **Thử nghiệm trên Postman:**
+  ![Postman Confirm Cancel OTP](img/postman_cancel_appointment_comfirm.png)
+
+#### 3. API Gửi OTP Đăng nhập Bác sĩ (`POST /auth/doctor/send-otp`)
+- **Mục đích:** Xác thực đăng nhập không mật khẩu (Passwordless Authentication) cho nhân sự y tế.
+- **Request Body:**
+  ```json
+  {
+    "email": "baokhangcoder@gmail.com"
+  }
+  ```
+- **Kết quả thực tế (HTTP 200 OK - 1.08 s):** Hệ thống tìm thấy thông tin bác sĩ `BS. CKI Huỳnh Ngọc Bảo Khang`, gửi OTP qua SNS và trả về `debugOtp` hỗ trợ kiểm thử.
+
+  **Thử nghiệm trên Postman:**
+  ![Postman Send OTP Doctor](img/postman_send_otp.png)
+
+#### 4. API Xác minh OTP & Cấp phiên Bác sĩ (`POST /auth/doctor/verify-otp`)
+- **Mục đích:** Xác minh mã OTP hợp lệ và trả về đầy đủ hồ sơ bác sĩ (`DoctorId`, `Specialty`, `Room`...).
+- **Request Body:**
+  ```json
+  {
+    "email": "baokhangcoder@gmail.com",
+    "otp": "271452"
+  }
+  ```
+- **Kết quả thực tế (HTTP 200 OK - 1.00 s):** Cấp quyền đăng nhập thành công cho Bác sĩ Huỳnh Ngọc Bảo Khang.
+
+  **Thử nghiệm trên Postman:**
+  ![Postman Verify OTP Doctor](img/postman_verify_otp.png)
+
+#### 5. API Lấy danh sách ca khám theo Bác sĩ (`GET /doctors/DOC01/appointments`)
+- **Mục đích:** Truy vấn toàn bộ lịch khám của một bác sĩ trực tiếp từ Partition Key `DoctorId`.
+- **Kết quả thực tế (HTTP 200 OK - 1.44 s - 2.1 KB):** Trả về danh sách 6 ca khám của Bác sĩ Nguyễn Văn An.
+
+  **Thử nghiệm trên Postman:**
+  ![Postman Get Appointments by Doctor](img/postman_get_appointments_by_doctorId.png)
+
+---
+
+### 3.4. Đánh Giá Chi Phí Vận Hành Trên AWS (Billing & Cost Optimization)
+
+Mô hình **100% Serverless** của CareSync giúp tối ưu hóa chi phí vận hành ở mức gần như tuyệt đối dựa trên chính sách **AWS Free Tier**:
+
+| Dịch vụ AWS | Cấu hình triển khai | Định mức miễn phí (Free Tier) | Mức tiêu thụ thực tế | Chi phí |
+| :--- | :--- | :--- | :--- | :---: |
+| **AWS Lambda** | Node.js 18.x (128MB RAM) | 1,000,000 req & 3,200,000 giây/tháng | ~5,000 req (< 1,000s) | **$0.00** |
+| **Amazon DynamoDB** | On-Demand (kèm GSI) | 25 RCU/WCU & 25 GB Storage | 3 bảng (< 5 MB) | **$0.00** |
+| **Amazon API Gateway** | HTTP API (Payload v2) | $1.00 / 1,000,000 requests | ~5,000 requests | **$0.00** |
+| **Amazon S3** | Static Website Hosting | 5 GB Storage & 20,000 GET req | ~2.5 MB (HTML/CSS/JS) | **$0.00** |
+| **Amazon SNS** | Email Pub/Sub Topic | 1,000 email thông báo/tháng | ~200 emails | **$0.00** |
+| **EventBridge Scheduler** | One-time Schedule (2 phút) | 14,000,000 invocations/tháng | ~100 schedules | **$0.00** |
+| **AWS KMS** | Customer Managed Key (CMK) | 20,000 KMS requests miễn phí | 1 CMK ($1.00/tháng) | **$1.00** *(trừ Lab budget)* |
+| **TỔNG CỘNG** | **Kiến trúc Serverless** | -- | -- | **$0.00 / tháng** *(Tiền túi)* |
+
+> **Ưu thế vượt trội:** Thay vì phải tốn $8.50 - $12.00/tháng duy trì máy chủ ảo EC2 24/7, kiến trúc Serverless giúp CareSync vận hành theo cơ chế "Dùng bao nhiêu trả bấy nhiêu", đạt tiêu chuẩn **Zero-Cost Operation** cho môi trường đào tạo.
+
+---
+
+### 3.5. Quy Trình & Checklist Dọn Dẹp Tài Nguyên (Resource Cleanup)
+
+Quy trình giải phóng tài nguyên tuân thủ nghiêm ngặt **thứ tự phụ thuộc (Dependency Order)** từ ngoài vào trong:
+
+1. **Amazon EventBridge Scheduler:** Xóa các lịch hẹn giờ nhắc nhở `CareSync-remind-*`.
+2. **Amazon SNS Topic:** Xóa Subscriptions và Topic `CareSync-AppointmentNotice`.
+3. **Amazon API Gateway:** Xóa HTTP API `CareSync-API`.
+4. **AWS Lambda:** Xóa hàm `AppointmentBookingFunction`.
+5. **Amazon S3 Bucket:** Dọn sạch toàn bộ đối tượng (Empty Bucket) rồi xóa Bucket `caresync-web-hosting`.
+6. **Amazon DynamoDB:** Xóa 3 bảng dữ liệu `Appointments` (kèm GSI), `Doctors`, `Patients`.
+7. **AWS KMS:** Lên lịch hủy Customer Managed Key (`ScheduleKeyDeletion` 7 ngày).
+
+---
 
 ---
 

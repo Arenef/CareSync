@@ -23,7 +23,7 @@
 |  2  | Triển khai khóa khung giờ khám đã qua trong ngày              |     Bùi Anh Khôi (SV1)     |  1.5 giờ  | Tự động so sánh giờ hiện tại với các slot trong ngày, vô hiệu hóa nút đặt và gán tooltip cảnh báo trực quan.                           |   **Hoàn thành**   |
 |  3  | Nâng cấp Live Search không dấu và sửa lỗi gõ tiếng Việt       |     Bùi Anh Khôi (SV1)     |  2.0 giờ  | Thêm hàm chuẩn hóa `normalizeString`, cố định thanh topbar tránh giật focus giúp gõ tiếng Việt có dấu chuẩn xác.                       |   **Hoàn thành**   |
 |  4  | Kiểm thử toàn diện End-to-End (E2E) và chụp 16 ảnh minh chứng |     Bùi Anh Khôi (SV1)     |  2.5 giờ  | Nghiệm thu 4 luồng người dùng chính trên hệ thống thật, chụp 16 ảnh minh chứng sắc nét cho báo cáo.                                    |   **Hoàn thành**   |
-|  5  | Kiểm thử Postman/Log, Đánh giá chi phí AWS & Quy trình dọn dẹp | Huỳnh Ngọc Bảo Khang (SV2) |    --     | _(Đang thực hiện: Postman & Log, Đánh giá chi phí, Checklist dọn dẹp)_                                                                 | **Đang thực hiện** |
+|  5  | Module Calendar, Kiểm thử Postman API, Đánh giá chi phí & Dọn dẹp | Huỳnh Ngọc Bảo Khang (SV2) |  8.0 giờ  | Hoàn thành `calendar.js` (740 dòng), `lookup.css` (578 dòng), kiểm thử độc lập 5 API Postman, phân tích chi phí Serverless và checklist dọn dẹp. |   **Hoàn thành**   |
 |  6  | Tổng hợp Báo cáo Tổng kết Tuần 4 và hoàn thiện hồ sơ đồ án    |     Cả hai thành viên      |  2.0 giờ  | Phối hợp hoàn thiện `BaoCaoWeek4.md`, `commit.md` và kiểm tra chéo hệ thống.                                                           |   **Hoàn thành**   |
 
 ---
@@ -47,4 +47,14 @@
 
 ### 2.2. Huỳnh Ngọc Bảo Khang – MSSV: 24110241 (SV2)
 
-_(Thành viên SV2 sẽ trực tiếp cập nhật chi tiết các đầu việc, số giờ và minh chứng thực hiện sau khi hoàn thành)._
+- **Tổng thời gian thực hiện:** **8.0 giờ**
+- **Báo cáo thực hành chi tiết:** [SV2_HuynhNgocBaoKhang/MinhChungThucHanh.md](SV2_HuynhNgocBaoKhang/MinhChungThucHanh.md)
+- **Tài liệu khai báo AI hỗ trợ:** [SV2_HuynhNgocBaoKhang/NoiDungAIHoTro.md](SV2_HuynhNgocBaoKhang/NoiDungAIHoTro.md)
+
+| STT | Công việc phụ trách | Số giờ | Minh chứng thực tế & File mã nguồn |
+| :-: | :--- | :---: | :--- |
+|  1  | **Thiết kế & Xây dựng Module Lịch biểu Đa năng (Shared Calendar Module)**<br>- Lập trình module lịch biểu tái sử dụng `client/js/calendar.js` (740 dòng) và styling `client/css/lookup.css` (578 dòng).<br>- Tích hợp 2 chế độ `patient` (bệnh nhân tra cứu lịch hẹn) và `doctor` (bác sĩ theo dõi ca khám).<br>- Thuật toán xử lý ngày tháng `parseApptDate`, gom nhóm Hash Map và highlight ngày hiện tại. | **3.0** | - File: [`client/js/calendar.js`](../../client/js/calendar.js)<br>- File: [`client/css/lookup.css`](../../client/css/lookup.css)<br>- Ảnh minh chứng: `img/E2E_09_Lookup_Success_Cards.png`, `img/E2E_15_Doctor_Portal_Dashboard.png` |
+|  2  | **Triệt tiêu LocalStorage & Vận hành 100% trên AWS DynamoDB Live**<br>- Loại bỏ hoàn toàn cơ chế lưu cache offline cũ trong `lookup.js` và `booking.js`.<br>- Kết nối dữ liệu sống với bảng `Appointments` qua GSI `PatientPhone-index` ($O(1)$).<br>- Đồng bộ chuẩn hóa định dạng `SlotKey` (`YYYY-MM-DD#HH:mm`). | **1.5** | - File: [`client/js/lookup.js`](../../client/js/lookup.js)<br>- File: [`client/js/booking.js`](../../client/js/booking.js)<br>- Commit: `6d48acd` |
+|  3  | **Kiểm thử Độc lập 5 API trên Postman & Chụp minh chứng**<br>- Thiết lập bộ test Postman và gọi trực tiếp API Gateway endpoint thật.<br>- Kiểm thử luồng gửi/xác thực OTP đăng nhập Bác sĩ (`/auth/doctor/send-otp`, `/verify-otp`).<br>- Kiểm thử luồng gửi/xác thực OTP hủy lịch hẹn (`/appointments/request-cancel`, `/confirm-cancel`).<br>- Kiểm thử API trích xuất lịch khám theo bác sĩ (`GET /doctors/DOC01/appointments`). | **2.0** | - 5 ảnh Postman trong [`worklog/Week 4/img/`](img/): `postman_send_otp.png`, `postman_verify_otp.png`, `postman_cancel_appointment_send_otp.png`, `postman_cancel_appointment_comfirm.png`, `postman_get_appointments_by_doctorId.png` |
+|  4  | **Phân tích Chi phí Serverless AWS & Lập Checklist Dọn dẹp Tài nguyên**<br>- Đánh giá định mức Free Tier và hạn mức Learner Lab ($100 budget) cho 7 dịch vụ AWS.<br>- Xây dựng checklist dọn dẹp theo thứ tự phụ thuộc (Dependency Order) từ ngoài vào trong để bảo vệ ngân sách Lab. | **1.5** | - Báo cáo chi tiết: [`SV2_HuynhNgocBaoKhang/MinhChungThucHanh.md`](SV2_HuynhNgocBaoKhang/MinhChungThucHanh.md)<br>- Báo cáo tổng kết: [`BaoCaoWeek4.md`](BaoCaoWeek4.md) |
+
