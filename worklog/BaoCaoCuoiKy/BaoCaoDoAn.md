@@ -51,7 +51,7 @@
     - [3.3. Tuần 3: Tích hợp AWS KMS, GSI DynamoDB \& Web Hosting S3](#33-tuần-3-tích-hợp-aws-kms-gsi-dynamodb--web-hosting-s3)
     - [3.4. Tuần 4: Tái cấu trúc Clean Architecture, Module Lịch dùng chung \& OTP Security](#34-tuần-4-tái-cấu-trúc-clean-architecture-module-lịch-dùng-chung--otp-security)
   - [CHƯƠNG 4: KẾT QUẢ KIỂM THỬ \& NGHIỆM THU HỆ THỐNG](#chương-4-kết-quả-kiểm-thử--nghiệm-thu-hệ-thống)
-    - [4.1. Kiểm thử độc lập 5 API cốt lõi trên Postman](#41-kiểm-thử-độc-lập-5-api-cốt-lõi-trên-postman)
+    - [4.1. Kiểm thử độc lập toàn diện các API trên Postman](#41-kiểm-thử-độc-lập-toàn-diện-các-api-trên-postman)
     - [4.2. Nghiệm thu 4 kịch bản End-to-End (E2E) trên môi trường Live](#42-nghiệm-thu-4-kịch-bản-end-to-end-e2e-trên-môi-trường-live)
       - [Kịch bản 1: Luồng bệnh nhân đặt khám và xuất vé điện tử](#kịch-bản-1-luồng-bệnh-nhân-đặt-khám-và-xuất-vé-điện-tử)
       - [Kịch bản 2: Bắt lỗi chống trùng lịch khám (409 Conflict) trên Cloud](#kịch-bản-2-bắt-lỗi-chống-trùng-lịch-khám-409-conflict-trên-cloud)
@@ -118,7 +118,7 @@ Hệ thống phân tách rạch ròi 2 nhóm đối tượng người dùng chí
 | **Dịch vụ AWS bắt buộc**       | API Gateway, Lambda, DynamoDB, EventBridge, SNS, KMS, S3.                                                                                                                        | Triển khai đầy đủ và tích hợp cả 7 dịch vụ AWS cốt lõi (kèm Amazon CloudWatch Logs giám sát).                                                                                                                                                                                                                                                                                                    |  **100% ĐẠT**  |
 | **Tính chất dữ liệu**          | Chỉ sử dụng dữ liệu giả lập (Mock data).                                                                                                                                         | Sử dụng dữ liệu giả lập cho 10 bác sĩ (`DOC01` - `DOC10`) và các hồ sơ bệnh nhân mẫu; tuyệt đối không dùng dữ liệu nhạy cảm thật.                                                                                                                                                                                                                                                                |  **100% ĐẠT**  |
 | **Môi trường & Ràng buộc AWS** | Region `us-east-1` / `us-west-2`; dùng `LabRole`; không tạo IAM user/role; gắn tag `Project/Owner`; dừng/xóa tài nguyên sau mỗi buổi.                                            | Vận hành tại Region `us-east-1`; sử dụng quyền `LabRole` có sẵn; gắn tag đầy đủ `Project: CareSync`, `Owner: DomainApps`; lập checklist dọn dẹp tài nguyên theo Dependency Order bảo toàn ngân sách Learner Lab.                                                                                                                                                                                 |  **100% ĐẠT**  |
-| **Minh chứng nộp bài**         | Ảnh chụp console/CLI (Account ID, Region, thời gian); mã nguồn trên Git; báo cáo + sơ đồ kiến trúc; video demo $\le$ 10 phút.                                                    | 16 ảnh chụp console/CLI và luồng E2E có định danh đầy đủ; repo GitHub công khai; sơ đồ kiến trúc Serverless trực quan; video demo chuẩn thời lượng trên Google Drive.                                                                                                                                                                                                                            |  **100% ĐẠT**  |
+| **Minh chứng nộp bài**         | Ảnh chụp console/CLI (Account ID, Region, thời gian); mã nguồn trên Git; báo cáo + sơ đồ kiến trúc; video demo $\le$ 10 phút.                                                    | 21 ảnh chụp console/CLI, kiểm thử Postman độc lập và nghiệm thu luồng E2E có định danh đầy đủ; repo GitHub công khai; sơ đồ kiến trúc Serverless trực quan; video demo chuẩn thời lượng trên Google Drive.                                                                                                                                                                                     |  **100% ĐẠT**  |
 
 ---
 
@@ -245,30 +245,86 @@ Toàn bộ **9 RESTful API** được triển khai qua Amazon API Gateway (Base 
 
 ## CHƯƠNG 4: KẾT QUẢ KIỂM THỬ & NGHIỆM THU HỆ THỐNG
 
-### 4.1. Kiểm thử độc lập 5 API cốt lõi trên Postman
+### 4.1. Kiểm thử độc lập toàn diện các API trên Postman
 
-SV2 đã thiết lập bộ sưu tập Postman và chạy kiểm thử độc lập trực tiếp lên API Gateway thật trên AWS (`https://2q1b3nxtkg.execute-api.us-east-1.amazonaws.com`):
+Nhóm sinh viên đã thiết lập và thực thi bộ sưu tập Postman kiểm thử độc lập trực tiếp lên API Gateway thật trên AWS (`https://2q1b3nxtkg.execute-api.us-east-1.amazonaws.com`). Các ca kiểm thử bao phủ toàn diện cả 3 nhóm chức năng cốt lõi: Danh mục & Đặt lịch khám, Tra cứu bảo mật qua GSI DynamoDB, và Bảo mật OTP Bác sĩ / Hủy lịch:
 
-| STT | Endpoint kiểm thử              | Phương thức | Dữ liệu đầu vào (Payload)                                    | Kết quả kỳ vọng                             | Kết quả thực tế                          | Trạng thái |
-| :-: | :----------------------------- | :---------: | :----------------------------------------------------------- | :------------------------------------------ | :--------------------------------------- | :--------: |
-|  1  | `/appointments/request-cancel` |   `POST`    | `{"appointmentId": "APT-971930", "email": "test@gmail.com"}` | HTTP 200, sinh OTP 6 số và gửi SNS          | HTTP 200 OK (1.18 s - 750 B)             |  **PASS**  |
-|  2  | `/appointments/confirm-cancel` |   `POST`    | `{"appointmentId": "APT-971930", "otp": "384504"}`           | HTTP 200, đổi status `CANCELLED`            | HTTP 200 OK (1.18 s - 750 B)             |  **PASS**  |
-|  3  | `/auth/doctor/send-otp`        |   `POST`    | `{"email": "buianhkhoi020120@gmail.com"}`                    | HTTP 200, kiểm tra danh bạ bác sĩ & gửi OTP | HTTP 200 OK (1.53 s - 751 B)             |  **PASS**  |
-|  4  | `/auth/doctor/verify-otp`      |   `POST`    | `{"email": "buianhkhoi020120@gmail.com", "otp": "252514"}`   | HTTP 200, cấp quyền và trả hồ sơ bác sĩ     | HTTP 200 OK (1.29 s - 912 B)             |  **PASS**  |
-|  5  | `/doctors/DOC01/appointments`  |    `GET`    | Không (truy vấn theo `DoctorId = DOC01`)                     | HTTP 200, trả về danh sách ca khám          | HTTP 200 OK (1.44 s - 2.1 KB, 6 ca khám) |  **PASS**  |
+| STT | Endpoint kiểm thử | Phương thức | Dữ liệu đầu vào (Payload) | Kết quả kỳ vọng | Kết quả thực tế | Trạng thái |
+| :-: | :---------------- | :---------: | :------------------------ | :-------------- | :-------------- | :--------: |
+| 1 | `/doctors` | `GET` | Không (Empty) | HTTP 200, danh sách 10 bác sĩ từ bảng `Doctors` | HTTP 200 OK (335 ms - 4.18 KB) | **PASS** |
+| 2 | `/appointments` | `POST` | JSON đặt lịch (`DOC01`, `2026-11-20#09:00`, Huỳnh Ngọc Bảo Khang...) | HTTP 201 Created, tạo mã `APT-...`, lưu DynamoDB, mã hóa KMS, kích hoạt SNS & Scheduler | HTTP 201 Created (3.20 s - 556 B, mã `APT-1792913203119`) | **PASS** |
+| 3 | `/appointments` | `POST` | Trùng `DoctorId: DOC01` & `SlotKey: 2026-11-20#09:00` | HTTP 409 Conflict, bắt lỗi `ConditionalCheckFailedException` | HTTP 409 Conflict (1.73 s - 266 B, chặn trùng lịch) | **PASS** |
+| 4 | `/appointments?phone=0934567803` | `GET` | Query param `phone=0934567803` | HTTP 200, truy vấn GSI `PatientPhone-index` trả về lịch hẹn ($O(1)$) | HTTP 200 OK (2.36 s - 609 B, 1 ca khám `APT03`) | **PASS** |
+| 5 | `/appointments?phone=0909999888` | `GET` | Query param `phone=0909999888` | HTTP 200, tra cứu lịch hẹn mới tạo của bệnh nhân qua GSI | HTTP 200 OK (939 ms - 582 B, ca khám `APT-1792913203119`) | **PASS** |
+| 6 | `/appointments/request-cancel` | `POST` | `{"doctorId": "DOC12", "slotKey": "2026-10-31#08:00"}` | HTTP 200, sinh OTP 6 số và gửi qua SNS Email | HTTP 200 OK (1.18 s - 750 B) | **PASS** |
+| 7 | `/appointments/confirm-cancel` | `POST` | `{"doctorId": "DOC12", "slotKey": "2026-10-31#08:00", "otp": "269800"}` | HTTP 200, đổi status `CANCELLED` / giải phóng slot khám | HTTP 200 OK (1.18 s - 750 B) | **PASS** |
+| 8 | `/auth/doctor/send-otp` | `POST` | `{"email": "buianhkhoi020120@gmail.com"}` | HTTP 200, kiểm tra danh bạ bác sĩ & gửi OTP qua SNS | HTTP 200 OK (1.53 s - 751 B) | **PASS** |
+| 9 | `/auth/doctor/verify-otp` | `POST` | `{"email": "buianhkhoi020120@gmail.com", "otp": "252514"}` | HTTP 200, xác thực OTP, cấp quyền & trả hồ sơ bác sĩ | HTTP 200 OK (1.29 s - 912 B) | **PASS** |
+| 10 | `/doctors/DOC01/appointments` | `GET` | Không (truy vấn theo PK `DoctorId = DOC01`) | HTTP 200, trả về danh sách ca khám của bác sĩ | HTTP 200 OK (1.44 s - 2.1 KB, 6 ca khám) | **PASS** |
 
-_Minh chứng kiểm thử chi tiết trên Postman:_
+_(Bộ sưu tập Postman collection đầy đủ đã được xuất và lưu trữ tại [`docs/CareSync_Week3.postman_collection.json`](../../docs/CareSync_Week3.postman_collection.json))_.
 
-- **Gửi OTP đăng nhập Bác sĩ:**
-  ![Postman Send OTP Doctor](../Week%204/img/postman_send_otp.png)
-- **Xác thực OTP Bác sĩ thành công:**
-  ![Postman Verify OTP Doctor](../Week%204/img/postman_verify_otp.png)
-- **Gửi OTP yêu cầu hủy lịch khám:**
-  ![Postman Cancel Request OTP](../Week%204/img/postman_cancel_appointment_send_otp.png)
-- **Xác nhận OTP hủy lịch khám thành công:**
-  ![Postman Confirm Cancel OTP](../Week%204/img/postman_cancel_appointment_comfirm.png)
-- **Truy vấn danh sách lịch khám của Bác sĩ:**
-  ![Postman Get Doctor Appointments](../Week%204/img/postman_get_appointments_by_doctorId.png)
+---
+
+#### A. Nhóm API Quản lý Bác sĩ & Đặt lịch khám bệnh
+
+**1. Kiểm thử trích xuất danh bạ bác sĩ (`GET /doctors` - HTTP 200 OK):**
+- **Mục đích:** Kiểm tra khả năng kết nối Lambda với bảng DynamoDB `Doctors` và trả về toàn bộ danh bạ y tế công khai.
+- **Kết quả thực tế:** HTTP `200 OK` (335 ms - 4.18 KB), trả về danh sách đầy đủ 10 bác sĩ kèm chuyên khoa và khung giờ làm việc.
+![Kiểm thử GET /doctors trên Postman](../Week%202/img/postman_get_doctor.png)
+
+**2. Kiểm thử đặt lịch khám mới & Kích hoạt chuỗi sự kiện Serverless (`POST /appointments` - HTTP 201 Created):**
+- **Mục đích:** Xác thực toàn bộ chuỗi nghiệp vụ: ghi nhận lịch vào bảng `Appointments`, cập nhật hồ sơ bệnh nhân mã hóa số điện thoại bằng AWS KMS, bắn bản tin email qua SNS Publish và tạo lịch hẹn nhắc tự động sau 2 phút qua EventBridge Scheduler.
+- **Kết quả thực tế:** HTTP `201 Created` (3.20 s - 556 B), hệ thống khởi tạo thành công mã phiếu khám `APT-1792913203119` cho bệnh nhân Huỳnh Ngọc Bảo Khang.
+![Kiểm thử POST /appointments tạo lịch mới thành công](../Week%203/img/postman_post_appointments.png)
+
+**3. Kiểm thử cơ chế chống trùng lịch khám (`POST /appointments` - HTTP 409 Conflict):**
+- **Mục đích:** Cố tình gửi lại request đặt lịch trùng đúng bác sĩ `DOC01` vào khung giờ `09:00` ngày `2026-11-20` đã được cấp trước đó để kiểm tra cơ chế bảo vệ nguyên tử.
+- **Kết quả thực tế:** HTTP `409 Conflict` (1.73 s - 266 B), biểu thức `ConditionExpression` ở tầng DynamoDB kích hoạt chặn trùng lịch $O(1)$, Lambda trả về thông báo lỗi trực quan: *"Khung giờ này của bác sĩ đã có người đặt trước. Vui lòng chọn giờ khác!"*.
+![Kiểm thử chống trùng lịch 409 Conflict trên Postman](../Week%203/img/postman_post_appointment_conflict.png)
+
+---
+
+#### B. Nhóm API Tra cứu Lịch hẹn qua DynamoDB Global Secondary Index (GSI)
+
+**4. Kiểm thử tra cứu lịch khám theo số điện thoại qua GSI (`GET /appointments?phone=0934567803` - HTTP 200 OK):**
+- **Mục đích:** Kiểm tra chỉ mục toàn cục `PatientPhone-index` trên bảng `Appointments`, cho phép bệnh nhân tra cứu lịch khám của mình bằng SĐT trong thời gian thực mà không cần quét toàn bộ bảng (Full Table Scan).
+- **Kết quả thực tế:** HTTP `200 OK` (2.36 s - 609 B), trích xuất chính xác 1 ca khám `APT03` của bệnh nhân Lê Hoàng Phúc với Bác sĩ ThS. BS Trần Thị Mai.
+![Kiểm thử Postman tra cứu lịch hẹn theo SĐT qua GSI](../Week%203/img/postman_get_appointment.png)
+
+**5. Kiểm thử tra cứu lịch khám bệnh nhân mới tạo qua GSI (`GET /appointments?phone=0909999888` - HTTP 200 OK):**
+- **Mục đích:** Kiểm tra tính nhất quán dữ liệu tức thì (Immediate Consistency) sau khi đặt lịch khám mới qua SĐT `0909999888`.
+- **Kết quả thực tế:** HTTP `200 OK` (939 ms - 582 B), phản hồi ngay ca khám `APT-1792913203119` với đầy đủ thông tin ngày giờ và trạng thái `CONFIRMED`.
+![Kiểm thử Postman tra cứu lịch hẹn theo SĐT bệnh nhân mới đặt](../Week%203/img/postman_get_appointment_by_phone.png)
+
+---
+
+#### C. Nhóm API Bảo mật Xác thực OTP & Quản lý Cổng Bác sĩ
+
+**6. Gửi mã OTP yêu cầu hủy lịch khám (`POST /appointments/request-cancel` - HTTP 200 OK):**
+- **Mục đích:** Bệnh nhân yêu cầu hủy lịch, hệ thống kiểm tra thông tin ca khám và gửi mã OTP ngẫu nhiên 6 chữ số về email đã đăng ký qua Amazon SNS để xác thực danh tính.
+- **Kết quả thực tế:** HTTP `200 OK` (1.18 s - 750 B), gửi mã OTP thành công và che mờ email để bảo mật danh tính.
+![Postman Cancel Request OTP](../Week%204/img/postman_cancel_appointment_send_otp.png)
+
+**7. Xác nhận OTP và hủy lịch khám thành công (`POST /appointments/confirm-cancel` - HTTP 200 OK):**
+- **Mục đích:** Đối chiếu mã OTP và thời hạn hiệu lực 5 phút. Khi hợp lệ, Lambda cập nhật trạng thái `CANCELLED`, giải phóng khung giờ khám trên DynamoDB và gọi lệnh hủy lịch nhắc trên EventBridge Scheduler.
+- **Kết quả thực tế:** HTTP `200 OK` (1.18 s - 750 B), ca khám được hủy an toàn và slot giờ được mở lại cho bệnh nhân khác.
+![Postman Confirm Cancel OTP](../Week%204/img/postman_cancel_appointment_comfirm.png)
+
+**8. Gửi mã OTP đăng nhập không mật khẩu cho Bác sĩ (`POST /auth/doctor/send-otp` - HTTP 200 OK):**
+- **Mục đích:** Xác thực đăng nhập không mật khẩu (Passwordless Authentication) cho nhân sự y tế thông qua email phòng khám.
+- **Kết quả thực tế:** HTTP `200 OK` (1.53 s - 751 B), hệ thống đối chiếu danh bạ bác sĩ, tạo mã OTP và gửi qua Amazon SNS Topic.
+![Postman Send OTP Doctor](../Week%204/img/postman_send_otp.png)
+
+**9. Xác minh mã OTP Bác sĩ và cấp phiên làm việc (`POST /auth/doctor/verify-otp` - HTTP 200 OK):**
+- **Mục đích:** Xác minh mã OTP 6 số hợp lệ và cấp phiên làm việc (Session) kèm toàn bộ thông tin hồ sơ bác sĩ (`DoctorId`, `Specialty`, `Room`...).
+- **Kết quả thực tế:** HTTP `200 OK` (1.29 s - 912 B), xác thực danh tính Bác sĩ thành công và cho phép truy cập Cổng bác sĩ.
+![Postman Verify OTP Doctor](../Week%204/img/postman_verify_otp.png)
+
+**10. Truy vấn danh sách lịch khám của Bác sĩ (`GET /doctors/DOC01/appointments` - HTTP 200 OK):**
+- **Mục đích:** Bác sĩ trích xuất danh sách tất cả các ca khám của chính mình theo Partition Key `DoctorId = DOC01`.
+- **Kết quả thực tế:** HTTP `200 OK` (1.44 s - 2.1 KB), trả về đầy đủ danh sách 6 ca khám trong ngày của Bác sĩ DOC01.
+![Postman Get Doctor Appointments](../Week%204/img/postman_get_appointments_by_doctorId.png)
 
 ### 4.2. Nghiệm thu 4 kịch bản End-to-End (E2E) trên môi trường Live
 
