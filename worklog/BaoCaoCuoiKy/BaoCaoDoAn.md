@@ -45,6 +45,7 @@
       - [2. Bảng `Patients` (Hồ sơ bệnh nhân \& Bảo mật KMS)](#2-bảng-patients-hồ-sơ-bệnh-nhân--bảo-mật-kms)
       - [3. Bảng `Appointments` (Quản lý lịch khám \& Lịch hẹn)](#3-bảng-appointments-quản-lý-lịch-khám--lịch-hẹn)
     - [2.4. Danh mục RESTful API của hệ thống CareSync](#24-danh-mục-restful-api-của-hệ-thống-caresync)
+    - [2.5. Cấu trúc thư mục dự án \& Thiết kế phân tầng Clean Architecture](#25-cấu-trúc-thư-mục-dự-án--thiết-kế-phân-tầng-clean-architecture)
   - [CHƯƠNG 3: QUÁ TRÌNH HIỆN THỰC ĐỒ ÁN QUA 4 TUẦN](#chương-3-quá-trình-hiện-thực-đồ-án-qua-4-tuần)
     - [3.1. Tuần 1: Nghiên cứu lý thuyết, thiết kế sơ đồ và khởi tạo hạ tầng PoC](#31-tuần-1-nghiên-cứu-lý-thuyết-thiết-kế-sơ-đồ-và-khởi-tạo-hạ-tầng-poc)
     - [3.2. Tuần 2: Xây dựng Backend Serverless, CRUD DynamoDB \& Khóa chống trùng](#32-tuần-2-xây-dựng-backend-serverless-crud-dynamodb--khóa-chống-trùng)
@@ -193,6 +194,76 @@ Toàn bộ **9 RESTful API** được triển khai qua Amazon API Gateway (Base 
 |  7  |   `POST`    | `/auth/doctor/send-otp`            | Bác sĩ yêu cầu đăng nhập: Gửi mã OTP 6 chữ số qua Email SNS Topic đến bác sĩ                      |   200 OK / 404 Not Found   |
 |  8  |   `POST`    | `/auth/doctor/verify-otp`          | Bác sĩ nhập OTP: Xác thực và cấp phiên làm việc (Session) hiển thị cổng bác sĩ                    | 200 OK / 401 Unauthorized  |
 |  9  |    `GET`    | `/doctors/{doctorId}/appointments` | Cổng bác sĩ trích xuất danh sách tất cả các ca khám của chính mình theo ngày                      |           200 OK           |
+
+### 2.5. Cấu trúc thư mục dự án & Thiết kế phân tầng Clean Architecture
+
+Hệ thống CareSync được thiết kế và tổ chức theo nguyên lý phân tách trách nhiệm độc lập (**Separation of Concerns**). Toàn bộ dự án phân tách rõ ràng giữa tầng hiển thị tĩnh phía Client (Single Page Application - lưu trữ và phục vụ qua Amazon S3) và tầng xử lý nghiệp vụ Serverless Backend (AWS Lambda kết nối DynamoDB, KMS, SNS, EventBridge):
+
+```text
+CareSync/
+├── client/                               # Mã nguồn Frontend (Hosting tĩnh trên Amazon S3)
+│   ├── index.html                        # Giao diện chính Single Page Application (SPA)
+│   ├── css/                              # Hệ thống định kiểu phân tầng (Modular CSS)
+│   │   ├── base.css                      # CSS Reset và thiết lập phần tử nền tảng
+│   │   ├── variables.css                 # Hệ thống Design Tokens (Màu sắc HSL, Typography, Spacing)
+│   │   ├── layout.css                    # Định dạng khung lưới Header, Main Container, Footer
+│   │   ├── components.css                # Các thành phần giao diện tái sử dụng (Button, Badge, Modal, Card)
+│   │   ├── booking.css                   # Định kiểu form đặt lịch, chọn khung giờ & vé khám Ticket
+│   │   ├── lookup.css                    # Định kiểu Lịch biểu dùng chung (Calendar) & Modal OTP
+│   │   ├── responsive.css                # Media Queries tương thích Mobile, Tablet, Desktop
+│   │   └── style.css                     # File CSS tổng hợp nạp toàn bộ styling
+│   ├── js/                               # Logic xử lý phía Client (ES6 JavaScript Modules)
+│   │   ├── app.js                        # Điểm khởi động ứng dụng và khởi tạo các module
+│   │   ├── api.js                        # Module cấu hình Base URL & hàm gọi API Gateway
+│   │   ├── doctors.js                    # Tải động danh bạ bác sĩ & bộ lọc chuyên khoa
+│   │   ├── booking.js                    # Quản lý form đặt lịch, tự động khóa khung giờ quá khứ
+│   │   ├── calendar.js                   # Module Lịch biểu tháng dùng chung (Patient & Doctor Portal)
+│   │   ├── lookup.js                     # Tra cứu lịch theo SĐT qua GSI DynamoDB & quy trình hủy OTP
+│   │   ├── doctor-auth.js                # Đăng nhập bác sĩ qua OTP, Live Search tiếng Việt không dấu
+│   │   └── navigation.js                 # Điều hướng cuộn trang & hệ thống Toast Notification
+│   └── assets/                           # Tài nguyên đa phương tiện tĩnh
+│       ├── icons/logo.svg                # Biểu tượng thương hiệu CareSync SVG vector
+│       └── images/                       # Hình ảnh đại diện bác sĩ và banner y tế
+│
+├── server/
+│   └── lambda/                           # Mã nguồn Backend Serverless (AWS Lambda Runtime Node.js)
+│       ├── index.js                      # Entrypoint: Tiếp nhận Lambda Proxy event, Routing & CORS
+│       ├── config/                       # Cấu hình kết nối AWS SDK v3
+│       │   └── db.js                     # Khởi tạo DynamoDBClient và DynamoDBDocumentClient
+│       ├── routes/                       # Khai báo định tuyến theo nhóm tài nguyên
+│       │   ├── doctor.routes.js          # Định tuyến GET /doctors, GET /doctors/:id
+│       │   └── appointment.routes.js     # Định tuyến /appointments, OTP hủy lịch & lịch bác sĩ
+│       ├── controller/                   # Tiếp nhận HTTP request & format chuẩn Lambda response
+│       │   ├── doctor.controller.js      # Điều phối xử lý danh mục bác sĩ
+│       │   └── appointment.controller.js # Điều phối đặt lịch, tra cứu GSI, gửi/xác thực OTP
+│       ├── service/                      # Tầng nghiệp vụ cốt lõi (Business Logic & AWS SDK calls)
+│       │   ├── doctor.service.js         # Truy vấn Scan/GetItem bảng Doctors
+│       │   ├── appointment.service.js    # Tạo lịch (Conditional Writes 409), SNS Publish, EventBridge
+│       │   ├── patient.service.js        # Quản lý bảng Patients, giải mã dữ liệu cá nhân
+│       │   └── kms.service.js            # Mã hóa/giải mã trực tiếp bằng AWS KMS CMK
+│       └── utils/                        # Các tiện ích bổ trợ Native Lambda
+│           ├── dynamoClient.mjs          # Client DynamoDB tối ưu hóa tái sử dụng kết nối
+│           └── response.mjs              # Chuẩn hóa payload phản hồi HTTP (200, 201, 400, 404, 409)
+│
+├── docs/                                 # Tài liệu dự án & Postman Collection kiểm thử
+│   └── CareSync_Week3.postman_collection.json # Bộ sưu tập Postman kiểm định 10 API
+├── worklog/                              # Hồ sơ báo cáo tiến độ và nghiệm thu đồ án
+│   ├── Week 1/                           # Tuần 1: Khởi tạo hạ tầng PoC
+│   ├── Week 2/                           # Tuần 2: Backend CRUD & Khóa chống trùng
+│   ├── Week 3/                           # Tuần 3: Tích hợp AWS KMS, GSI & S3 Hosting
+│   ├── Week 4/                           # Tuần 4: Clean Architecture, Module Calendar, OTP Security
+│   └── BaoCaoCuoiKy/                     # Báo cáo tổng kết đồ án & Báo cáo giải phóng tài nguyên AWS
+│       ├── BaoCaoDoAn.md                 # Báo cáo tổng kết chính thức đồ án CareSync
+│       └── BaoCaoGiaiPhongTaiNguyenAWS.md# Báo cáo chi tiết quy trình dọn dẹp tài nguyên đám mây
+├── README.md                             # Tài liệu tổng quan và hướng dẫn vận hành dự án
+└── sequence_diagram.mmd                  # Sơ đồ tuần tự tương tác Serverless DynamoDB
+```
+
+**Vai trò các tầng kiến trúc phân tầng trong Lambda Backend:**
+- **Entrypoint (`index.js`):** Tiếp nhận sự kiện `APIGatewayProxyEventV2`, bóc tách `routeKey` và chuyển tiếp đến router tương ứng; đồng thời thiết lập sẵn các CORS headers (`Access-Control-Allow-Origin: *`, `Access-Control-Allow-Methods: GET, POST, OPTIONS`).
+- **Router Layer (`routes/`):** Ánh xạ phương thức HTTP và đường dẫn URI đến hàm xử lý nghiệp vụ của Controller, giúp mã nguồn không bị phình to dạng `if-else` nguyên khối.
+- **Controller Layer (`controller/`):** Tiếp nhận dữ liệu từ request body / query parameters, thực hiện kiểm tra định dạng dữ liệu (Input Validation) và đóng gói kết quả phản hồi chuẩn JSON qua module `response.mjs`.
+- **Service Layer (`service/`):** Trái tim xử lý logic của hệ thống. Chứa đựng các thuật toán nghiệp vụ, cơ chế chống trùng lịch nguyên tử (`ConditionExpression`), mã hóa dữ liệu với AWS KMS CMK, bắn thông báo email qua Amazon SNS và kích hoạt EventBridge Scheduler.
 
 ---
 
