@@ -11,7 +11,8 @@
 
 - **Link Github của nhóm:** [https://github.com/Arenef/CareSync](https://github.com/Arenef/CareSync)
 - **Video Demo CareSync:** [https://drive.google.com/drive/folders/1sK3Uae6RGCYvLRe3XZixI6ULkMxq5bKn?usp=sharing](https://drive.google.com/drive/folders/1sK3Uae6RGCYvLRe3XZixI6ULkMxq5bKn?usp=sharing)
-- **Báo cáo tổng kết đồ án:** [BaoCaoDoAn.md](../../BaoCaoDoAn.md)
+- **Báo cáo tổng kết đồ án:** [BaoCaoDoAn.md](../BaoCaoCuoiKy/BaoCaoDoAn.md)
+- **Báo cáo giải phóng tài nguyên AWS:** [BaoCaoGiaiPhongTaiNguyenAWS.md](../BaoCaoCuoiKy/BaoCaoGiaiPhongTaiNguyenAWS.md)
 - **Bảng phân công nhiệm vụ & thời gian:** [BangPhanCongWeek4.md](BangPhanCongWeek4.md)
 - **Báo cáo tổng kết tuần 4 & đồ án:** [BaoCaoWeek4.md](BaoCaoWeek4.md)
 

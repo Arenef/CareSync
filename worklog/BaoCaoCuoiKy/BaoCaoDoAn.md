@@ -128,7 +128,7 @@ Hệ thống phân tách rạch ròi 2 nhóm đối tượng người dùng chí
 
 Toàn bộ hệ thống CareSync được thiết kế theo mô hình phân tầng hướng dịch vụ (Decoupled Microservices) hoàn toàn không máy chủ:
 
-![Sơ đồ kiến trúc Serverless CareSync hoàn chỉnh](worklog/Week%204/img/Serverless_CareSync_Architecture.jpg)
+![Sơ đồ kiến trúc Serverless CareSync hoàn chỉnh](../Week%204/img/Serverless_CareSync_Architecture.jpg)
 
 ### 2.2. Vai trò & cơ chế hoạt động của các dịch vụ AWS cốt lõi
 
@@ -260,15 +260,15 @@ SV2 đã thiết lập bộ sưu tập Postman và chạy kiểm thử độc l�
 _Minh chứng kiểm thử chi tiết trên Postman:_
 
 - **Gửi OTP đăng nhập Bác sĩ:**
-  ![Postman Send OTP Doctor](worklog/Week%204/img/postman_send_otp.png)
+  ![Postman Send OTP Doctor](../Week%204/img/postman_send_otp.png)
 - **Xác thực OTP Bác sĩ thành công:**
-  ![Postman Verify OTP Doctor](worklog/Week%204/img/postman_verify_otp.png)
+  ![Postman Verify OTP Doctor](../Week%204/img/postman_verify_otp.png)
 - **Gửi OTP yêu cầu hủy lịch khám:**
-  ![Postman Cancel Request OTP](worklog/Week%204/img/postman_cancel_appointment_send_otp.png)
+  ![Postman Cancel Request OTP](../Week%204/img/postman_cancel_appointment_send_otp.png)
 - **Xác nhận OTP hủy lịch khám thành công:**
-  ![Postman Confirm Cancel OTP](worklog/Week%204/img/postman_cancel_appointment_comfirm.png)
+  ![Postman Confirm Cancel OTP](../Week%204/img/postman_cancel_appointment_comfirm.png)
 - **Truy vấn danh sách lịch khám của Bác sĩ:**
-  ![Postman Get Doctor Appointments](worklog/Week%204/img/postman_get_appointments_by_doctorId.png)
+  ![Postman Get Doctor Appointments](../Week%204/img/postman_get_appointments_by_doctorId.png)
 
 ### 4.2. Nghiệm thu 4 kịch bản End-to-End (E2E) trên môi trường Live
 
@@ -279,31 +279,31 @@ Hệ thống đã trải qua nghiệm thu 4 kịch bản người dùng toàn di
 - **Các bước thực hiện:** Bệnh nhân truy cập trang chủ S3, lọc danh bạ chọn Bác sĩ Lê Thị Bình, chọn ngày khám và khung giờ `09:30`, nhập thông tin cá nhân kèm CCCD và gửi yêu cầu.
 - **Kết quả:** Hệ thống hiển thị modal vé khám điện tử (`APT-179340`), lưu dữ liệu vào DynamoDB với CCCD được mã hóa KMS và nhận ngay email thông báo qua Amazon SNS.
 - **Minh chứng:**
-  ![Đặt lịch thành công](worklog/Week%204/img/E2E_04_Booking_Success_Ticket.png)
-  ![Minh chứng mã hóa KMS trên DynamoDB](worklog/Week%204/img/E2E_05_DynamoDB_KMS_Patient.jpg)
+  ![Đặt lịch thành công](../Week%204/img/E2E_04_Booking_Success_Ticket.png)
+  ![Minh chứng mã hóa KMS trên DynamoDB](../Week%204/img/E2E_05_DynamoDB_KMS_Patient.jpg)
 
 #### Kịch bản 2: Bắt lỗi chống trùng lịch khám (409 Conflict) trên Cloud
 
 - **Các bước thực hiện:** Một người dùng khác cố tình đặt lại cùng Bác sĩ Lê Thị Bình vào đúng khung giờ `09:30` cùng ngày.
 - **Kết quả:** AWS Lambda kích hoạt `ConditionalCheckFailedException` từ DynamoDB và trả về HTTP 409 Conflict; giao diện hiển thị thông báo toast màu đỏ cảnh báo khung giờ đã có người đặt và yêu cầu chọn lại.
 - **Minh chứng:**
-  ![Bắt lỗi 409 Conflict](worklog/Week%204/img/E2E_07_Booking_Conflict_409.png)
+  ![Bắt lỗi 409 Conflict](../Week%204/img/E2E_07_Booking_Conflict_409.png)
 
 #### Kịch bản 3: Tra cứu lịch khám bảo mật & Hủy lịch bằng OTP Email
 
 - **Các bước thực hiện:** Bệnh nhân chuyển sang tab "Lịch hẹn của tôi", nhập số điện thoại để tra cứu các ca khám của mình từ DynamoDB GSI. Nhấn nút "Hủy lịch", hệ thống gửi OTP 6 số qua email. Bệnh nhân nhập mã OTP để xác nhận hủy.
 - **Kết quả:** Lịch hẹn chuyển sang trạng thái `Đã hủy` (màu đỏ) và khung giờ khám được tự động giải phóng trên hệ thống.
 - **Minh chứng:**
-  ![Tra cứu lịch hẹn](worklog/Week%204/img/E2E_09_Lookup_Success_Cards.png)
-  ![Xác nhận hủy bằng OTP thành công](worklog/Week%204/img/E2E_13_Cancel_Success_Result.png)
+  ![Tra cứu lịch hẹn](../Week%204/img/E2E_09_Lookup_Success_Cards.png)
+  ![Xác nhận hủy bằng OTP thành công](../Week%204/img/E2E_13_Cancel_Success_Result.png)
 
 #### Kịch bản 4: Cổng bác sĩ - Đăng nhập OTP, xem lịch khám và tìm kiếm bệnh nhân
 
 - **Các bước thực hiện:** Bác sĩ truy cập Cổng bác sĩ, nhập email phòng khám để nhận OTP qua SNS, nhập OTP đăng nhập thành công. Giao diện bảng điều khiển hiển thị thống kê tổng ca khám, chuyển đổi giữa List View và Calendar View, thử nghiệm tìm kiếm không dấu "vuong".
 - **Kết quả:** Danh sách lọc ngay lập tức còn 1 ca khám của bệnh nhân "Nguyễn Thị Vương" mà không bị reload trang hay gãy dấu tiếng Việt.
 - **Minh chứng:**
-  ![Cổng bác sĩ Dashboard](worklog/Week%204/img/E2E_15_Doctor_Portal_Dashboard.png)
-  ![Live Search không dấu](worklog/Week%204/img/E2E_16_Doctor_Search_Filter.png)
+  ![Cổng bác sĩ Dashboard](../Week%204/img/E2E_15_Doctor_Portal_Dashboard.png)
+  ![Live Search không dấu](../Week%204/img/E2E_16_Doctor_Search_Filter.png)
 
 ### 4.3. Giám sát vận hành và nhật ký thực thi trên Amazon CloudWatch Logs
 
