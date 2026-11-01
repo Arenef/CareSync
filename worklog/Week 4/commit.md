@@ -106,6 +106,20 @@
 - **Commit Message:** `feat(backend): thêm API yêu cầu và xác thực hủy lịch hẹn qua OTP SNS`
 - **Mô tả:** Xây dựng 2 endpoint `/appointments/request-cancel` và `/appointments/confirm-cancel`, tích hợp mã OTP 6 chữ số có hiệu lực 5 phút gửi qua SNS Publish và giải phóng slot DynamoDB.
 
+### Commit 5: Bổ sung báo cáo và minh chứng giải phóng tài nguyên AWS
+
+- **Hash commit:** `c29dc7e`
+- **Link commit:** [https://github.com/Arenef/CareSync/commit/c29dc7e](https://github.com/Arenef/CareSync/commit/c29dc7e)
+- **Commit Message:** `docs: bo sung bao cao va minh chung giai phong tai nguyen AWS (baocaocuoiky)`
+- **Mô tả:** Lập tài liệu báo cáo giải phóng dữ liệu và hủy tài nguyên trên AWS (`BaoCaoGiaiPhongTaiNguyenAWS.md`) kèm 15 hình ảnh minh chứng dọn dẹp sạch sẽ toàn bộ hạ tầng đám mây (DynamoDB, S3, API Gateway, Lambda, SNS, EventBridge, KMS, CloudWatch Logs) trên cả 2 tài khoản AWS Academy Learner Lab của nhóm theo đúng thứ tự phụ thuộc, đảm bảo chi phí duy trì trở về $0.00.
+
+### Commit 6: Đồng bộ cấu trúc lưu trữ Báo cáo cuối kỳ và chuẩn hóa liên kết
+
+- **Hash commit:** `47e6de1`
+- **Link commit:** [https://github.com/Arenef/CareSync/commit/47e6de1](https://github.com/Arenef/CareSync/commit/47e6de1)
+- **Commit Message:** `docs: chuyen BaoCaoCuoiKy vao worklog va cap nhat duong dan lien ket`
+- **Mô tả:** Di chuyển thư mục `BaoCaoCuoiKy/` vào trong `worklog/` để hoàn thiện cấu trúc tài liệu lưu trữ của dự án và cập nhật lại đường dẫn liên kết trong `README.md` cùng các tài liệu tổng kết.
+
 ---
 
 ## 5. Model A.I đã sử dụng trong Tuần 4
